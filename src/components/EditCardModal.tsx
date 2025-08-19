@@ -1,11 +1,22 @@
-import React, { useState } from 'react';
-import { X, Upload, Building2, Link, AlertCircle, Sparkles, Wand2, RefreshCw, Key, Bot } from 'lucide-react';
-import { ReviewCard } from '../types';
-import { generateSlug, validateGoogleMapsUrl } from '../utils/helpers';
-import { aiService } from '../utils/aiService';
-import { StarRating } from './StarRating';
-import { SegmentedButtonGroup } from './SegmentedButtonGroup';
-import { TagInput } from './TagInput';
+import React, { useState } from "react";
+import {
+  X,
+  Upload,
+  Building2,
+  Link,
+  AlertCircle,
+  Sparkles,
+  Wand2,
+  RefreshCw,
+  Key,
+  Bot,
+} from "lucide-react";
+import { ReviewCard } from "../types";
+import { generateSlug, validateGoogleMapsUrl } from "../utils/helpers";
+import { aiService } from "../utils/aiService";
+import { StarRating } from "./StarRating";
+import { SegmentedButtonGroup } from "./SegmentedButtonGroup";
+import { TagInput } from "./TagInput";
 
 interface EditCardModalProps {
   card: ReviewCard;
@@ -13,31 +24,38 @@ interface EditCardModalProps {
   onSave: (card: ReviewCard) => void;
 }
 
-export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onSave }) => {
+export const EditCardModal: React.FC<EditCardModalProps> = ({
+  card,
+  onClose,
+  onSave,
+}) => {
   const [formData, setFormData] = useState({
     businessName: card.businessName,
     category: card.category,
     type: card.type,
-    description: card.description || '',
-    location: card.location || '',
+    description: card.description || "",
+    location: card.location || "",
     services: card.services || [],
     logoUrl: card.logoUrl,
     googleMapsUrl: card.googleMapsUrl,
-    geminiApiKey: card.geminiApiKey || '',
-    geminiModel: card.geminiModel || 'gemini-2.0-flash'
+    geminiApiKey: card.geminiApiKey || "",
+    geminiModel: card.geminiModel || "gemini-2.0-flash",
   });
-  
+
   // AI Review Generation State
   const [aiReviewData, setAiReviewData] = useState({
     starRating: 5,
-    language: 'English',
-    tone: 'Friendly' as 'Professional' | 'Friendly' | 'Casual' | 'Grateful',
-    useCase: 'Customer review' as 'Customer review' | 'Student feedback' | 'Patient experience',
-    highlights: '',
-    generatedReview: '',
-    generatedTagline: ''
+    language: "English",
+    tone: "Friendly" as "Professional" | "Friendly" | "Casual" | "Grateful",
+    useCase: "Customer review" as
+      | "Customer review"
+      | "Student feedback"
+      | "Patient experience",
+    highlights: "",
+    generatedReview: "",
+    generatedTagline: "",
   });
-  
+
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
@@ -45,32 +63,35 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
   const [showAiPanel, setShowAiPanel] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+      setErrors((prev) => ({ ...prev, [field]: "" }));
     }
   };
 
   const handleServicesChange = (services: string[]) => {
-    setFormData(prev => ({ ...prev, services }));
+    setFormData((prev) => ({ ...prev, services }));
   };
 
   const handleAiDataChange = (field: string, value: string | number) => {
-    setAiReviewData(prev => ({ ...prev, [field]: value }));
+    setAiReviewData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleLogoUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        setErrors(prev => ({ ...prev, logoUrl: 'File size must be less than 5MB' }));
+        setErrors((prev) => ({
+          ...prev,
+          logoUrl: "File size must be less than 5MB",
+        }));
         return;
       }
 
       const reader = new FileReader();
       reader.onload = (e) => {
         const result = e.target?.result as string;
-        handleInputChange('logoUrl', result);
+        handleInputChange("logoUrl", result);
       };
       reader.readAsDataURL(file);
     }
@@ -78,16 +99,22 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
 
   const generateAiReview = async () => {
     if (!formData.businessName || !formData.category || !formData.type) {
-      setErrors(prev => ({ ...prev, aiReview: 'Please fill business name, category, and type first' }));
+      setErrors((prev) => ({
+        ...prev,
+        aiReview: "Please fill business name, category, and type first",
+      }));
       return;
     }
 
     if (!formData.geminiApiKey) {
-      setErrors(prev => ({ ...prev, aiReview: 'Please provide Gemini API key first' }));
+      setErrors((prev) => ({
+        ...prev,
+        aiReview: "Please provide Gemini API key first",
+      }));
       return;
     }
     setIsGeneratingReview(true);
-    setErrors(prev => ({ ...prev, aiReview: '' }));
+    setErrors((prev) => ({ ...prev, aiReview: "" }));
 
     try {
       const review = await aiService.generateReview({
@@ -95,19 +122,22 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
         category: formData.category,
         type: formData.type,
         highlights: aiReviewData.highlights,
-       selectedServices: formData.services,
+        selectedServices: formData.services,
         starRating: aiReviewData.starRating,
         language: aiReviewData.language,
         tone: aiReviewData.tone,
         useCase: aiReviewData.useCase,
         geminiApiKey: formData.geminiApiKey,
-        geminiModel: formData.geminiModel
+        geminiModel: formData.geminiModel,
       });
 
-      setAiReviewData(prev => ({ ...prev, generatedReview: review.text }));
+      setAiReviewData((prev) => ({ ...prev, generatedReview: review.text }));
     } catch (error) {
-      console.error('Error generating review:', error);
-      setErrors(prev => ({ ...prev, aiReview: 'Failed to generate review. Please try again.' }));
+      console.error("Error generating review:", error);
+      setErrors((prev) => ({
+        ...prev,
+        aiReview: "Failed to generate review. Please try again.",
+      }));
     } finally {
       setIsGeneratingReview(false);
     }
@@ -115,29 +145,38 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
 
   const generateTagline = async () => {
     if (!formData.businessName || !formData.category || !formData.type) {
-      setErrors(prev => ({ ...prev, tagline: 'Please fill business name, category, and type first' }));
+      setErrors((prev) => ({
+        ...prev,
+        tagline: "Please fill business name, category, and type first",
+      }));
       return;
     }
 
     if (!formData.geminiApiKey) {
-      setErrors(prev => ({ ...prev, tagline: 'Please provide Gemini API key first' }));
+      setErrors((prev) => ({
+        ...prev,
+        tagline: "Please provide Gemini API key first",
+      }));
       return;
     }
     setIsGeneratingTagline(true);
-    setErrors(prev => ({ ...prev, tagline: '' }));
+    setErrors((prev) => ({ ...prev, tagline: "" }));
 
     try {
       const tagline = await aiService.generateTagline(
-        formData.businessName, 
-        formData.category, 
+        formData.businessName,
+        formData.category,
         formData.type,
         formData.geminiApiKey,
         formData.geminiModel
       );
-      setAiReviewData(prev => ({ ...prev, generatedTagline: tagline }));
+      setAiReviewData((prev) => ({ ...prev, generatedTagline: tagline }));
     } catch (error) {
-      console.error('Error generating tagline:', error);
-      setErrors(prev => ({ ...prev, tagline: 'Failed to generate tagline. Please try again.' }));
+      console.error("Error generating tagline:", error);
+      setErrors((prev) => ({
+        ...prev,
+        tagline: "Failed to generate tagline. Please try again.",
+      }));
     } finally {
       setIsGeneratingTagline(false);
     }
@@ -147,21 +186,21 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
     const newErrors: Record<string, string> = {};
 
     if (!formData.businessName.trim()) {
-      newErrors.businessName = 'Business name is required';
+      newErrors.businessName = "Business name is required";
     }
 
     if (!formData.category.trim()) {
-      newErrors.category = 'Business category is required';
+      newErrors.category = "Business category is required";
     }
 
     if (!formData.type.trim()) {
-      newErrors.type = 'Business type is required';
+      newErrors.type = "Business type is required";
     }
 
     if (!formData.googleMapsUrl.trim()) {
-      newErrors.googleMapsUrl = 'Google Maps URL is required';
+      newErrors.googleMapsUrl = "Google Maps URL is required";
     } else if (!validateGoogleMapsUrl(formData.googleMapsUrl)) {
-      newErrors.googleMapsUrl = 'Please enter a valid Google Maps review URL';
+      newErrors.googleMapsUrl = "Please enter a valid Google Maps review URL";
     }
 
     setErrors(newErrors);
@@ -170,7 +209,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) return;
 
     setIsLoading(true);
@@ -189,41 +228,37 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
         googleMapsUrl: formData.googleMapsUrl.trim(),
         geminiApiKey: formData.geminiApiKey.trim(),
         geminiModel: formData.geminiModel,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date().toISOString(),
       };
 
       onSave(updatedCard);
     } catch (error) {
-      console.error('Error updating card:', error);
+      console.error("Error updating card:", error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const languageOptions = [
-    'English',
-    'Gujarati', 
-    'Hindi',
-  ];
+  const languageOptions = ["English", "Gujarati", "Hindi"];
 
-  const toneOptions = ['Friendly', 'Professional', 'Casual', 'Grateful'];
+  const toneOptions = ["Friendly", "Professional", "Casual", "Grateful"];
 
   const modelOptions = [
-    'gemini-2.0-flash',
-    'gemini-1.5-pro',
-    'gemini-1.5-flash',
-    'gemini-1.0-pro'
+    "gemini-2.0-flash",
+    "gemini-1.5-pro",
+    "gemini-1.5-flash",
+    "gemini-1.0-pro",
   ];
 
   const categoryOptions = [
-    'Retail & Shopping',
-    'Food & Beverage',
-    'Services',
-    'Professional Businesses',
-    'Health & Medical',
-    'Education',
-    'Hotels & Travel',
-    'Entertainment & Recreation'
+    "Retail & Shopping",
+    "Food & Beverage",
+    "Services",
+    "Professional Businesses",
+    "Health & Medical",
+    "Education",
+    "Hotels & Travel",
+    "Entertainment & Recreation",
   ];
 
   return (
@@ -231,7 +266,9 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
       <div className="bg-white rounded-2xl w-full max-w-4xl max-h-[95vh] overflow-y-auto shadow-2xl">
         <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 rounded-t-2xl">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-semibold text-gray-800">Edit Review Card</h2>
+            <h2 className="text-xl font-semibold text-gray-800">
+              Edit Review Card
+            </h2>
             <button
               onClick={onClose}
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
@@ -255,12 +292,14 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   <input
                     type="text"
                     value={formData.businessName}
-                    onChange={(e) => handleInputChange('businessName', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("businessName", e.target.value)
+                    }
                     placeholder="Enter business name"
                     className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
-                      errors.businessName 
-                        ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                      errors.businessName
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
                     }`}
                   />
                 </div>
@@ -285,16 +324,20 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   </label>
                   <select
                     value={formData.category}
-                    onChange={(e) => handleInputChange('category', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("category", e.target.value)
+                    }
                     className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
-                      errors.category 
-                        ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                      errors.category
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
                     }`}
                   >
                     <option value="">Select Category</option>
-                    {categoryOptions.map(category => (
-                      <option key={category} value={category}>{category}</option>
+                    {categoryOptions.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
                     ))}
                   </select>
                   {errors.category && (
@@ -312,12 +355,12 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   <input
                     type="text"
                     value={formData.type}
-                    onChange={(e) => handleInputChange('type', e.target.value)}
+                    onChange={(e) => handleInputChange("type", e.target.value)}
                     placeholder="e.g., Software Company, Restaurant, Clinic"
                     className={`w-full px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
-                      errors.type 
-                        ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                      errors.type
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
                     }`}
                   />
                   {errors.type && (
@@ -336,12 +379,16 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                 </label>
                 <textarea
                   value={formData.description}
-                  onChange={(e) => handleInputChange('description', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("description", e.target.value)
+                  }
                   placeholder="Brief description of your business, services, or specialties..."
                   rows={3}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
                 />
-                <p className="text-xs text-gray-500 mt-1">This helps generate more relevant reviews</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  This helps generate more relevant reviews
+                </p>
               </div>
 
               {/* Location */}
@@ -352,11 +399,15 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                 <input
                   type="text"
                   value={formData.location}
-                  onChange={(e) => handleInputChange('location', e.target.value)}
+                  onChange={(e) =>
+                    handleInputChange("location", e.target.value)
+                  }
                   placeholder="City, State or Area"
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
-                <p className="text-xs text-gray-500 mt-1">Optional: Helps with location-specific reviews</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  Optional: Helps with location-specific reviews
+                </p>
               </div>
 
               {/* Gemini API Configuration */}
@@ -368,14 +419,16 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   <div className="relative">
                     <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
-                      type="password"
+                      type="text"
                       value={formData.geminiApiKey}
-                      onChange={(e) => handleInputChange('geminiApiKey', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("geminiApiKey", e.target.value)
+                      }
                       placeholder="Enter Gemini API key"
                       className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
-                        errors.geminiApiKey 
-                          ? 'border-red-500 focus:ring-red-500' 
-                          : 'border-gray-300 focus:ring-blue-500'
+                        errors.geminiApiKey
+                          ? "border-red-500 focus:ring-red-500"
+                          : "border-gray-300 focus:ring-blue-500"
                       }`}
                     />
                   </div>
@@ -386,7 +439,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                     </p>
                   )}
                   <p className="text-xs text-gray-500 mt-1">
-                    Get your API key from{' '}
+                    Get your API key from{" "}
                     <a
                       href="https://makersuite.google.com/app/apikey"
                       target="_blank"
@@ -406,15 +459,21 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                     <Bot className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <select
                       value={formData.geminiModel}
-                      onChange={(e) => handleInputChange('geminiModel', e.target.value)}
+                      onChange={(e) =>
+                        handleInputChange("geminiModel", e.target.value)
+                      }
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
-                      {modelOptions.map(model => (
-                        <option key={model} value={model}>{model}</option>
+                      {modelOptions.map((model) => (
+                        <option key={model} value={model}>
+                          {model}
+                        </option>
                       ))}
                     </select>
                   </div>
-                  <p className="text-xs text-gray-500 mt-1">Choose the Gemini model for AI generation</p>
+                  <p className="text-xs text-gray-500 mt-1">
+                    Choose the Gemini model for AI generation
+                  </p>
                 </div>
               </div>
 
@@ -461,7 +520,9 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                         className="hidden"
                       />
                     </label>
-                    <p className="text-xs text-gray-500 mt-1">PNG, JPG up to 5MB</p>
+                    <p className="text-xs text-gray-500 mt-1">
+                      PNG, JPG up to 5MB
+                    </p>
                   </div>
                 </div>
                 {errors.logoUrl && (
@@ -482,12 +543,14 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   <input
                     type="url"
                     value={formData.googleMapsUrl}
-                    onChange={(e) => handleInputChange('googleMapsUrl', e.target.value)}
+                    onChange={(e) =>
+                      handleInputChange("googleMapsUrl", e.target.value)
+                    }
                     placeholder="https://search.google.com/local/writereview?placeid=..."
                     className={`w-full pl-10 pr-4 py-3 border rounded-lg focus:outline-none focus:ring-2 transition-all duration-300 ${
-                      errors.googleMapsUrl 
-                        ? 'border-red-500 focus:ring-red-500' 
-                        : 'border-gray-300 focus:ring-blue-500'
+                      errors.googleMapsUrl
+                        ? "border-red-500 focus:ring-red-500"
+                        : "border-gray-300 focus:ring-blue-500"
                     }`}
                   />
                 </div>
@@ -511,20 +574,20 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                 >
                   Cancel
                 </button>
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setShowAiPanel(!showAiPanel)}
                   className="px-4 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors duration-200 flex items-center"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   AI Tools
-                </button>
+                </button> */}
                 <button
                   type="submit"
                   disabled={isLoading}
                   className="flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isLoading ? 'Saving...' : 'Save Changes'}
+                  {isLoading ? "Saving..." : "Save Changes"}
                 </button>
               </div>
             </form>
@@ -536,17 +599,23 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
               <div className="space-y-6">
                 <div className="flex items-center justify-between">
                   <h3 className="text-lg font-semibold text-gray-800 flex items-center">
-                    <Sparkles className="w-5 h-5 mr-2 text-purple-600" />
-                    AI Tools
+                    <Sparkles className="w-5 h-5 mr-2 text-purple-600" />s
                   </h3>
                 </div>
 
                 {/* Tagline Generator */}
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <h4 className="font-medium text-gray-800 mb-3">Generate Tagline</h4>
+                  <h4 className="font-medium text-gray-800 mb-3">
+                    Generate Tagline
+                  </h4>
                   <button
                     onClick={generateTagline}
-                    disabled={isGeneratingTagline || !formData.businessName || !formData.category || !formData.type}
+                    disabled={
+                      isGeneratingTagline ||
+                      !formData.businessName ||
+                      !formData.category ||
+                      !formData.type
+                    }
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isGeneratingTagline ? (
@@ -554,76 +623,104 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                     ) : (
                       <Wand2 className="w-4 h-4" />
                     )}
-                    {isGeneratingTagline ? 'Generating...' : 'Generate Tagline'}
+                    {isGeneratingTagline ? "Generating..." : "Generate Tagline"}
                   </button>
-                  
+
                   {aiReviewData.generatedTagline && (
                     <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                      <p className="text-sm text-purple-800 font-medium">"{aiReviewData.generatedTagline}"</p>
+                      <p className="text-sm text-purple-800 font-medium">
+                        "{aiReviewData.generatedTagline}"
+                      </p>
                     </div>
                   )}
-                  
+
                   {errors.tagline && (
-                    <p className="mt-2 text-sm text-red-600">{errors.tagline}</p>
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.tagline}
+                    </p>
                   )}
                 </div>
 
                 {/* Review Generator */}
                 <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <h4 className="font-medium text-gray-800 mb-3">Generate AI Review</h4>
-                  
+                  <h4 className="font-medium text-gray-800 mb-3">
+                    Generate AI Review
+                  </h4>
+
                   {/* Star Rating */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Star Rating</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Star Rating
+                    </label>
                     <StarRating
                       rating={aiReviewData.starRating}
-                      onRatingChange={(rating) => handleAiDataChange('starRating', rating)}
+                      onRatingChange={(rating) =>
+                        handleAiDataChange("starRating", rating)
+                      }
                       size="md"
                     />
                   </div>
 
                   {/* Language */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Language
+                    </label>
                     <SegmentedButtonGroup
                       options={languageOptions}
                       selected={aiReviewData.language}
-                      onChange={(value) => handleAiDataChange('language', value as string)}
+                      onChange={(value) =>
+                        handleAiDataChange("language", value as string)
+                      }
                       size="sm"
                     />
                   </div>
 
                   {/* Tone */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Tone</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Tone
+                    </label>
                     <SegmentedButtonGroup
                       options={toneOptions}
                       selected={aiReviewData.tone}
-                      onChange={(value) => handleAiDataChange('tone', value as string)}
+                      onChange={(value) =>
+                        handleAiDataChange("tone", value as string)
+                      }
                       size="sm"
                     />
                   </div>
 
                   {/* Use Case */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Use Case</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Use Case
+                    </label>
                     <select
                       value={aiReviewData.useCase}
-                      onChange={(e) => handleAiDataChange('useCase', e.target.value)}
+                      onChange={(e) =>
+                        handleAiDataChange("useCase", e.target.value)
+                      }
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
                       <option value="Customer review">Customer review</option>
                       <option value="Student feedback">Student feedback</option>
-                      <option value="Patient experience">Patient experience</option>
+                      <option value="Patient experience">
+                        Patient experience
+                      </option>
                     </select>
                   </div>
 
                   {/* Highlights */}
                   <div className="mb-4">
-                    <label className="block text-sm font-medium text-gray-700 mb-2">Highlights (Optional)</label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Highlights (Optional)
+                    </label>
                     <textarea
                       value={aiReviewData.highlights}
-                      onChange={(e) => handleAiDataChange('highlights', e.target.value)}
+                      onChange={(e) =>
+                        handleAiDataChange("highlights", e.target.value)
+                      }
                       placeholder="e.g., fast service, friendly staff, clean environment"
                       rows={2}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
@@ -633,7 +730,12 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   {/* Generate Button */}
                   <button
                     onClick={generateAiReview}
-                    disabled={isGeneratingReview || !formData.businessName || !formData.category || !formData.type}
+                    disabled={
+                      isGeneratingReview ||
+                      !formData.businessName ||
+                      !formData.category ||
+                      !formData.type
+                    }
                     className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {isGeneratingReview ? (
@@ -641,16 +743,19 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                     ) : (
                       <Sparkles className="w-4 h-4" />
                     )}
-                    {isGeneratingReview ? 'Generating...' : 'Generate Review'}
+                    {isGeneratingReview ? "Generating..." : "Generate Review"}
                   </button>
 
                   {/* Generated Review Display */}
                   {aiReviewData.generatedReview && (
                     <div className="mt-4 p-3 bg-blue-50 rounded-lg border border-blue-200">
-                      <p className="text-sm text-blue-800">"{aiReviewData.generatedReview}"</p>
+                      <p className="text-sm text-blue-800">
+                        "{aiReviewData.generatedReview}"
+                      </p>
                       <div className="mt-2 flex items-center justify-between">
                         <span className="text-xs text-blue-600">
-                          {aiReviewData.language} • {aiReviewData.starRating} stars
+                          {aiReviewData.language} • {aiReviewData.starRating}{" "}
+                          stars
                         </span>
                         <button
                           onClick={generateAiReview}
@@ -664,7 +769,9 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({ card, onClose, onS
                   )}
 
                   {errors.aiReview && (
-                    <p className="mt-2 text-sm text-red-600">{errors.aiReview}</p>
+                    <p className="mt-2 text-sm text-red-600">
+                      {errors.aiReview}
+                    </p>
                   )}
                 </div>
               </div>

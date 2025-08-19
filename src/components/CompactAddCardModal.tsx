@@ -387,7 +387,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
                   <div className="relative">
                     <Key className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
                     <input
-                      type="password"
+                      type="text" // changed from "password" to "text"
                       value={formData.geminiApiKey}
                       onChange={(e) => handleInputChange('geminiApiKey', e.target.value)}
                       placeholder="Enter Gemini API key"
@@ -529,14 +529,14 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
                 >
                   Cancel
                 </button>
-                <button
+                {/* <button
                   type="button"
                   onClick={() => setShowAiPanel(!showAiPanel)}
                   className="px-4 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors duration-200 flex items-center"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   AI Tools
-                </button>
+                </button> */}
                 <button
                   type="submit"
                   disabled={isLoading}
