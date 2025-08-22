@@ -35,9 +35,9 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
   if (services.length === 0) return null;
 
   return (
-    <div className={`space-y-4 ${className}`}>
+    <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between">
-        <label className="block text-sm font-semibold text-gray-800 flex items-center">
+        <label className="block text-sm font-medium text-gray-700 flex items-center">
           <Sparkles className="w-4 h-4 mr-2 text-purple-600" />
           Select Services to Highlight
         </label>
