@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, CheckCircle, RotateCcw, ArrowLeft, Sparkles, RefreshCw, Eye } from 'lucide-react';
+import { Copy, CheckCircle, Sparkles, RefreshCw, Eye } from 'lucide-react';
 import { ReviewCard } from '../types';
 import { StarRating } from './StarRating';
 import { SegmentedButtonGroup } from './SegmentedButtonGroup';
@@ -20,7 +20,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
   const [currentReview, setCurrentReview] = useState('');
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLanguage, setSelectedLanguage] = useState('English');
-  const [selectedTone, setSelectedTone] = useState<'Professional' | 'Friendly' | 'Casual' | 'Grateful'>('Friendly');
+  const [selectedTone] = useState<'Professional' | 'Friendly' | 'Casual' | 'Grateful'>('Friendly');
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -32,7 +32,6 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
     'Hindi',
   ];
 
-  const toneOptions = ['Friendly', 'Professional', 'Casual', 'Grateful'];
 
   useEffect(() => {
     // Generate initial review when component loads
@@ -109,11 +108,6 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
     generateReviewForRating(selectedRating, language, selectedTone, selectedServices);
-  };
-
-  const handleToneChange = (tone: 'Professional' | 'Friendly' | 'Casual' | 'Grateful') => {
-    setSelectedTone(tone);
-    generateReviewForRating(selectedRating, selectedLanguage, tone, selectedServices);
   };
 
   const handleServicesChange = (services: string[]) => {

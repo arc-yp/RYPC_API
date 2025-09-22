@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit, Trash2, Eye, Search, Building2, Calendar, LogOut, Database, Loader2, Wifi, WifiOff, RefreshCw, ExternalLink } from 'lucide-react';
 import { ReviewCard } from '../types';
 import { storage } from '../utils/storage';
@@ -20,11 +20,7 @@ export const AdminDashboard: React.FC = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [connectionStatus, setConnectionStatus] = useState<'connected' | 'local' | 'checking'>('checking');
 
-  useEffect(() => {
-    initializeDashboard();
-  }, []);
-
-  const initializeDashboard = async () => {
+  const initializeDashboard = useCallback(async () => {
     setIsLoading(true);
     
     // Check connection status
@@ -37,7 +33,11 @@ export const AdminDashboard: React.FC = () => {
     
     await loadCards();
     setIsLoading(false);
-  };
+  }, []);
+
+  useEffect(() => {
+    initializeDashboard();
+  }, [initializeDashboard]);
 
   const loadCards = async () => {
     try {
@@ -143,10 +143,6 @@ export const AdminDashboard: React.FC = () => {
     card.slug.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const handlePreview = (slug: string) => {
-    window.open(`/${slug}`, '_blank');
-  };
-
   const handleViewCard = (slug: string) => {
     window.open(`/${slug}`, '_blank');
   };
@@ -219,6 +215,13 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             {getConnectionStatusDisplay()}
             <div className="flex items-center gap-3">
+              <a
+                href="/admin/analytics"
+                className="inline-flex items-center px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors duration-200 border border-white/20"
+                title="Analytics"
+              >
+                <Eye className="w-4 h-4 mr-2" /> Analytics
+              </a>
               <button
                 onClick={handleRefresh}
                 disabled={isRefreshing}
@@ -394,14 +397,21 @@ export const AdminDashboard: React.FC = () => {
                             </h3>
                             <p className="text-sm text-slate-400">/{card.slug}</p>
                           </div>
+                          {/* Views pill */}
+                          <div className="ml-2">
+                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-white/10 text-blue-200 border border-white/20">
+                              <Eye className="w-3 h-3" />
+                              {(card.viewCount || 0).toLocaleString()}
+                            </span>
+                          </div>
                         </div>
 
                         <div className="mb-4">
-                          <p className="text-xs text-slate-400 mb-1">Category : <spam className="text-sm text-slate-300">{card.category}</spam></p>
+                          <p className="text-xs text-slate-400 mb-1">Category : <span className="text-sm text-slate-300">{card.category}</span></p>
                          
-                          <p className="text-xs text-slate-400 mb-1 mt-2">Type : <spam className="text-sm text-slate-300">{card.type}</spam></p>
+                          <p className="text-xs text-slate-400 mb-1 mt-2">Type : <span className="text-sm text-slate-300">{card.type}</span></p>
                           
-                          <p className="text-xs text-slate-400 mb-1 mt-2">Created : <spam className="text-sm text-slate-300">{formatDate(card.createdAt)}</spam></p>
+                          <p className="text-xs text-slate-400 mb-1 mt-2">Created : <span className="text-sm text-slate-300">{formatDate(card.createdAt)}</span></p>
                         </div>
 
                         <div className="flex gap-2">
@@ -422,6 +432,8 @@ export const AdminDashboard: React.FC = () => {
                           <button
                             onClick={() => setDeletingCard(card)}
                             className="inline-flex items-center justify-center px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
+                            title="Delete card"
+                            aria-label={`Delete ${card.businessName}`}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>

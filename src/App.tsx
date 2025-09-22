@@ -3,11 +3,13 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import ReactGA from 'react-ga4';
 
 import { AdminDashboard } from './components/AdminDashboard';
+import { AnalyticsDashboard } from './components/AnalyticsDashboard';
 import { CompactReviewCardView } from './components/CompactReviewCardView';
 import { LoginPage } from './components/LoginPage';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { storage } from './utils/storage';
 import { auth } from './utils/auth';
+import { ReviewCard } from './types';
 
 ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
 
@@ -30,6 +32,15 @@ function App() {
               <AdminDashboard />
             </ProtectedRoute>
           } 
+        />
+        {/* Analytics Route */}
+        <Route 
+          path="/admin/analytics" 
+          element={
+            <ProtectedRoute>
+              <AnalyticsDashboard />
+            </ProtectedRoute>
+          }
         />
         
         {/* Default route redirects based on auth status */}
@@ -54,7 +65,7 @@ function App() {
 
 // Component to handle dynamic review card routing
 const DynamicReviewCard: React.FC = () => {
-  const [card, setCard] = React.useState(null);
+  const [card, setCard] = React.useState<ReviewCard | null>(null);
   const [loading, setLoading] = React.useState(true);
   const slug = window.location.pathname.slice(1); // Remove leading slash
 
@@ -99,8 +110,7 @@ const DynamicReviewCard: React.FC = () => {
           <img
             src="/aireviewsystm_qrcode.png"
             alt="AI Review System QR Code"
-            className="mx-auto mb-6 w-40 max-w-full border-4 border-blue-500 rounded-lg shadow-lg"
-            style={{ background: "#fff" }}
+            className="mx-auto mb-6 w-40 max-w-full border-4 border-blue-500 rounded-lg shadow-lg bg-white"
           />
           <h1 className="text-xl font-bold text-white mb-4">If Card Not Found</h1>
           <h1 className="text-3xl font-bold text-white mb-4">
