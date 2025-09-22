@@ -23,6 +23,7 @@ const transformDbRowToCard = (row: any): ReviewCard => ({
   googleMapsUrl: row.google_maps_url,
   geminiApiKey: row.gemini_api_key || '',
   geminiModel: row.gemini_model || 'gemini-2.0-flash',
+  viewCount: row.view_count || 0,
   createdAt: row.created_at,
   updatedAt: row.updated_at
 });
@@ -41,6 +42,7 @@ const transformCardToDbInsert = (card: ReviewCard) => {
     google_maps_url: card.googleMapsUrl,
     gemini_api_key: card.geminiApiKey || null,
     gemini_model: card.geminiModel || 'gemini-2.0-flash',
+    view_count: card.viewCount || 0,
     created_at: card.createdAt || new Date().toISOString(),
     updated_at: card.updatedAt || new Date().toISOString()
   };
@@ -66,6 +68,7 @@ const transformCardToDbUpdate = (card: ReviewCard) => ({
   google_maps_url: card.googleMapsUrl,
   gemini_api_key: card.geminiApiKey || null,
   gemini_model: card.geminiModel || 'gemini-2.0-flash',
+  view_count: card.viewCount || 0,
   updated_at: new Date().toISOString()
 });
 
@@ -432,6 +435,98 @@ export const storage = {
       console.log(`Data sync completed successfully - ${transformedSupabaseCards.length} cards synced`);
     } catch (error) {
       console.error('Error during data sync:', error);
+    }
+  },
+
+  // View count methods
+  async incrementViewCount(cardId: string): Promise<boolean> {
+    try {
+      console.log('Incrementing view count for card:', cardId);
+
+      // First, increment in localStorage
+      const localCards = this._getLocalCards();
+      const cardIndex = localCards.findIndex(card => card.id === cardId);
+      if (cardIndex !== -1) {
+        localCards[cardIndex].viewCount = (localCards[cardIndex].viewCount || 0) + 1;
+        this._saveLocalCards(localCards);
+        console.log('View count incremented in localStorage');
+      }
+
+      // Then try to increment in Supabase if configured
+      if (isSupabaseConfigured() && supabase) {
+        try {
+          console.log('Attempting to increment view count in Supabase...');
+          const { error } = await supabase.rpc('increment_view_count', {
+            card_id: cardId
+          });
+
+          if (error) {
+            console.error('Error incrementing view count in Supabase (keeping localStorage changes):', error);
+            // Fallback: update the record manually
+            const { data: currentCard, error: fetchError } = await supabase
+              .from('review_cards')
+              .select('view_count')
+              .eq('id', cardId)
+              .single();
+
+            if (!fetchError && currentCard) {
+              const newViewCount = (currentCard.view_count || 0) + 1;
+              const { error: updateError } = await supabase
+                .from('review_cards')
+                .update({ view_count: newViewCount })
+                .eq('id', cardId);
+
+              if (updateError) {
+                console.error('Error updating view count manually:', updateError);
+              } else {
+                console.log('View count updated manually in Supabase');
+              }
+            }
+            return true;
+          }
+          
+          console.log('View count successfully incremented in Supabase');
+          return true;
+        } catch (supabaseError) {
+          console.error('Supabase connection failed (keeping localStorage changes):', supabaseError);
+          return true;
+        }
+      } else {
+        console.log('Supabase not configured, view count updated in localStorage only');
+        return true;
+      }
+    } catch (error) {
+      console.error('Error incrementing view count:', error);
+      return false;
+    }
+  },
+
+  async getViewCount(cardId: string): Promise<number> {
+    try {
+      // Try Supabase first if configured
+      if (isSupabaseConfigured() && supabase) {
+        try {
+          const { data, error } = await supabase
+            .from('review_cards')
+            .select('view_count')
+            .eq('id', cardId)
+            .single();
+
+          if (!error && data) {
+            return data.view_count || 0;
+          }
+        } catch (supabaseError) {
+          console.error('Error fetching view count from Supabase:', supabaseError);
+        }
+      }
+
+      // Fallback to localStorage
+      const localCards = this._getLocalCards();
+      const card = localCards.find(card => card.id === cardId);
+      return card?.viewCount || 0;
+    } catch (error) {
+      console.error('Error getting view count:', error);
+      return 0;
     }
   }
 };

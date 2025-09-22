@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Copy, CheckCircle, RotateCcw, ArrowLeft, Sparkles, RefreshCw } from 'lucide-react';
+import { Copy, CheckCircle, RotateCcw, ArrowLeft, Sparkles, RefreshCw, Eye } from 'lucide-react';
 import { ReviewCard } from '../types';
 import { StarRating } from './StarRating';
 import { SegmentedButtonGroup } from './SegmentedButtonGroup';
 import { ServiceSelector } from './ServiceSelector';
 import { aiService } from '../utils/aiService';
+import { storage } from '../utils/storage';
 
 interface CompactReviewCardViewProps {
   card: ReviewCard;
@@ -18,6 +19,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [viewCount, setViewCount] = useState(card.viewCount || 0);
 
   const languageOptions = [
     'English',
@@ -30,7 +32,20 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
   useEffect(() => {
     // Generate initial review when component loads
     generateReviewForRating(5, 'English', 'Friendly', []);
-  }, []);
+    
+    // Increment view count when component loads
+    const incrementView = async () => {
+      try {
+        await storage.incrementViewCount(card.id);
+        const newViewCount = await storage.getViewCount(card.id);
+        setViewCount(newViewCount);
+      } catch (error) {
+        console.error('Failed to increment view count:', error);
+      }
+    };
+    
+    incrementView();
+  }, [card.id]);
 
   const generateReviewForRating = async (
     rating: number, 
@@ -183,6 +198,9 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
           <h1 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
             {card.businessName}
           </h1>
+          
+          
+          
           {/* <p className="text-blue-200 text-sm">AI-Powered Review System</p> */}
         </div>
 
@@ -357,7 +375,21 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
               <p>{card.services && card.services.length > 0 ? '5' : '6'}. Paste in Google Maps and submit your review</p>
             </div>
           </div>
+
+          
         </div>
+
+        {/* View Counter */}
+          <div className="flex items-center justify-center gap-2 mb-2 mt-4">
+            <div className="bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
+              <div className="flex items-center gap-2 text-blue-200">
+                <Eye className="w-4 h-4" />
+                <span className="text-sm font-medium">
+                  {viewCount.toLocaleString()} {viewCount === 1 ? 'view' : 'views'}
+                </span>
+              </div>
+            </div>
+          </div>
       </div>
     </div>
   );
