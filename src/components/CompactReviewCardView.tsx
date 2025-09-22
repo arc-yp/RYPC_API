@@ -7,6 +7,11 @@ import { ServiceSelector } from './ServiceSelector';
 import { aiService } from '../utils/aiService';
 import { storage } from '../utils/storage';
 
+// Prevent double increments in React 18 Strict Mode by tracking increments
+// per page load and per card id. This resets on full page refresh, so each
+// refresh will correctly count +1, but avoids the dev double-mount increment.
+const hasIncrementedThisLoad: Record<string, boolean> = {};
+
 interface CompactReviewCardViewProps {
   card: ReviewCard;
 }
@@ -35,12 +40,18 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
     
     // Increment view count when component loads
     const incrementView = async () => {
+      // Guard: if we've already incremented this card during this page load, skip
+      if (hasIncrementedThisLoad[card.id]) return;
+
+      hasIncrementedThisLoad[card.id] = true;
       try {
         await storage.incrementViewCount(card.id);
         const newViewCount = await storage.getViewCount(card.id);
         setViewCount(newViewCount);
       } catch (error) {
         console.error('Failed to increment view count:', error);
+        // In case of error, allow retry on next render attempt
+        delete hasIncrementedThisLoad[card.id];
       }
     };
     
