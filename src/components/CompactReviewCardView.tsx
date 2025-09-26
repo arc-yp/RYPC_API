@@ -162,14 +162,14 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     {/* Main Card */}
     <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-[0_10px_18px_rgba(59,131,246,0.36),0_2px_8px_rgba(199,29,251,0.58)]">
           {/* Colored Dots (Top-Left) */}
-          {/* <div className="absolute top-8 right-8 sm:top-5 sm:right-10 flex gap-2">
-            <span className="w-4 h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
-            <span className="w-4 h-4 rounded-full bg-red-500 shadow-sm shadow-red-300" />
-            <span className="w-4 h-4 rounded-full bg-yellow-400 shadow-sm shadow-yellow-200" />
-            <span className="w-4 h-4 rounded-full bg-green-500 shadow-sm shadow-green-300" />
-          </div> */}
+          <div className="absolute top-4 right-4 sm:top-5 sm:right-10 flex gap-2">
+            <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
+            <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-red-500 shadow-sm shadow-red-300" />
+            <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-yellow-400 shadow-sm shadow-yellow-200" />
+            <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-green-500 shadow-sm shadow-green-300" />
+          </div>
           {/* Simple Header */}
-          <div className="flex flex-row xs:flex-row sm:flex-row items-start xs:items-center sm:items-center gap-3 sm:gap-4 mb-4">
+          <div className="flex flex-row xs:flex-row sm:flex-row items-start xs:items-center sm:items-center gap-3 sm:gap-4 mb-4 mt-4 sm:mt-0">
             {card.logoUrl ? (
               <img
                 src={card.logoUrl}
@@ -186,25 +186,23 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
                 {card.businessName}
               </h1>
               {card.location && (
-                <div className="mt-1 relative group flex items-start sm:items-center gap-1 w-full">
-                  <MapPin
-                    className="w-4 h-4 text-blue-600 shrink-0 mt-0.5 sm:mt-0"
-                    aria-hidden="true"
+                <div className="mt-1 relative group flex items-start sm:items-center gap-0 w-full">
+                  <img
+                    src="/map.png"
+                    alt="Map icon"
+                    className="w-6 h-6 sm:w-6 sm:h-6 object-contain shrink-0 mt-0 sm:mt-0"
                   />
+                 
                   <a
                     href={
                       card.googleMapsUrl ||
-                      `https://www.google.com/maps/search/${encodeURIComponent(
-                        card.location
-                      )}`
+                      `https://www.google.com/maps/search/${encodeURIComponent(card.location)}`
                     }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[13px] sm:text-sm text-neutral-600 hover:text-blue-700 underline-offset-2 hover:underline leading-snug break-words"
                   >
-                    <span className="sm:hidden break-words">
-                      {card.location}
-                    </span>
+                    <span className="sm:hidden break-words">{card.location}</span>
                     <span className="hidden sm:inline" title={card.location}>
                       {card.location}
                     </span>
