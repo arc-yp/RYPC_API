@@ -12,13 +12,25 @@ export const generateId = (): string => {
 };
 
 export const formatDate = (dateString: string): string => {
-  return new Date(dateString).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+  const d = new Date(dateString);
+  if (isNaN(d.getTime())) return '';
+  const datePart = d.toLocaleDateString('en-GB', {
+    day: '2-digit',
+    month: '2-digit',
+    year: 'numeric'
   });
+  const timePart = d.toLocaleTimeString('en-GB', {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  });
+  return `${datePart} ${timePart}`; // e.g. 31/01/2025 14:05
+};
+
+export const addDays = (dateString: string, days: number): string => {
+  const d = new Date(dateString);
+  d.setDate(d.getDate() + days);
+  return d.toISOString();
 };
 
 export const validateGoogleMapsUrl = (url: string): boolean => {

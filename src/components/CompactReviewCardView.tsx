@@ -5,7 +5,6 @@ import {
   Sparkles,
   RefreshCw,
   Eye,
-  MapPin,
   Languages,
 } from "lucide-react";
 import { ReviewCard } from "../types";
@@ -26,6 +25,31 @@ interface CompactReviewCardViewProps {
 export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   card,
 }) => {
+  // If the card is inactive, do not render the interactive review UI
+  if (card.active === false) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-6">
+        <div className="max-w-md w-full text-center bg-white rounded-xl border border-neutral-200 p-8 shadow-sm">
+          <h1 className="text-xl font-semibold text-neutral-800 mb-2">
+            {card.businessName}
+          </h1>
+          <p className="text-neutral-500 text-sm mb-4">This review card is currently inactive.</p>
+          <p className="text-neutral-400 text-xs">Please check back later.</p>
+          <h1 className="text-sm text-white mb-4">
+            Please! Contact Admin&nbsp;
+            <a
+              href="https://www.aireviewsystem.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400 hover:text-blue-600"
+            >
+              https://www.aireviewsystem.com/
+            </a>
+          </h1>
+        </div>
+      </div>
+    );
+  }
   const [currentReview, setCurrentReview] = useState("");
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLanguage, setSelectedLanguage] = useState("English");

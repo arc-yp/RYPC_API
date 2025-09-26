@@ -60,7 +60,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
   const [isGeneratingTagline, setIsGeneratingTagline] = useState(false);
-  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [showAiPanel] = useState(false); // AI panel currently disabled
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -228,6 +228,8 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
         googleMapsUrl: formData.googleMapsUrl.trim(),
         geminiApiKey: formData.geminiApiKey.trim(),
         geminiModel: formData.geminiModel,
+        // keep existing active state unchanged (not editable here)
+        active: card.active,
         updatedAt: new Date().toISOString(),
       };
 
@@ -457,7 +459,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                   </label>
                   <div className="relative">
                     <Bot className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select
+                    <select aria-label="Gemini Model"
                       value={formData.geminiModel}
                       onChange={(e) =>
                         handleInputChange("geminiModel", e.target.value)
@@ -696,7 +698,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Use Case
                     </label>
-                    <select
+                    <select aria-label="Use Case"
                       value={aiReviewData.useCase}
                       onChange={(e) =>
                         handleAiDataChange("useCase", e.target.value)

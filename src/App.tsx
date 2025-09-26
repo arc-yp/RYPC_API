@@ -132,6 +132,33 @@ const DynamicReviewCard: React.FC = () => {
     );
   }
 
+  if (card.active === false) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+        <div className="text-center max-w-lg p-8 bg-slate-800/40 backdrop-blur rounded-2xl border border-white/10">
+          <div className="w-24 h-24 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <span className="text-4xl">⚠️</span>
+          </div>
+          <h1 className="text-3xl font-bold text-white mb-4">Temporarily Unavailable</h1>
+          
+          <p className="text-slate-300 mb-4">The review card for "/{slug}" is currently inactive.</p>
+          <p className="text-slate-400 text-sm">Please check back later or contact the business owner if you believe this is an error.</p>
+           <h1 className="text-sm text-white mb-4">
+            Please! Contact Admin&nbsp;
+            <a
+              href="https://www.aireviewsystem.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400 hover:text-blue-600"
+            >
+              https://www.aireviewsystem.com/
+            </a>
+          </h1>
+        </div>
+      </div>
+    );
+  }
+
   return <CompactReviewCardView card={card} />;
 };
 

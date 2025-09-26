@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Upload, Building2, Link, AlertCircle, Sparkles, Wand2, RefreshCw, Key, Bot } from 'lucide-react';
+import { X, Upload, Building2, AlertCircle, Sparkles, Wand2, RefreshCw, Key, Bot } from 'lucide-react';
 import { ReviewCard } from '../types';
 import { generateId, generateSlug, validateGoogleMapsUrl } from '../utils/helpers';
 import { aiService } from '../utils/aiService';
@@ -42,7 +42,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
   const [isGeneratingTagline, setIsGeneratingTagline] = useState(false);
-  const [showAiPanel, setShowAiPanel] = useState(false);
+  const [showAiPanel] = useState(false); // AI panel currently disabled; keep state for future enablement
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -189,6 +189,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
         googleMapsUrl: formData.googleMapsUrl.trim(),
         geminiApiKey: formData.geminiApiKey.trim(),
         geminiModel: formData.geminiModel,
+        active: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -284,7 +285,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Business Category *
                   </label>
-                  <select
+                  <select aria-label="Business Category"
                     value={formData.category}
                     onChange={(e) => {
                       handleInputChange('category', e.target.value);
@@ -423,7 +424,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
                   </label>
                   <div className="relative">
                     <Bot className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select
+                    <select aria-label="Gemini Model"
                       value={formData.geminiModel}
                       onChange={(e) => handleInputChange('geminiModel', e.target.value)}
                       className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -625,7 +626,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
                   {/* Use Case */}
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-gray-700 mb-2">Use Case</label>
-                    <select
+                    <select aria-label="Use Case"
                       value={aiReviewData.useCase}
                       onChange={(e) => handleAiDataChange('useCase', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { X, Upload, Building2, Link, AlertCircle } from 'lucide-react';
 import { ReviewCard } from '../types';
 import { generateId, generateSlug, validateGoogleMapsUrl } from '../utils/helpers';
-import { storage } from '../utils/storage';
 
 interface AddCardModalProps {
   onClose: () => void;
@@ -55,7 +54,7 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({ onClose, onSave }) =
       newErrors.googleMapsUrl = 'Please enter a valid Google Maps review URL';
     }
 
-    const slug = generateSlug(formData.businessName);
+  // slug generated dynamically below
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -72,9 +71,12 @@ export const AddCardModal: React.FC<AddCardModalProps> = ({ onClose, onSave }) =
       const newCard: ReviewCard = {
         id: generateId(),
         businessName: formData.businessName.trim(),
+        category: 'General', // default placeholder; can be edited later
+        type: 'Business', // default placeholder
         slug: generateSlug(formData.businessName),
         logoUrl: formData.logoUrl,
         googleMapsUrl: formData.googleMapsUrl.trim(),
+        active: true,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };

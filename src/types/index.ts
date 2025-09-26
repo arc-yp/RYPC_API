@@ -12,6 +12,8 @@ export interface ReviewCard {
   geminiApiKey?: string;
   geminiModel?: string;
   viewCount?: number;
+  // Whether the card is active (visible/usable). Newly created cards default to true.
+  active?: boolean;
   createdAt: string;
   updatedAt: string;
 }

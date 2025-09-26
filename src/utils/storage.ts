@@ -2,6 +2,7 @@ import { ReviewCard } from '../types';
 import { supabase, isSupabaseConfigured } from './supabase';
 
 const STORAGE_KEY = 'scc_review_cards';
+const DELETED_IDS_KEY = 'scc_review_cards_deleted_ids'; // tombstones for deleted cards
 
 // Helper function to validate UUID format
 const isValidUuid = (id: string): boolean => {
@@ -24,6 +25,7 @@ const transformDbRowToCard = (row: any): ReviewCard => ({
   geminiApiKey: row.gemini_api_key || '',
   geminiModel: row.gemini_model || 'gemini-2.0-flash',
   viewCount: row.view_count || 0,
+  active: typeof row.active === 'boolean' ? row.active : true,
   createdAt: row.created_at,
   updatedAt: row.updated_at
 });
@@ -43,6 +45,7 @@ const transformCardToDbInsert = (card: ReviewCard) => {
     gemini_api_key: card.geminiApiKey || null,
     gemini_model: card.geminiModel || 'gemini-2.0-flash',
     view_count: card.viewCount || 0,
+    active: typeof card.active === 'boolean' ? card.active : true,
     created_at: card.createdAt || new Date().toISOString(),
     updated_at: card.updatedAt || new Date().toISOString()
   };
@@ -69,6 +72,7 @@ const transformCardToDbUpdate = (card: ReviewCard) => ({
   gemini_api_key: card.geminiApiKey || null,
   gemini_model: card.geminiModel || 'gemini-2.0-flash',
   view_count: card.viewCount || 0,
+  active: typeof card.active === 'boolean' ? card.active : true,
   updated_at: new Date().toISOString()
 });
 
@@ -90,6 +94,38 @@ export const storage = {
     } catch (error) {
       console.error('Error saving to localStorage:', error);
     }
+  },
+
+  // Tombstone helpers to prevent resurrecting deleted cards from remote/local syncs
+  _getDeletedIds(): string[] {
+    try {
+      const stored = localStorage.getItem(DELETED_IDS_KEY);
+      return stored ? JSON.parse(stored) : [];
+    } catch (error) {
+      console.error('Error reading deleted IDs from localStorage:', error);
+      return [];
+    }
+  },
+
+  _saveDeletedIds(ids: string[]): void {
+    try {
+      localStorage.setItem(DELETED_IDS_KEY, JSON.stringify(ids));
+    } catch (error) {
+      console.error('Error saving deleted IDs to localStorage:', error);
+    }
+  },
+
+  _addDeletedId(id: string): void {
+    const ids = this._getDeletedIds();
+    if (!ids.includes(id)) {
+      ids.push(id);
+      this._saveDeletedIds(ids);
+    }
+  },
+
+  _removeDeletedId(id: string): void {
+    const ids = this._getDeletedIds().filter(x => x !== id);
+    this._saveDeletedIds(ids);
   },
 
   _addLocalCard(card: ReviewCard): void {
@@ -135,7 +171,10 @@ export const storage = {
           }
 
           console.log(`Successfully fetched ${data?.length || 0} cards from Supabase`);
-          const supabaseCards = (data || []).map(transformDbRowToCard);
+          const tombstones = this._getDeletedIds();
+          const supabaseCards = (data || [])
+            .map(transformDbRowToCard)
+            .filter(c => !tombstones.includes(c.id));
           
           // Also sync with localStorage for offline access
           this._saveLocalCards(supabaseCards);
@@ -143,15 +182,18 @@ export const storage = {
           return supabaseCards;
         } catch (supabaseError) {
           console.error('Supabase connection failed, using localStorage:', supabaseError);
-          return this._getLocalCards();
+          const tombstones = this._getDeletedIds();
+          return this._getLocalCards().filter(c => !tombstones.includes(c.id));
         }
       } else {
         console.log('Supabase not configured, using localStorage');
-        return this._getLocalCards();
+        const tombstones = this._getDeletedIds();
+        return this._getLocalCards().filter(c => !tombstones.includes(c.id));
       }
     } catch (error) {
       console.error('Error loading cards:', error);
-      return this._getLocalCards();
+      const tombstones = this._getDeletedIds();
+      return this._getLocalCards().filter(c => !tombstones.includes(c.id));
     }
   },
 
@@ -162,6 +204,9 @@ export const storage = {
       // Always save to localStorage first for immediate feedback
       this._addLocalCard(card);
       console.log('Card saved to localStorage');
+
+      // Remove any tombstone if re-adding previously deleted card
+      this._removeDeletedId(card.id);
 
       // Then try to sync with Supabase if configured
       if (isSupabaseConfigured() && supabase) {
@@ -250,6 +295,9 @@ export const storage = {
       this._deleteLocalCard(cardId);
       console.log('Card deleted from localStorage');
 
+      // Add tombstone immediately so future syncs won't resurrect the card
+      this._addDeletedId(cardId);
+
       // Then try to sync with Supabase if configured
       if (isSupabaseConfigured() && supabase) {
         try {
@@ -333,7 +381,7 @@ export const storage = {
     try {
       // Test connection first before attempting migration
       console.log('Testing Supabase connection...');
-      const { data: testData, error: testError } = await supabase
+      const { error: testError } = await supabase
         .from('review_cards')
         .select('count')
         .limit(1);
@@ -427,7 +475,10 @@ export const storage = {
         return;
       }
 
-      const transformedSupabaseCards = (supabaseCards || []).map(transformDbRowToCard);
+      const tombstones = this._getDeletedIds();
+      const transformedSupabaseCards = (supabaseCards || [])
+        .map(transformDbRowToCard)
+        .filter(c => !tombstones.includes(c.id));
       
       // Update localStorage with latest Supabase data
       this._saveLocalCards(transformedSupabaseCards);

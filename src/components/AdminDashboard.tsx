@@ -1,39 +1,58 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit, Trash2, Eye, Search, Building2, Calendar, LogOut, Database, Loader2, Wifi, WifiOff, RefreshCw, ExternalLink, QrCode } from 'lucide-react';
-import { ReviewCard } from '../types';
-import { storage } from '../utils/storage';
-import { formatDate } from '../utils/helpers';
-import { CompactAddCardModal } from './CompactAddCardModal';
-import { EditCardModal } from './EditCardModal';
-import { ConfirmDialog } from './ConfirmDialog';
-import { auth } from '../utils/auth';
-import { isSupabaseConfigured } from '../utils/supabase';
-import { QRCodeModal } from './QRCodeModal';
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  Plus,
+  Edit,
+  Trash2,
+  Eye,
+  Search,
+  Building2,
+  Calendar,
+  LogOut,
+  Database,
+  Loader2,
+  Wifi,
+  WifiOff,
+  RefreshCw,
+  ExternalLink,
+  QrCode,
+} from "lucide-react";
+import { ReviewCard } from "../types";
+import { storage } from "../utils/storage";
+import { formatDate, addDays } from "../utils/helpers";
+import { CompactAddCardModal } from "./CompactAddCardModal";
+import { EditCardModal } from "./EditCardModal";
+import { ConfirmDialog } from "./ConfirmDialog";
+import { auth } from "../utils/auth";
+import { isSupabaseConfigured } from "../utils/supabase";
+import { QRCodeModal } from "./QRCodeModal";
 
 export const AdminDashboard: React.FC = () => {
   const [cards, setCards] = useState<ReviewCard[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCard, setEditingCard] = useState<ReviewCard | null>(null);
   const [deletingCard, setDeletingCard] = useState<ReviewCard | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMigrating, setIsMigrating] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
-  const [connectionStatus, setConnectionStatus] = useState<'connected' | 'local' | 'checking'>('checking');
+  const [connectionStatus, setConnectionStatus] = useState<
+    "connected" | "local" | "checking"
+  >("checking");
   const [selectedCategories] = useState<string[]>([]);
   const [qrCard, setQrCard] = useState<ReviewCard | null>(null);
+  // Removed showInactive filter; inactive cards are always visible per requirements
 
   const initializeDashboard = useCallback(async () => {
     setIsLoading(true);
-    
+
     // Check connection status
     if (isSupabaseConfigured()) {
-      setConnectionStatus('connected');
+      setConnectionStatus("connected");
       await checkForMigration();
     } else {
-      setConnectionStatus('local');
+      setConnectionStatus("local");
     }
-    
+
     await loadCards();
     setIsLoading(false);
   }, []);
@@ -48,13 +67,13 @@ export const AdminDashboard: React.FC = () => {
       setCards(savedCards);
       console.log(`Loaded ${savedCards.length} cards`);
     } catch (error) {
-      console.error('Error loading cards:', error);
+      console.error("Error loading cards:", error);
       setCards([]);
     }
   };
 
   const checkForMigration = async () => {
-    const localData = localStorage.getItem('scc_review_cards');
+    const localData = localStorage.getItem("scc_review_cards");
     if (localData) {
       try {
         const localCards = JSON.parse(localData);
@@ -64,13 +83,16 @@ export const AdminDashboard: React.FC = () => {
           try {
             await storage.migrateFromLocalStorage();
           } catch (migrationError) {
-            console.error('Migration failed, continuing with local storage:', migrationError);
+            console.error(
+              "Migration failed, continuing with local storage:",
+              migrationError
+            );
           }
           setIsMigrating(false);
-          console.log('Migration completed');
+          console.log("Migration completed");
         }
       } catch (error) {
-        console.error('Error during migration check:', error);
+        console.error("Error during migration check:", error);
         setIsMigrating(false);
       }
     }
@@ -82,13 +104,13 @@ export const AdminDashboard: React.FC = () => {
       if (success) {
         await loadCards(); // Reload to get latest data
         setShowAddModal(false);
-        console.log('Card added successfully:', newCard.businessName);
+        console.log("Card added successfully:", newCard.businessName);
       } else {
-        alert('Failed to add card. Please try again.');
+        alert("Failed to add card. Please try again.");
       }
     } catch (error) {
-      console.error('Error adding card:', error);
-      alert('Failed to add card. Please try again.');
+      console.error("Error adding card:", error);
+      alert("Failed to add card. Please try again.");
     }
   };
 
@@ -98,13 +120,13 @@ export const AdminDashboard: React.FC = () => {
       if (success) {
         await loadCards(); // Reload to get latest data
         setEditingCard(null);
-        console.log('Card updated successfully:', updatedCard.businessName);
+        console.log("Card updated successfully:", updatedCard.businessName);
       } else {
-        alert('Failed to update card. Please try again.');
+        alert("Failed to update card. Please try again.");
       }
     } catch (error) {
-      console.error('Error updating card:', error);
-      alert('Failed to update card. Please try again.');
+      console.error("Error updating card:", error);
+      alert("Failed to update card. Please try again.");
     }
   };
 
@@ -115,13 +137,13 @@ export const AdminDashboard: React.FC = () => {
         if (success) {
           await loadCards(); // Reload to get latest data
           setDeletingCard(null);
-          console.log('Card deleted successfully:', deletingCard.businessName);
+          console.log("Card deleted successfully:", deletingCard.businessName);
         } else {
-          alert('Failed to delete card. Please try again.');
+          alert("Failed to delete card. Please try again.");
         }
       } catch (error) {
-        console.error('Error deleting card:', error);
-        alert('Failed to delete card. Please try again.');
+        console.error("Error deleting card:", error);
+        alert("Failed to delete card. Please try again.");
       }
     }
   };
@@ -133,34 +155,36 @@ export const AdminDashboard: React.FC = () => {
         await storage.syncData();
       }
       await loadCards();
-      console.log('Data refreshed successfully');
+      console.log("Data refreshed successfully");
     } catch (error) {
-      console.error('Error refreshing data:', error);
+      console.error("Error refreshing data:", error);
     } finally {
       setIsRefreshing(false);
     }
   };
 
-  const filteredCards = cards.filter(card => {
+  const filteredCards = cards.filter((card) => {
     const matchesSearch =
       card.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       card.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(card.category);
+    const matchesCategory =
+      selectedCategories.length === 0 ||
+      selectedCategories.includes(card.category);
     return matchesSearch && matchesCategory;
   });
 
   const handleViewCard = (slug: string) => {
-    window.open(`/${slug}`, '_blank');
+    window.open(`/${slug}`, "_blank");
   };
 
   const handleLogout = () => {
     auth.logout();
-    window.location.href = '/login';
+    window.location.href = "/login";
   };
 
   const getConnectionStatusDisplay = () => {
     switch (connectionStatus) {
-      case 'connected':
+      case "connected":
         return (
           <div className="flex items-center text-green-400 text-sm">
             <Database className="w-4 h-4 mr-2" />
@@ -168,7 +192,7 @@ export const AdminDashboard: React.FC = () => {
             <span>Cloud Storage Active</span>
           </div>
         );
-      case 'local':
+      case "local":
         return (
           <div className="flex items-center text-yellow-400 text-sm">
             <Building2 className="w-4 h-4 mr-2" />
@@ -234,8 +258,12 @@ export const AdminDashboard: React.FC = () => {
                 className="inline-flex items-center px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors duration-200 disabled:opacity-50"
                 title="Refresh Data"
               >
-                <RefreshCw className={`w-4 h-4 mr-2 ${isRefreshing ? 'animate-spin' : ''}`} />
-                {isRefreshing ? 'Syncing...' : 'Refresh'}
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${
+                    isRefreshing ? "animate-spin" : ""
+                  }`}
+                />
+                {isRefreshing ? "Syncing..." : "Refresh"}
               </button>
               <button
                 onClick={handleLogout}
@@ -247,13 +275,8 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
 
-
-         
-          
-          
-          
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
-  {/* <div className=" flex items-center justify-center mb-8">            
+            {/* <div className=" flex items-center justify-center mb-8">            
                       <img
                         src="/py.png"
                         alt="YP Logo"
@@ -263,10 +286,9 @@ export const AdminDashboard: React.FC = () => {
             Review Cards Dashboard
           </h1>
           <p className="text-slate-300">
-            {connectionStatus === 'connected' 
-              ? 'Your review cards are synced across all devices' 
-              : 'Managing review cards locally'
-            }
+            {connectionStatus === "connected"
+              ? "Your review cards are synced across all devices"
+              : "Managing review cards locally"}
           </p>
         </div>
 
@@ -282,6 +304,7 @@ export const AdminDashboard: React.FC = () => {
               className="w-full pl-12 pr-4 py-3 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300"
             />
           </div>
+          {/* Removed show inactive toggle button */}
           <button
             onClick={() => setShowAddModal(true)}
             className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold rounded-xl hover:from-blue-700 hover:to-purple-700 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105"
@@ -291,10 +314,10 @@ export const AdminDashboard: React.FC = () => {
           </button>
         </div>
 
-  {/* Stats */}
-  <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        {/* Stats */}
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20  ">
-                <p className="text-slate-400 text-sm font-medium">Total Cards</p>
+            <p className="text-slate-400 text-sm font-medium">Total Cards</p>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-3xl font-bold text-white">{cards.length}</p>
@@ -305,7 +328,7 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <p className="text-slate-400 text-sm font-medium">Active Today</p>
+            <p className="text-slate-400 text-sm font-medium">Active Today</p>
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-3xl font-bold text-white">{cards.length}</p>
@@ -316,14 +339,21 @@ export const AdminDashboard: React.FC = () => {
             </div>
           </div>
           <div className="bg-white/10 backdrop-blur-md rounded-xl p-6 border border-white/20">
-                <p className="text-slate-400 text-sm font-medium">This Month</p>
+            <p className="text-slate-400 text-sm font-medium">This Month</p>
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-3xl font-bold text-white">{cards.filter(card => {
-                  const cardDate = new Date(card.createdAt);
-                  const now = new Date();
-                  return cardDate.getMonth() === now.getMonth() && cardDate.getFullYear() === now.getFullYear();
-                }).length}</p>
+                <p className="text-3xl font-bold text-white">
+                  {
+                    cards.filter((card) => {
+                      const cardDate = new Date(card.createdAt);
+                      const now = new Date();
+                      return (
+                        cardDate.getMonth() === now.getMonth() &&
+                        cardDate.getFullYear() === now.getFullYear()
+                      );
+                    }).length
+                  }
+                </p>
               </div>
               <div className="w-12 h-12 bg-purple-500/20 rounded-lg flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-purple-400" />
@@ -338,12 +368,13 @@ export const AdminDashboard: React.FC = () => {
             <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
               <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />
             </div>
-            <h3 className="text-2xl font-semibold text-white mb-2">Loading Cards</h3>
+            <h3 className="text-2xl font-semibold text-white mb-2">
+              Loading Cards
+            </h3>
             <p className="text-slate-400">
-              {connectionStatus === 'connected' 
-                ? 'Fetching your review cards from cloud storage...' 
-                : 'Loading your review cards from local storage...'
-              }
+              {connectionStatus === "connected"
+                ? "Fetching your review cards from cloud storage..."
+                : "Loading your review cards from local storage..."}
             </p>
           </div>
         ) : filteredCards.length === 0 ? (
@@ -352,13 +383,12 @@ export const AdminDashboard: React.FC = () => {
               <Building2 className="w-12 h-12 text-slate-400" />
             </div>
             <h3 className="text-2xl font-semibold text-white mb-2">
-              {searchTerm ? 'No cards found' : 'No review cards yet'}
+              {searchTerm ? "No cards found" : "No review cards yet"}
             </h3>
             <p className="text-slate-400 mb-8 max-w-md mx-auto">
-              {searchTerm 
-                ? 'Try adjusting your search terms or create a new card.'
-                : 'Get started by creating your first review card for your business.'
-              }
+              {searchTerm
+                ? "Try adjusting your search terms or create a new card."
+                : "Get started by creating your first review card for your business."}
             </p>
             {!searchTerm && (
               <button
@@ -385,73 +415,120 @@ export const AdminDashboard: React.FC = () => {
                     className="bg-white/10 backdrop-blur-md rounded-xl border border-white/20 overflow-hidden hover:bg-white/15 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl relative"
                   >
                     <div className="p-6">
-                        <div className="flex items-center mb-4">
-                          <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 shadow-lg">
-                            {card.logoUrl ? (
-                              <img
-                                src={card.logoUrl}
-                                alt={`${card.businessName} logo`}
-                                className="w-8 h-8 object-contain"
-                              />
-                            ) : (
-                              <Building2 className="w-6 h-6 text-gray-600" />
-                            )}
-                          </div>
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold text-white truncate">
-                              {card.businessName}
-                            </h3>
-                            <p className="text-sm text-slate-400">/{card.slug}</p>
-                          </div>
-                          {/* Views pill */}
-                          <div className="ml-2">
-                            <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-white/10 text-blue-200 border border-white/20">
-                              <Eye className="w-3 h-3" />
-                              {(card.viewCount || 0).toLocaleString()}
+                      <div className="flex items-center mb-4">
+                        <div className="w-12 h-12 bg-white rounded-lg flex items-center justify-center mr-4 shadow-lg">
+                          {card.logoUrl ? (
+                            <img
+                              src={card.logoUrl}
+                              alt={`${card.businessName} logo`}
+                              className="w-8 h-8 object-contain"
+                            />
+                          ) : (
+                            <Building2 className="w-6 h-6 text-gray-600" />
+                          )}
+                        </div>
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold text-white truncate">
+                            {card.businessName}
+                          </h3>
+                          <p className="text-sm text-slate-400">/{card.slug}</p>
+                        </div>
+                        {/* Views pill */}
+                        <div className="ml-2 flex flex-col items-end ">
+                          <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-white/10 text-blue-200 border border-white/20">
+                            <Eye className="w-3 h-3" />
+                            {(card.viewCount || 0).toLocaleString()}
+                          </span>
+                          {card.active === false && (
+                            <span className="mt-1 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs bg-red-500/20 text-red-200 border border-red-400/20 w-full justify-center">
+                              Inactive
                             </span>
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="mb-4">
+                        <p className="text-xs text-slate-400 mb-1">
+                          Category :{" "}
+                          <span className="text-sm text-slate-300">
+                            {card.category}
+                          </span>
+                        </p>
+
+                        <p className="text-xs text-slate-400 mb-1 mt-2">
+                          Type :{" "}
+                          <span className="text-sm text-slate-300">
+                            {card.type}
+                          </span>
+                        </p>
+
+                        <div className="flex items-center justify-between mb-4">
+                          <p className="text-xs text-slate-400 mb-0">
+                            Created :{" "}
+                            <span className="text-sm text-slate-300">
+                              {formatDate(card.createdAt)} - {formatDate(addDays(card.createdAt, 365))}
+                            </span>
+                          </p>
+
+                          <div className="flex items-center gap-3">
+                            {/* Active toggle switch (right side) */}
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const updated = { ...card, active: !card.active, updatedAt: new Date().toISOString() };
+                                setCards((prev) => prev.map((c) => (c.id === card.id ? updated : c)));
+                                await storage.updateCard(updated);
+                              }}
+                              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
+                                card.active ? "bg-green-500" : "bg-gray-400/60"
+                              }`}
+                              aria-label={card.active ? "Deactivate card" : "Activate card"}
+                              title={card.active ? "Click to deactivate" : "Click to activate"}
+                            >
+                              <span
+                                className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
+                                  card.active ? "translate-x-6" : "translate-x-1"
+                                }`}
+                              />
+                            </button>
                           </div>
                         </div>
+                        
+                      </div>
 
-                        <div className="mb-4">
-                          <p className="text-xs text-slate-400 mb-1">Category : <span className="text-sm text-slate-300">{card.category}</span></p>
-                         
-                          <p className="text-xs text-slate-400 mb-1 mt-2">Type : <span className="text-sm text-slate-300">{card.type}</span></p>
-                          
-                          <p className="text-xs text-slate-400 mb-1 mt-2">Created : <span className="text-sm text-slate-300">{formatDate(card.createdAt)}</span></p>
-                        </div>
-
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleViewCard(card.slug)}
-                            className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors duration-200"
-                          >
-                            <ExternalLink className="w-4 h-4 mr-1" />
-                            Open
-                          </button>
-                          <button
-                            onClick={() => setQrCard(card)}
-                            className="inline-flex items-center justify-center px-3 py-2 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition-colors duration-200"
-                            title="Show QR"
-                          >
-                            <QrCode className="w-4 h-4 mr-1" />
-                            QR
-                          </button>
-                          <button
-                            onClick={() => setEditingCard(card)}
-                            className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-purple-600/20 text-purple-400 rounded-lg hover:bg-purple-600/30 transition-colors duration-200"
-                          >
-                            <Edit className="w-4 h-4 mr-1" />
-                            Edit
-                          </button>
-                          <button
-                            onClick={() => setDeletingCard(card)}
-                            className="inline-flex items-center justify-center px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
-                            title="Delete card"
-                            aria-label={`Delete ${card.businessName}`}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
+                      <div className="flex flex-wrap gap-2">
+                        
+                        <button
+                          onClick={() => handleViewCard(card.slug)}
+                          className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors duration-200"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          Open
+                        </button>
+                        <button
+                          onClick={() => setQrCard(card)}
+                          className="inline-flex items-center justify-center px-3 py-2 bg-blue-600/20 text-blue-300 rounded-lg hover:bg-blue-600/30 transition-colors duration-200"
+                          title="Show QR"
+                        >
+                          <QrCode className="w-4 h-4 mr-1" />
+                          QR
+                        </button>
+                        <button
+                          onClick={() => setEditingCard(card)}
+                          className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-purple-600/20 text-purple-400 rounded-lg hover:bg-purple-600/30 transition-colors duration-200"
+                        >
+                          <Edit className="w-4 h-4 mr-1" />
+                          Edit
+                        </button>
+                        <button
+                          onClick={() => setDeletingCard(card)}
+                          className="inline-flex items-center justify-center px-3 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
+                          title="Delete card"
+                          aria-label={`Delete ${card.businessName}`}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
