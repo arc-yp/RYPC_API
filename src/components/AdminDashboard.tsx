@@ -470,7 +470,7 @@ export const AdminDashboard: React.FC = () => {
                             </span>
                           </p>
 
-                          <div className="flex items-center gap-3">
+                          <div className="flex items-center justify-center gap-3">
                             {/* Active toggle switch (right side) */}
                             <button
                               type="button"
