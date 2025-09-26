@@ -162,14 +162,14 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     {/* Main Card */}
     <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-[0_10px_18px_rgba(59,131,246,0.36),0_2px_8px_rgba(199,29,251,0.58)]">
           {/* Colored Dots (Top-Left) */}
-          <div className="absolute top-8 right-8 sm:top-5 sm:right-10 flex gap-2">
+          {/* <div className="absolute top-8 right-8 sm:top-5 sm:right-10 flex gap-2">
             <span className="w-4 h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
             <span className="w-4 h-4 rounded-full bg-red-500 shadow-sm shadow-red-300" />
             <span className="w-4 h-4 rounded-full bg-yellow-400 shadow-sm shadow-yellow-200" />
             <span className="w-4 h-4 rounded-full bg-green-500 shadow-sm shadow-green-300" />
-          </div>
+          </div> */}
           {/* Simple Header */}
-          <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center gap-3 sm:gap-4 mb-4">
+          <div className="flex flex-row xs:flex-row sm:flex-row items-start xs:items-center sm:items-center gap-3 sm:gap-4 mb-4">
             {card.logoUrl ? (
               <img
                 src={card.logoUrl}
@@ -246,18 +246,6 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
                 size="sm"
               />
             </div>
-
-            {/* {showAdvanced && (
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Tone</label>
-                <SegmentedButtonGroup
-                  options={toneOptions}
-                  selected={selectedTone}
-                  onChange={(value) => handleToneChange(value as 'Professional' | 'Friendly' | 'Casual' | 'Grateful')}
-                  size="sm"
-                />
-              </div>
-            )} */}
           </div>
 
           {/* Service Selection */}
@@ -269,16 +257,6 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
               className="mb-4"
             />
           )}
-
-          {/* Advanced Options Toggle
-          <div className="text-center mb-4">
-            <button
-              onClick={() => setShowAdvanced(!showAdvanced)}
-              className="text-sm text-blue-600 hover:text-blue-800 flex items-center mx-auto"
-            >
-              {showAdvanced ? 'Hide' : 'Show'} Advanced Options
-            </button>
-          </div> */}
 
           {/* Review Text */}
           <div className="mb-3">

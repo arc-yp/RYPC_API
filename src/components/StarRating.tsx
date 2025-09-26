@@ -23,7 +23,7 @@ export const StarRating: React.FC<StarRatingProps> = ({
   return (
     <div className="flex gap-1">
       {[1, 2, 3, 4, 5].map((star) => {
-        const isSelectable = star === 4 || star === 5;
+        const isSelectable = star === 1 || star === 2 || star === 3 || star === 4 || star === 5;
         return (
           <button
             key={star}
