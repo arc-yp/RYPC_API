@@ -1,42 +1,48 @@
-import React, { useState, useEffect } from 'react';
-import { Copy, CheckCircle, Sparkles, RefreshCw, Eye } from 'lucide-react';
-import { ReviewCard } from '../types';
-import { StarRating } from './StarRating';
-import { SegmentedButtonGroup } from './SegmentedButtonGroup';
-import { ServiceSelector } from './ServiceSelector';
-import { aiService } from '../utils/aiService';
-import { storage } from '../utils/storage';
+import React, { useState, useEffect } from "react";
+import {
+  Copy,
+  CheckCircle,
+  Sparkles,
+  RefreshCw,
+  Eye,
+  MapPin,
+  Languages,
+} from "lucide-react";
+import { ReviewCard } from "../types";
+import { StarRating } from "./StarRating";
+import { SegmentedButtonGroup } from "./SegmentedButtonGroup";
+import { ServiceSelector } from "./ServiceSelector";
+import { aiService } from "../utils/aiService";
+import { storage } from "../utils/storage";
 
-// Prevent double increments in React 18 Strict Mode by tracking increments
-// per page load and per card id. This resets on full page refresh, so each
-// refresh will correctly count +1, but avoids the dev double-mount increment.
+// Prevent double increments in React 18 Strict Mode
+// Track view increments per card id for this page load to avoid double increments in Strict Mode
 const hasIncrementedThisLoad: Record<string, boolean> = {};
 
 interface CompactReviewCardViewProps {
   card: ReviewCard;
 }
 
-export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ card }) => {
-  const [currentReview, setCurrentReview] = useState('');
+export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
+  card,
+}) => {
+  const [currentReview, setCurrentReview] = useState("");
   const [selectedRating, setSelectedRating] = useState(5);
-  const [selectedLanguage, setSelectedLanguage] = useState('English');
-  const [selectedTone] = useState<'Professional' | 'Friendly' | 'Casual' | 'Grateful'>('Friendly');
+  const [selectedLanguage, setSelectedLanguage] = useState("English");
+  const [selectedTone] = useState<
+    "Professional" | "Friendly" | "Casual" | "Grateful"
+  >("Friendly");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [viewCount, setViewCount] = useState(card.viewCount || 0);
 
-  const languageOptions = [
-    'English',
-    'Gujarati', 
-    'Hindi',
-  ];
-
+  const languageOptions = ["English", "Gujarati", "Hindi"];
 
   useEffect(() => {
     // Generate initial review when component loads
-    generateReviewForRating(5, 'English', 'Friendly', []);
-    
+    generateReviewForRating(5, "English", "Friendly", []);
+
     // Increment view count when component loads
     const incrementView = async () => {
       // Guard: if we've already incremented this card during this page load, skip
@@ -48,19 +54,19 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
         const newViewCount = await storage.getViewCount(card.id);
         setViewCount(newViewCount);
       } catch (error) {
-        console.error('Failed to increment view count:', error);
+        console.error("Failed to increment view count:", error);
         // In case of error, allow retry on next render attempt
         delete hasIncrementedThisLoad[card.id];
       }
     };
-    
+
     incrementView();
   }, [card.id]);
 
   const generateReviewForRating = async (
-    rating: number, 
-    language?: string, 
-    tone?: 'Professional' | 'Friendly' | 'Casual' | 'Grateful',
+    rating: number,
+    language?: string,
+    tone?: "Professional" | "Friendly" | "Casual" | "Grateful",
     services?: string[]
   ) => {
     setIsGenerating(true);
@@ -74,27 +80,21 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
         starRating: rating,
         language: language || selectedLanguage,
         tone: tone || selectedTone,
-        useCase: 'Customer review',
+        useCase: "Customer review",
         geminiApiKey: card.geminiApiKey,
-        geminiModel: card.geminiModel
+        geminiModel: card.geminiModel,
       });
       setCurrentReview(review.text);
     } catch (error) {
-      console.error('Failed to generate review:', error);
+      console.error("Failed to generate review:", error);
       // Use contextual fallback review
-      const fallbackReview = aiService.getFallbackReview({
-        businessName: card.businessName,
-        category: card.category,
-        type: card.type,
-        selectedServices: services || selectedServices,
-        starRating: rating,
-        language: language || selectedLanguage,
-        tone: tone || selectedTone,
-        useCase: 'Customer review',
-        geminiApiKey: card.geminiApiKey,
-        geminiModel: card.geminiModel
-      });
-      setCurrentReview(fallbackReview);
+      const includedServices = (services || selectedServices || [])
+        .slice(0, 3)
+        .join(", ");
+      const fallback = `${rating} star experience at ${card.businessName}${
+        includedServices ? " for " + includedServices : ""
+      }. Great service and friendly staff.`;
+      setCurrentReview(fallback);
     } finally {
       setIsGenerating(false);
     }
@@ -102,17 +102,32 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
 
   const handleRatingChange = (rating: number) => {
     setSelectedRating(rating);
-    generateReviewForRating(rating, selectedLanguage, selectedTone, selectedServices);
+    generateReviewForRating(
+      rating,
+      selectedLanguage,
+      selectedTone,
+      selectedServices
+    );
   };
 
   const handleLanguageChange = (language: string) => {
     setSelectedLanguage(language);
-    generateReviewForRating(selectedRating, language, selectedTone, selectedServices);
+    generateReviewForRating(
+      selectedRating,
+      language,
+      selectedTone,
+      selectedServices
+    );
   };
 
   const handleServicesChange = (services: string[]) => {
     setSelectedServices(services);
-    generateReviewForRating(selectedRating, selectedLanguage, selectedTone, services);
+    generateReviewForRating(
+      selectedRating,
+      selectedLanguage,
+      selectedTone,
+      services
+    );
   };
 
   const handleCopyAndRedirect = async () => {
@@ -122,29 +137,35 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
       setTimeout(() => setCopied(false), 2000);
       window.location.href = card.googleMapsUrl;
     } catch (err) {
-      console.error('Failed to copy text: ', err);
+      console.error("Failed to copy text: ", err);
     }
   };
 
   const handleRegenerateReview = () => {
-    generateReviewForRating(selectedRating, selectedLanguage, selectedTone, selectedServices);
+    generateReviewForRating(
+      selectedRating,
+      selectedLanguage,
+      selectedTone,
+      selectedServices
+    );
   };
 
   const renderReviewText = () => {
-    if (selectedLanguage.includes('+')) {
+    if (selectedLanguage.includes("+")) {
       // For mixed languages, try to split by sentences
-      const sentences = currentReview.split(/[.]+/).filter(s => s.trim());
+      const sentences = currentReview.split(/[.]+/).filter((s) => s.trim());
       return (
         <div className="space-y-1">
           {sentences.map((sentence, index) => (
             <p key={index} className="text-gray-800 text-sm leading-relaxed">
-              {sentence.trim()}{index < sentences.length - 1 ? '.' : ''}
+              {sentence.trim()}
+              {index < sentences.length - 1 ? "." : ""}
             </p>
           ))}
         </div>
       );
     }
-    
+
     return (
       <blockquote className="text-gray-800 text-sm leading-relaxed">
         {currentReview}
@@ -153,87 +174,88 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900 flex items-center justify-center p-4">
-      {/* Background Effects */}
-      <div className="absolute inset-0">
-        <div className="absolute top-[10%] left-[10%] w-64 h-64 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute bottom-[10%] right-[10%] w-80 h-80 bg-purple-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      </div>
-
-      <div className="relative z-10 w-full max-w-xl">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-block relative">
-            <div className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 mx-auto mb-3 sm:mb-4 relative perspective-1000">
-              {/* 3D Rotating Ring */}
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-400 via-purple-500 to-pink-500 rounded-full animate-spin-continuous opacity-30 transform-gpu"></div>
-              <div className="absolute inset-1 bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 rounded-full animate-spin-reverse opacity-20 transform-gpu"></div>
-
-              {/* Main Logo Container with 3D Effect */}
-              <div className="absolute inset-2 bg-white rounded-full flex items-center justify-center shadow-3d transform hover:scale-110 transition-all duration-500 animate-float-gentle">
-                <div className="relative w-full h-full flex items-center justify-center overflow-hidden rounded-full">
-                  {/* Logo Display */}
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    {card.logoUrl ? (
-                      <img
-                        src={card.logoUrl}
-                        alt={`${card.businessName} Logo`}
-                        className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 animate-pulse-gentle transform-gpu object-contain"
-                      />
-                    ) : (
-                      <div className="w-10 h-10 sm:w-12 sm:h-12 lg:w-14 lg:h-14 bg-gradient-to-r from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-xs sm:text-sm lg:text-base">
-                          {card.businessName.charAt(0)}
-                        </span>
-                      </div>
-                    )}
-                  </div>
+    <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-4 sm:p-6 md:p-10 lg:p-16 bg-gradient-to-br from-slate-200 via-purple-200 to-slate-200">
+      <div className="w-full max-w-xl sm:max-w-2xl">
+        {/* Main Card */}
+        <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-md" style={{ boxShadow: "0 10px 18px rgba(59, 131, 246, 0.36), 0 2px 8px rgba(199, 29, 251, 0.58)" }}>
+          {/* Colored Dots (Top-Left) */}
+          <div className="absolute top-8 right-8 sm:top-5 sm:right-10 flex gap-2">
+            <span className="w-4 h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
+            <span className="w-4 h-4 rounded-full bg-red-500 shadow-sm shadow-red-300" />
+            <span className="w-4 h-4 rounded-full bg-yellow-400 shadow-sm shadow-yellow-200" />
+            <span className="w-4 h-4 rounded-full bg-green-500 shadow-sm shadow-green-300" />
+          </div>
+          {/* Simple Header */}
+          <div className="flex flex-col xs:flex-row sm:flex-row items-start xs:items-center sm:items-center gap-3 sm:gap-4 mb-4">
+            {card.logoUrl ? (
+              <img
+                src={card.logoUrl}
+                alt={`${card.businessName} Logo`}
+                className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-contain border border-neutral-300 shadow-sm"
+              />
+            ) : (
+              <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-full bg-blue-600 flex items-center justify-center text-white text-lg sm:text-xl font-semibold">
+                {card.businessName.charAt(0)}
+              </div>
+            )}
+            <div className="min-w-0 w-full">
+              <h1 className="text-lg sm:text-xl font-semibold text-neutral-800 leading-tight break-words">
+                {card.businessName}
+              </h1>
+              {card.location && (
+                <div className="mt-1 relative group flex items-start sm:items-center gap-1 w-full">
+                  <MapPin
+                    className="w-4 h-4 text-blue-600 shrink-0 mt-0.5 sm:mt-0"
+                    aria-hidden="true"
+                  />
+                  <a
+                    href={
+                      card.googleMapsUrl ||
+                      `https://www.google.com/maps/search/${encodeURIComponent(
+                        card.location
+                      )}`
+                    }
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[13px] sm:text-sm text-neutral-600 hover:text-blue-700 underline-offset-2 hover:underline leading-snug break-words"
+                  >
+                    <span className="sm:hidden break-words">
+                      {card.location}
+                    </span>
+                    <span className="hidden sm:inline" title={card.location}>
+                      {card.location}
+                    </span>
+                  </a>
                 </div>
-              </div>
-
-              {/* Orbiting particles */}
-              <div className="absolute inset-0 animate-spin-slow">
-                <div className="absolute -top-1 left-1/2 w-2 h-2 bg-blue-400 rounded-full opacity-60 animate-pulse"></div>
-                <div className="absolute top-1/2 -right-1 w-1.5 h-1.5 bg-purple-400 rounded-full opacity-60 animate-pulse delay-300"></div>
-                <div className="absolute -bottom-1 left-1/2 w-2 h-2 bg-pink-400 rounded-full opacity-60 animate-pulse delay-600"></div>
-                <div className="absolute top-1/2 -left-1 w-1.5 h-1.5 bg-cyan-400 rounded-full opacity-60 animate-pulse delay-900"></div>
-              </div>
+              )}
             </div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-2 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
-            {card.businessName}
-          </h1>
-          
-          
-          
-          {/* <p className="text-blue-200 text-sm">AI-Powered Review System</p> */}
-        </div>
-
-        {/* Main Card */}
-        <div className="bg-white/95 backdrop-blur-md rounded-2xl p-5 shadow-2xl border border-white/20">
           {/* Star Rating Selector */}
-          <div className="text-center mb-1">
-            <p className="text-gray-700 font-medium mb-3">Select Rating</p>
-            <div className="flex justify-center">
+          <div className="text-center mb-2">
+            {/* <p className="text-neutral-700 font-medium mb-2">Rate your experience</p> */}
+            <div className="flex justify-center mb-1 ">
               <StarRating
                 rating={selectedRating}
                 onRatingChange={handleRatingChange}
                 size="lg"
               />
             </div>
-            <p className="text-sm text-gray-500 mt-2">
+            {/* <p className="text-xs text-neutral-500">
               {selectedRating === 1 && "Very dissatisfied"}
               {selectedRating === 2 && "Below average"}
               {selectedRating === 3 && "Average experience"}
               {selectedRating === 4 && "Good experience"}
               {selectedRating === 5 && "Excellent experience"}
-            </p>
+            </p> */}
           </div>
 
           {/* Language & Tone Selectors */}
-          <div className="grid grid-cols-1 gap-4 mb-4">
+          <div className="grid grid-cols-1 gap-3 mb-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+              <label className="block text-sm font-medium text-gray-700 flex items-center mb-2">
+                <Languages className="w-4 h-4 mr-2 text-orange-600" />
+                Language
+              </label>
               <SegmentedButtonGroup
                 options={languageOptions}
                 selected={selectedLanguage}
@@ -276,75 +298,56 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
           </div> */}
 
           {/* Review Text */}
-          <div className="mb-2">
-            <div className="bg-gradient-to-br from-gray-50 to-blue-50/30 rounded-2xl p-6 border-2 border-gray-300 min-h-[120px] flex items-center shadow-inner">
+          <div className="mb-3">
+            <div className="rounded-xl p-4 border border-neutral-500 bg-neutral-50 min-h-[110px] flex items-center">
               {isGenerating ? (
                 <div className="flex items-center justify-center w-full">
                   <div className="text-center">
-                    <RefreshCw className="animate-spin h-8 w-8 text-blue-600 mx-auto mb-2" />
-                    <span className="text-gray-600 font-medium">Generating personalized review...</span>
-                    <p className="text-xs text-gray-500 mt-1">
-                      Including {selectedServices.length > 0 ? `${selectedServices.length} selected services` : 'your preferences'}
+                    <RefreshCw className="animate-spin h-6 w-6 text-blue-600 mx-auto mb-2" />
+                    <span className="text-neutral-600 text-sm font-medium">
+                      Generating review...
+                    </span>
+                    <p className="text-[10px] text-neutral-500 mt-1">
+                      {selectedServices.length > 0
+                        ? `${selectedServices.length} services included`
+                        : "Personalizing text"}
                     </p>
                   </div>
                 </div>
               ) : (
-                <div className="w-full">
-                  {renderReviewText()}
-                </div>
+                <div className="w-full">{renderReviewText()}</div>
               )}
             </div>
-            
-            {/* Review Info */}
             {currentReview && !isGenerating && (
-              <div className="mt-4 p-3 bg-white/80 rounded-xl border border-gray-200">
-                <div className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2 text-gray-600">
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                      <span className="font-medium">{selectedLanguage}</span>
-                    </div>
-                    {/* <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-purple-400 rounded-full"></div>
-                      <span className="font-medium">{selectedTone}</span>
-                    </div> */}
-                    <div className="flex items-center gap-1">
-                      <div className="w-2 h-2 bg-yellow-400 rounded-full"></div>
-                      <span className="font-medium">{selectedRating} stars</span>
-                    </div> 
-                    {/* {selectedServices.length > 0 && (
-                      <div className="flex items-center gap-1">
-                        <div className="w-2 h-2 bg-green-400 rounded-full"></div>
-                        <span className="font-medium">{selectedServices.length} services</span>
-                      </div>
-                    )} */}
-                  </div>
-                  <span className="text-gray-500 font-mono">{currentReview.length} chars</span>
-                </div>
+              <div className="mt-2 flex items-center justify-between text-[11px] text-neutral-500">
+                <span>
+                  {selectedLanguage} • {selectedRating}★
+                </span>
+                <span className="font-mono">{currentReview.length} chars</span>
               </div>
             )}
           </div>
 
-          {/* Action Buttons */}
-          <div className="space-y-3">
+          {/* Action Buttons: side-by-side */}
+          <div className="flex gap-3">
             <button
               onClick={handleCopyAndRedirect}
               disabled={!currentReview || isGenerating}
-              className={`w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-semibold transition-all duration-300 ${
+              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
                 copied
                   ? "bg-green-500 text-white"
-                  : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700"
+                  : "bg-blue-600 hover:bg-blue-700 text-white"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
             >
               {copied ? (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Copied! Redirecting...
+                  Copied! Opening Google...
                 </>
               ) : (
                 <>
                   <Copy className="w-5 h-5" />
-                  Copy & Review
+                  Copy & Post to Google
                 </>
               )}
             </button>
@@ -352,7 +355,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
             <button
               onClick={handleRegenerateReview}
               disabled={isGenerating}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors duration-200 disabled:opacity-50 border border-gray-300"
+              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50 border border-neutral-300"
             >
               {isGenerating ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
@@ -362,39 +365,17 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({ ca
               Generate New Review
             </button>
           </div>
-
-          {/* Instructions */}
-          <div className="mt-4 p-5 bg-gradient-to-r from-blue-50 to-purple-50 rounded-2xl border-2 border-blue-100">
-            <h3 className="text-sm font-bold text-blue-900 mb-3 flex items-center">
-              <span className="text-lg mr-2">🚀</span>
-              How It Works
-            </h3>
-            <div className="space-y-2 text-xs text-blue-800">
-              <p>1. Select your rating (1-5 stars)</p>
-              <p>2. Choose your preferred language</p>
-              {card.services && card.services.length > 0 && (
-                <p>3. Pick services you want to highlight</p>
-              )}
-             
-              <p>{card.services && card.services.length > 0 ? '4' : '5'}. Click "Copy & Review" to copy your personalized text</p>
-              <p>{card.services && card.services.length > 0 ? '5' : '6'}. Paste in Google Maps and submit your review</p>
-            </div>
-          </div>
-
-          
         </div>
 
         {/* View Counter */}
-          <div className="flex items-center justify-center gap-2 mb-2 mt-4">
-            <div className="bg-white/10 backdrop-blur-md rounded-full px-4 py-2 border border-white/20">
-              <div className="flex items-center gap-2 text-blue-200">
-                <Eye className="w-4 h-4" />
-                <span className="text-sm font-medium">
-                  {viewCount.toLocaleString()} {viewCount === 1 ? 'view' : 'views'}
-                </span>
-              </div>
-            </div>
+        <div className="flex items-center justify-center gap-2 mb-4 mt-3">
+          <div className="px-3 py-1.5 rounded-full bg-white border border-neutral-200 shadow-sm flex items-center gap-2">
+            <Eye className="w-4 h-4 text-neutral-500" />
+            <span className="text-xs text-neutral-600 font-medium">
+              {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}
+            </span>
           </div>
+        </div>
       </div>
     </div>
   );

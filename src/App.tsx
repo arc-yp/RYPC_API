@@ -87,13 +87,13 @@ const DynamicReviewCard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-slate-200 via-purple-200 to-slate-200 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
           </div>
-          <h1 className="text-2xl font-bold text-white mb-4">Loading Review Card</h1>
-          <p className="text-slate-400">Please wait...</p>
+          <h1 className="text-2xl font-bold text-blue-900 mb-4">Loading Review Card</h1>
+          <p className="text-slate-900">Please wait...</p>
         </div>
       </div>
     );

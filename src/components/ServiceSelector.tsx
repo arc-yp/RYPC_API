@@ -18,7 +18,7 @@ export const ServiceSelector: React.FC<ServiceSelectorProps> = ({
 }) => {
   const sizeClasses = {
     sm: 'px-2 py-1 text-xs',      // smaller padding and font
-    md: 'px-3 py-1.5 text-sm',    // moderate padding and font
+    md: 'px-3 py-1.5 text-xs',    // moderate padding and font
     lg: 'px-4 py-2 text-xs'     // keep large as is
   };
 

@@ -18,9 +18,9 @@ export const SegmentedButtonGroup: React.FC<SegmentedButtonGroupProps> = ({
   size = 'md'
 }) => {
   const sizeClasses = {
-    sm: 'px-3 py-1.5 text-xs',
-    md: 'px-4 py-2 text-sm',
-    lg: 'px-6 py-3 text-base'
+    sm: 'px-2.5 py-1.5 text-xs',
+    md: 'px-3.5 py-2 text-sm',
+    lg: 'px-5 py-2.5 text-base'
   };
 
   const handleClick = (option: string) => {
@@ -52,14 +52,14 @@ export const SegmentedButtonGroup: React.FC<SegmentedButtonGroupProps> = ({
           onClick={() => handleClick(option)}
           className={`
             ${sizeClasses[size]}
-            rounded-full font-medium transition-all duration-200
-            border-2 whitespace-nowrap
+            rounded-full font-medium transition-colors duration-150
+            border whitespace-nowrap select-none
             ${isSelected(option)
-              ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-transparent shadow-lg transform scale-105'
-              : 'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:bg-blue-50'
+              ? 'bg-blue-600 text-white border-blue-600 shadow-sm'
+              : 'bg-white text-neutral-700 border-neutral-300 hover:border-blue-400 hover:bg-blue-50'
             }
-            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-            active:transform active:scale-95
+            focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1
+            active:bg-blue-600/90
           `}
           aria-pressed={isSelected(option)}
           role={multiple ? 'checkbox' : 'radio'}
