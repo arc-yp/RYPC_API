@@ -150,34 +150,17 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     );
   };
 
-  const renderReviewText = () => {
-    if (selectedLanguage.includes("+")) {
-      // For mixed languages, try to split by sentences
-      const sentences = currentReview.split(/[.]+/).filter((s) => s.trim());
-      return (
-        <div className="space-y-1">
-          {sentences.map((sentence, index) => (
-            <p key={index} className="text-gray-800 text-sm leading-relaxed">
-              {sentence.trim()}
-              {index < sentences.length - 1 ? "." : ""}
-            </p>
-          ))}
-        </div>
-      );
-    }
-
-    return (
-      <blockquote className="text-gray-800 text-sm leading-relaxed">
-        {currentReview}
-      </blockquote>
-    );
-  };
+  const renderReviewText = () => (
+    <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
+      {currentReview}
+    </blockquote>
+  );
 
   return (
-    <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-4 sm:p-6 md:p-10 lg:p-16 bg-gradient-to-br from-slate-200 via-purple-200 to-slate-200">
+    <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-4 sm:p-6 md:p-10 lg:p-16 bg-gradient-to-br from-blue-200 via-purple-200 to-slate-200">
       <div className="w-full max-w-xl sm:max-w-2xl">
-        {/* Main Card */}
-        <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-md" style={{ boxShadow: "0 10px 18px rgba(59, 131, 246, 0.36), 0 2px 8px rgba(199, 29, 251, 0.58)" }}>
+    {/* Main Card */}
+    <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-[0_10px_18px_rgba(59,131,246,0.36),0_2px_8px_rgba(199,29,251,0.58)]">
           {/* Colored Dots (Top-Left) */}
           <div className="absolute top-8 right-8 sm:top-5 sm:right-10 flex gap-2">
             <span className="w-4 h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
@@ -328,26 +311,27 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
             )}
           </div>
 
-          {/* Action Buttons: side-by-side */}
-          <div className="flex gap-3">
+          {/* Action Buttons - stack on very small screens */}
+          <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 mt-2 w-full">
             <button
               onClick={handleCopyAndRedirect}
               disabled={!currentReview || isGenerating}
-              className={`flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium transition-colors ${
+              className={`w-full sm:flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-medium text-sm sm:text-base transition-colors ${
                 copied
                   ? "bg-green-500 text-white"
                   : "bg-blue-600 hover:bg-blue-700 text-white"
               } disabled:opacity-50 disabled:cursor-not-allowed`}
+              aria-label="Copy review text and open Google Maps review page"
             >
               {copied ? (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  Copied! Opening Google...
+                  <span className="whitespace-nowrap">Copied! Opening Google...</span>
                 </>
               ) : (
                 <>
                   <Copy className="w-5 h-5" />
-                  Copy & Post to Google
+                  <span className="whitespace-nowrap">Copy & Post to Google</span>
                 </>
               )}
             </button>
@@ -355,14 +339,15 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
             <button
               onClick={handleRegenerateReview}
               disabled={isGenerating}
-              className="flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50 border border-neutral-300"
+              className="w-full sm:flex-1 flex items-center justify-center gap-2 px-4 py-3 bg-neutral-100 text-neutral-700 rounded-lg hover:bg-neutral-200 transition-colors duration-200 disabled:opacity-50 border border-neutral-300 text-sm sm:text-base"
+              aria-label="Generate a new review"
             >
               {isGenerating ? (
                 <RefreshCw className="w-4 h-4 animate-spin" />
               ) : (
                 <Sparkles className="w-4 h-4" />
               )}
-              Generate New Review
+              <span className="whitespace-nowrap">Generate New Review</span>
             </button>
           </div>
         </div>
