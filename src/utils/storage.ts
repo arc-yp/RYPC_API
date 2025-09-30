@@ -26,6 +26,7 @@ const transformDbRowToCard = (row: any): ReviewCard => ({
   geminiModel: row.gemini_model || 'gemini-2.0-flash',
   viewCount: row.view_count || 0,
   active: typeof row.active === 'boolean' ? row.active : true,
+  expiresAt: row.expires_at || undefined,
   createdAt: row.created_at,
   updatedAt: row.updated_at
 });
@@ -46,6 +47,7 @@ const transformCardToDbInsert = (card: ReviewCard) => {
     gemini_model: card.geminiModel || 'gemini-2.0-flash',
     view_count: card.viewCount || 0,
     active: typeof card.active === 'boolean' ? card.active : true,
+    expires_at: card.expiresAt || null,
     created_at: card.createdAt || new Date().toISOString(),
     updated_at: card.updatedAt || new Date().toISOString()
   };
@@ -73,6 +75,7 @@ const transformCardToDbUpdate = (card: ReviewCard) => ({
   gemini_model: card.geminiModel || 'gemini-2.0-flash',
   view_count: card.viewCount || 0,
   active: typeof card.active === 'boolean' ? card.active : true,
+  expires_at: card.expiresAt || null,
   updated_at: new Date().toISOString()
 });
 
@@ -172,9 +175,26 @@ export const storage = {
 
           console.log(`Successfully fetched ${data?.length || 0} cards from Supabase`);
           const tombstones = this._getDeletedIds();
-          const supabaseCards = (data || [])
+          let supabaseCards = (data || [])
             .map(transformDbRowToCard)
             .filter(c => !tombstones.includes(c.id));
+
+          // Auto deactivate expired cards locally and prepare remote updates
+          const now = Date.now();
+          const expiredActiveCards = supabaseCards.filter(c => c.active !== false && c.expiresAt && Date.parse(c.expiresAt) < now);
+          if (expiredActiveCards.length > 0) {
+            for (const card of expiredActiveCards) {
+              card.active = false;
+            }
+            // Fire and forget update to Supabase to persist deactivation
+            if (isSupabaseConfigured() && supabase) {
+              try {
+                await supabase.from('review_cards').upsert(expiredActiveCards.map(c => ({ id: c.id, active: false, updated_at: new Date().toISOString() })));              
+              } catch (e) {
+                console.warn('Failed to persist expiry deactivations:', e);
+              }
+            }
+          }
           
           // Also sync with localStorage for offline access
           this._saveLocalCards(supabaseCards);
@@ -188,12 +208,22 @@ export const storage = {
       } else {
         console.log('Supabase not configured, using localStorage');
         const tombstones = this._getDeletedIds();
-        return this._getLocalCards().filter(c => !tombstones.includes(c.id));
+        return this._getLocalCards().filter(c => !tombstones.includes(c.id)).map(c => {
+          if (c.active !== false && c.expiresAt && Date.parse(c.expiresAt) < Date.now()) {
+            return { ...c, active: false };
+          }
+          return c;
+        });
       }
     } catch (error) {
       console.error('Error loading cards:', error);
       const tombstones = this._getDeletedIds();
-      return this._getLocalCards().filter(c => !tombstones.includes(c.id));
+      return this._getLocalCards().filter(c => !tombstones.includes(c.id)).map(c => {
+        if (c.active !== false && c.expiresAt && Date.parse(c.expiresAt) < Date.now()) {
+          return { ...c, active: false };
+        }
+        return c;
+      });
     }
   },
 
@@ -479,6 +509,20 @@ export const storage = {
       const transformedSupabaseCards = (supabaseCards || [])
         .map(transformDbRowToCard)
         .filter(c => !tombstones.includes(c.id));
+
+      // Auto deactivate expired cards
+      const now = Date.now();
+      const expiredActiveCards = transformedSupabaseCards.filter(c => c.active !== false && c.expiresAt && Date.parse(c.expiresAt) < now);
+      if (expiredActiveCards.length > 0) {
+        for (const card of expiredActiveCards) {
+          card.active = false;
+        }
+        try {
+          await supabase.from('review_cards').upsert(expiredActiveCards.map(c => ({ id: c.id, active: false, updated_at: new Date().toISOString() })));
+        } catch (e) {
+          console.warn('Failed to persist expiry deactivations during sync:', e);
+        }
+      }
       
       // Update localStorage with latest Supabase data
       this._saveLocalCards(transformedSupabaseCards);

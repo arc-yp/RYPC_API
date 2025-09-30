@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import {
   ArrowLeft,
   BarChart3,
@@ -18,6 +18,8 @@ import {
 import { ReviewCard } from "../types";
 import { storage } from "../utils/storage";
 import { formatDate } from "../utils/helpers";
+import { BarChartHorizontal, DonutChart, CreationTrendChart, LegendDot } from "./analytics/charts";
+import ExpiringSection from "./analytics/ExpiringSection";
 
 export const AnalyticsDashboard: React.FC = () => {
   const [cards, setCards] = useState<ReviewCard[]>([]);
@@ -26,6 +28,14 @@ export const AnalyticsDashboard: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>("all");
   const [refreshing, setRefreshing] = useState(false);
   const [metric, setMetric] = useState<"total" | "perDay">("total");
+  const [nowTs, setNowTs] = useState<number>(Date.now());
+  const [copyFeedback, setCopyFeedback] = useState<string | null>(null);
+
+  // live clock for expiring soon section
+  useEffect(() => {
+    const t = setInterval(() => setNowTs(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
 
   useEffect(() => {
     const load = async () => {
@@ -66,6 +76,87 @@ export const AnalyticsDashboard: React.FC = () => {
       ? Math.round(totalViews / filtered.length)
       : 0;
     return { totalViews, avgViews, count: filtered.length };
+  }, [filtered]);
+
+  // Active vs inactive breakdown
+  const activeInactiveData = useMemo(() => {
+    const active = filtered.filter(c => c.active !== false).length;
+    const inactive = filtered.length - active;
+    return [
+      { label: 'Active', value: active },
+      { label: 'Inactive', value: inactive }
+    ];
+  }, [filtered]);
+
+  // Expiring soon: next 24h
+  const expiringSoon = useMemo(() => {
+    const in24h = nowTs + 24 * 60 * 60 * 1000;
+    return filtered
+      .filter(c => c.expiresAt && c.active !== false && Date.parse(c.expiresAt) > nowTs && Date.parse(c.expiresAt) <= in24h)
+      .sort((a,b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
+      .slice(0,10);
+  }, [filtered, nowTs]);
+
+  const expiringIn30Days = useMemo(() => {
+    const in30d = nowTs + 30 * 24 * 60 * 60 * 1000;
+    const in24h = nowTs + 24 * 60 * 60 * 1000; // exclude ones already in 24h list
+    return filtered
+      .filter(c => c.expiresAt && c.active !== false) 
+      .filter(c => {
+        const t = Date.parse(c.expiresAt!);
+        return t > in24h && t <= in30d; // strictly beyond 24h up to 30d
+      })
+      .sort((a,b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
+      .slice(0,15);
+  }, [filtered, nowTs]);
+
+  const expiringIn6Months = useMemo(() => {
+    const in6m = nowTs + 182 * 24 * 60 * 60 * 1000; // approx 6 months (182 days)
+    const in30d = nowTs + 30 * 24 * 60 * 60 * 1000; // exclude ones already in 30d list
+    return filtered
+      .filter(c => c.expiresAt && c.active !== false)
+      .filter(c => {
+        const t = Date.parse(c.expiresAt!);
+        return t > in30d && t <= in6m;
+      })
+      .sort((a,b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
+      .slice(0,20);
+  }, [filtered, nowTs]);
+
+  const formatRemaining = (card: ReviewCard) => {
+    if (!card.expiresAt) return '—';
+    const end = Date.parse(card.expiresAt);
+    const diff = end - nowTs;
+    if (diff <= 0) return 'Expired';
+    const s = Math.floor(diff/1000);
+    const d = Math.floor(s/86400);
+    const h = Math.floor((s%86400)/3600);
+    const m = Math.floor((s%3600)/60);
+    const sec = s%60;
+    if (d>0) return `${d}d ${h}h ${m}m`;
+    if (h>0) return `${h}h ${m}m ${sec}s`;
+    if (m>0) return `${m}m ${sec}s`;
+    return `${sec}s`;
+  };
+
+  // Creation trend last 30 days
+  const creationTrend = useMemo(() => {
+    const days: { date: string; count: number }[] = [];
+    const today = new Date();
+    for (let i=29;i>=0;i--) {
+      const d = new Date(today);
+      d.setDate(d.getDate()-i);
+      const key = d.toISOString().slice(0,10);
+      days.push({ date: key, count: 0 });
+    }
+    const index = new Map(days.map((d,i)=>[d.date,i]));
+    filtered.forEach(c => {
+      const key = new Date(c.createdAt).toISOString().slice(0,10);
+      if (index.has(key)) {
+        days[index.get(key)!].count += 1;
+      }
+    });
+    return days;
   }, [filtered]);
 
   const leaderboard = useMemo(() => {
@@ -151,36 +242,19 @@ export const AnalyticsDashboard: React.FC = () => {
     [filtered]
   );
 
-  // New chart: Views Distribution (bucketed)
-  const viewsDistribution = useMemo(() => {
-    const buckets = [
-      { label: '0', min: 0, max: 0 },
-      { label: '1-10', min: 1, max: 10 },
-      { label: '11-100', min: 11, max: 100 },
-      { label: '101-1k', min: 101, max: 1000 },
-      { label: '1001+', min: 1001, max: Number.POSITIVE_INFINITY },
-    ];
-    const counts = buckets.map(() => 0);
-    filtered.forEach(c => {
-      const v = c.viewCount || 0;
-      const idx = buckets.findIndex(b => v >= b.min && v <= b.max);
-      if (idx >= 0) counts[idx] += 1;
-    });
-    return buckets.map((b, i) => ({ label: b.label, value: counts[i] }));
-  }, [filtered]);
+  // (Views distribution removed for now; can be reintroduced as separate component if needed)
 
-  const handleDelete = async (id: string) => {
+  const handleDelete = useCallback(async (id: string) => {
     try {
       await storage.deleteCard(id);
-      // Refresh local state
       const fresh = await storage.getCards();
       setCards(fresh);
     } catch (e) {
       console.error("Failed to delete card", e);
     }
-  };
+  }, []);
 
-  const exportCSV = (rowsSource: ReviewCard[]) => {
+  const exportCSV = useCallback((rowsSource: ReviewCard[]) => {
     const header = [
       "businessName",
       "slug",
@@ -189,6 +263,8 @@ export const AnalyticsDashboard: React.FC = () => {
       "views",
       "createdAt",
       "updatedAt",
+      "active",
+      "expiresAt",
       "viewsPerDay",
     ];
     const now = Date.now();
@@ -208,6 +284,8 @@ export const AnalyticsDashboard: React.FC = () => {
         String(c.viewCount || 0),
         c.createdAt,
         c.updatedAt,
+        (c.active !== false).toString(),
+        c.expiresAt || '',
         perDay,
       ];
     });
@@ -223,9 +301,9 @@ export const AnalyticsDashboard: React.FC = () => {
     a.download = "analytics.csv";
     a.click();
     URL.revokeObjectURL(url);
-  };
+  }, []);
 
-  const handleRefresh = async () => {
+  const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
       await storage.syncData();
@@ -234,7 +312,7 @@ export const AnalyticsDashboard: React.FC = () => {
     } finally {
       setRefreshing(false);
     }
-  };
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-purple-900 to-pink-900">
@@ -345,11 +423,68 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="text-center py-16 text-slate-300">
-            Loading analytics...
+          <div className="space-y-6 animate-pulse" aria-label="Loading analytics" role="status">
+            <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+              <div className="h-52 bg-white/10 rounded-xl" />
+              <div className="h-52 bg-white/10 rounded-xl xl:col-span-2" />
+            </div>
+            <div className="h-64 bg-white/10 rounded-xl" />
+            <div className="h-64 bg-white/10 rounded-xl" />
+            <div className="h-64 bg-white/10 rounded-xl" />
           </div>
         ) : (
           <div className="space-y-8">
+            {/* Overview Row Including Active Breakdown & Creation Trend */}
+            <section>
+              <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
+                <TrendingUp className="w-5 h-5 mr-2 text-emerald-300" /> Status & Creation Trend
+              </h2>
+              <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
+                <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center">
+                  <h3 className="text-slate-200 text-sm mb-2">Active vs Inactive</h3>
+                  {activeInactiveData.every(d=>d.value===0) ? <div className="text-slate-400 text-sm">No cards</div> : <DonutChart data={activeInactiveData} size={200} thickness={28} ariaLabel="Active vs Inactive cards" />}
+                  <div className="flex gap-4 mt-4 text-xs text-slate-300">
+                    {activeInactiveData.map(d => (
+                      <span key={d.label} className="flex items-center gap-1"><span className={`inline-block w-2 h-2 rounded-full ${d.label==='Active' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>{d.label}: {d.value}</span>
+                    ))}
+                  </div>
+                </div>
+                <div className="bg-white/10 border border-white/20 rounded-xl p-4 xl:col-span-2">
+                  <h3 className="text-slate-200 text-sm mb-3">New Cards (Last 30 Days)</h3>
+                  <CreationTrendChart data={creationTrend} ariaLabel="Cards created last 30 days" />
+                </div>
+              </div>
+            </section>
+
+            <ExpiringSection
+              id="expiring24h"
+              title={<><Calendar className="w-5 h-5 mr-2 text-amber-300" /> Expiring Within 24 Hours</>}
+              rows={expiringSoon}
+              emptyMessage="No cards expiring in the next 24 hours."
+              accentClass=""
+              remainingBadgeClass="bg-blue-500/10 text-blue-200 border-blue-400/20"
+              formatRemaining={formatRemaining}
+            />
+
+            <ExpiringSection
+              id="expiring30d"
+              title={<><Calendar className="w-5 h-5 mr-2 text-blue-300" /> Expiring Within 30 Days</>}
+              rows={expiringIn30Days}
+              emptyMessage="No cards expiring in the next 30 days (beyond 24h)."
+              accentClass=""
+              remainingBadgeClass="bg-indigo-500/10 text-indigo-200 border-indigo-400/20"
+              formatRemaining={formatRemaining}
+            />
+
+            <ExpiringSection
+              id="expiring6m"
+              title={<><Calendar className="w-5 h-5 mr-2 text-purple-300" /> Expiring Within 6 Months</>}
+              rows={expiringIn6Months}
+              emptyMessage="No cards expiring in the next 6 months (beyond 30 days)."
+              accentClass=""
+              remainingBadgeClass="bg-purple-500/10 text-purple-200 border-purple-400/20"
+              formatRemaining={formatRemaining}
+            />
             {/* Leaderboard */}
             <section>
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
@@ -431,11 +566,17 @@ export const AnalyticsDashboard: React.FC = () => {
                                 <Eye className="w-4 h-4" />
                               </a>
                               <button
-                                onClick={() =>
-                                  navigator.clipboard.writeText(
-                                    `${window.location.origin}/${c.slug}`
-                                  )
-                                }
+                                onClick={() => {
+                                  navigator.clipboard.writeText(`${window.location.origin}/${c.slug}`)
+                                    .then(() => {
+                                      setCopyFeedback(`Copied /${c.slug}`);
+                                      setTimeout(() => setCopyFeedback(null), 1500);
+                                    })
+                                    .catch(() => {
+                                      setCopyFeedback('Copy failed');
+                                      setTimeout(() => setCopyFeedback(null), 1500);
+                                    });
+                                }}
                                 className="px-2 py-1 rounded-md bg-white/10 text-slate-200 text-xs border border-white/10"
                                 title={`Copy link /${c.slug}`}
                                 aria-label={`Copy link /${c.slug}`}
@@ -600,11 +741,17 @@ export const AnalyticsDashboard: React.FC = () => {
                             <Eye className="w-4 h-4" />
                           </a>
                           <button
-                            onClick={() =>
-                              navigator.clipboard.writeText(
-                                `${window.location.origin}/${c.slug}`
-                              )
-                            }
+                            onClick={() => {
+                              navigator.clipboard.writeText(`${window.location.origin}/${c.slug}`)
+                                .then(()=>{
+                                  setCopyFeedback(`Copied /${c.slug}`);
+                                  setTimeout(()=> setCopyFeedback(null), 1500);
+                                })
+                                .catch(()=>{
+                                  setCopyFeedback('Copy failed');
+                                  setTimeout(()=> setCopyFeedback(null), 1500);
+                                });
+                            }}
                             className="p-2 rounded-md bg-white/10 text-slate-200 border border-white/10"
                             title="Copy link"
                           >
@@ -628,201 +775,12 @@ export const AnalyticsDashboard: React.FC = () => {
           </div>
         )}
       </div>
+      <div className="sr-only" aria-live="polite">
+        {refreshing ? 'Refreshing data' : 'Idle'} {copyFeedback || ''}
+      </div>
     </div>
   );
 };
 
 export default AnalyticsDashboard;
 
-// --- Lightweight SVG Charts (no external deps) ---
-
-type BarDatum = { label: string; fullLabel?: string; value: number };
-
-const BarChartHorizontal: React.FC<{
-  data: BarDatum[];
-  width?: number;
-  height?: number;
-  padding?: number;
-  barGap?: number;
-  maxBars?: number;
-  ariaLabel?: string;
-}> = ({
-  data,
-  width = 520,
-  height = 240,
-  padding = 24,
-  barGap = 6,
-  maxBars = 10,
-  ariaLabel,
-}) => {
-  const trimmed = data.slice(0, maxBars);
-  const max = Math.max(1, ...trimmed.map((d) => d.value));
-  const innerW = width - padding * 2;
-  const barAreaH = height - padding * 2;
-  const barH = Math.max(
-    8,
-    Math.floor(
-      (barAreaH - barGap * (trimmed.length - 1)) / Math.max(1, trimmed.length)
-    )
-  );
-
-  const colors = ["#60a5fa", "#a78bfa", "#f472b6", "#34d399", "#fbbf24"];
-
-  return (
-    <svg
-      role="img"
-      aria-label={ariaLabel}
-      width="100%"
-      viewBox={`0 0 ${width} ${height}`}
-    >
-      <title>{ariaLabel}</title>
-      {trimmed.map((d, i) => {
-        const y = padding + i * (barH + barGap);
-        const w = Math.max(1, Math.round((d.value / max) * innerW));
-        const color = colors[i % colors.length];
-        return (
-          <g key={i} transform={`translate(${padding}, ${y})`}>
-            <rect
-              x={0}
-              y={0}
-              width={innerW}
-              height={barH}
-              fill="rgba(255,255,255,0.06)"
-              rx={6}
-            />
-            <rect x={0} y={0} width={w} height={barH} fill={color} rx={6} />
-            <text x={8} y={barH / 2 + 4} fontSize="10" fill="#0b1020">
-              {d.label}
-            </text>
-            <text
-              x={innerW - 8}
-              y={barH / 2 + 4}
-              fontSize="10"
-              fill="#0b1020"
-              textAnchor="end"
-            >
-              {d.value.toLocaleString()}
-            </text>
-          </g>
-        );
-      })}
-    </svg>
-  );
-};
-
-type DonutDatum = { label: string; value: number };
-
-const DonutChart: React.FC<{
-  data: DonutDatum[];
-  size?: number;
-  thickness?: number;
-  ariaLabel?: string;
-}> = ({ data, size = 240, thickness = 24, ariaLabel }) => {
-  const total = data.reduce((s, d) => s + d.value, 0) || 1;
-  const r = (size - thickness) / 2;
-  const cx = size / 2;
-  const cy = size / 2;
-  const circumference = 2 * Math.PI * r;
-  let acc = 0;
-  const colors = [
-    "#60a5fa",
-    "#a78bfa",
-    "#f472b6",
-    "#34d399",
-    "#fbbf24",
-    "#f87171",
-    "#22d3ee",
-    "#c084fc",
-  ];
-
-  return (
-    <svg
-      role="img"
-      aria-label={ariaLabel}
-      width={size}
-      height={size}
-      viewBox={`0 0 ${size} ${size}`}
-    >
-      <title>{ariaLabel}</title>
-      <circle
-        cx={cx}
-        cy={cy}
-        r={r}
-        fill="none"
-        stroke="rgba(255,255,255,0.08)"
-        strokeWidth={thickness}
-      />
-      {data.map((d, i) => {
-        const fraction = d.value / total;
-        const dash = fraction * circumference;
-        const gap = circumference - dash;
-        const rotation = (acc / total) * 360 - 90; // start from top
-        acc += d.value;
-        const color = colors[i % colors.length];
-        return (
-          <g key={i} transform={`rotate(${rotation} ${cx} ${cy})`}>
-            <circle
-              cx={cx}
-              cy={cy}
-              r={r}
-              fill="none"
-              stroke={color}
-              strokeWidth={thickness}
-              strokeDasharray={`${dash} ${gap}`}
-              strokeLinecap="butt"
-            />
-          </g>
-        );
-      })}
-      {/* Center label */}
-      <text
-        x={cx}
-        y={cy}
-        textAnchor="middle"
-        dominantBaseline="middle"
-        fontSize="12"
-        fill="#e5e7eb"
-      >
-        {total.toLocaleString()} views
-      </text>
-    </svg>
-  );
-};
-
-// Color helper to keep legend and charts consistent
-const chartColors = [
-  "#60a5fa",
-  "#a78bfa",
-  "#f472b6",
-  "#34d399",
-  "#fbbf24",
-  "#f87171",
-  "#22d3ee",
-  "#c084fc",
-];
-const chartBgClasses = [
-  "bg-blue-400",
-  "bg-purple-400",
-  "bg-pink-400",
-  "bg-emerald-400",
-  "bg-amber-400",
-  "bg-red-400",
-  "bg-cyan-400",
-  "bg-fuchsia-400",
-];
-
-const LegendDot: React.FC<{ index: string | number }> = ({ index }) => {
-  const i =
-    Math.abs(
-      typeof index === "number"
-        ? index
-        : [...String(index)].reduce((a, c) => a + c.charCodeAt(0), 0)
-    ) % chartColors.length;
-  const className = chartBgClasses[i];
-  return (
-    <span
-      aria-hidden
-      className={`inline-block w-2.5 h-2.5 rounded-full ${className}`}
-    />
-  );
-};

@@ -26,6 +26,9 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
     geminiApiKey: '',
     geminiModel: 'gemini-2.0-flash'
   });
+  // Expiry duration state: number + unit
+  const [expiryAmount, setExpiryAmount] = useState<number>(0); // 0 means no expiry
+  const [expiryUnit, setExpiryUnit] = useState<'minutes'|'hours'|'days'|'months'|'years'>('days');
   
   // AI Review Generation State
   const [aiReviewData, setAiReviewData] = useState({
@@ -176,6 +179,26 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
     setIsLoading(true);
 
     try {
+      // Compute expiresAt if duration > 0
+      let expiresAt: string | undefined = undefined;
+      if (expiryAmount > 0) {
+        const now = new Date();
+        const end = new Date(now);
+        switch (expiryUnit) {
+          case 'minutes':
+            end.setMinutes(end.getMinutes() + expiryAmount); break;
+          case 'hours':
+            end.setHours(end.getHours() + expiryAmount); break;
+          case 'days':
+            end.setDate(end.getDate() + expiryAmount); break;
+          case 'months':
+            end.setMonth(end.getMonth() + expiryAmount); break;
+          case 'years':
+            end.setFullYear(end.getFullYear() + expiryAmount); break;
+        }
+        expiresAt = end.toISOString();
+      }
+
       const newCard: ReviewCard = {
         id: generateId(),
         businessName: formData.businessName.trim(),
@@ -190,6 +213,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
         geminiApiKey: formData.geminiApiKey.trim(),
         geminiModel: formData.geminiModel,
         active: true,
+        expiresAt,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };
@@ -377,6 +401,33 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({ onClos
                 <p className="text-xs text-gray-500 mt-1">
                   Add services that customers can highlight in their reviews
                 </p>
+              </div>
+
+              {/* Expiry Duration */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time Limit (optional)</label>
+                <div className="flex gap-3">
+                  <input
+                    type="number"
+                    min={0}
+                    value={expiryAmount}
+                    onChange={e => setExpiryAmount(Number(e.target.value))}
+                    className="w-32 px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Amount"
+                  />
+                  <select
+                    value={expiryUnit}
+                    onChange={e => setExpiryUnit(e.target.value as any)}
+                    className="px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                    <option value="months">Months</option>
+                    <option value="years">Years</option>
+                  </select>
+                </div>
+                <p className="text-xs text-gray-500 mt-1">Leave amount 0 for no expiry. Card becomes inactive automatically when time ends.</p>
               </div>
 
               {/* Gemini API Configuration */}

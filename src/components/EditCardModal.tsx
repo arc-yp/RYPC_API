@@ -41,6 +41,11 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
     geminiApiKey: card.geminiApiKey || "",
     geminiModel: card.geminiModel || "gemini-2.0-flash",
   });
+  // Existing expiry and new duration inputs
+  const existingExpiry = card.expiresAt ? new Date(card.expiresAt) : null;
+  const [expiryAmount, setExpiryAmount] = useState<number>(0);
+  const [expiryUnit, setExpiryUnit] = useState<'minutes'|'hours'|'days'|'months'|'years'>('days');
+  const [clearExpiry, setClearExpiry] = useState(false);
 
   // AI Review Generation State
   const [aiReviewData, setAiReviewData] = useState({
@@ -60,7 +65,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
   const [isGeneratingTagline, setIsGeneratingTagline] = useState(false);
-  const [showAiPanel] = useState(false); // AI panel currently disabled
+  const [showAiPanel, setShowAiPanel] = useState(false);
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -228,10 +233,27 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
         googleMapsUrl: formData.googleMapsUrl.trim(),
         geminiApiKey: formData.geminiApiKey.trim(),
         geminiModel: formData.geminiModel,
-        // keep existing active state unchanged (not editable here)
-        active: card.active,
         updatedAt: new Date().toISOString(),
       };
+
+      // Determine new expiresAt
+      if (clearExpiry) {
+        updatedCard.expiresAt = undefined;
+      } else if (expiryAmount > 0) {
+        const now = new Date();
+        const end = new Date(now);
+        switch (expiryUnit) {
+          case 'minutes': end.setMinutes(end.getMinutes() + expiryAmount); break;
+          case 'hours': end.setHours(end.getHours() + expiryAmount); break;
+          case 'days': end.setDate(end.getDate() + expiryAmount); break;
+          case 'months': end.setMonth(end.getMonth() + expiryAmount); break;
+          case 'years': end.setFullYear(end.getFullYear() + expiryAmount); break;
+        }
+        updatedCard.expiresAt = end.toISOString();
+      } else {
+        // Keep existing expiry if no change
+        updatedCard.expiresAt = card.expiresAt;
+      }
 
       onSave(updatedCard);
     } catch (error) {
@@ -459,7 +481,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                   </label>
                   <div className="relative">
                     <Bot className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
-                    <select aria-label="Gemini Model"
+                    <select
                       value={formData.geminiModel}
                       onChange={(e) =>
                         handleInputChange("geminiModel", e.target.value)
@@ -492,6 +514,40 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                 <p className="text-xs text-gray-500 mt-1">
                   Add services that customers can highlight in their reviews
                 </p>
+              </div>
+
+              {/* Expiry Duration */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Time Limit</label>
+                {existingExpiry && !clearExpiry && (
+                  <p className="text-xs text-gray-500 mb-2">Current End: {existingExpiry.toLocaleDateString()} {existingExpiry.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
+                )}
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <input
+                    type="number"
+                    min={0}
+                    value={expiryAmount}
+                    onChange={e => setExpiryAmount(Number(e.target.value))}
+                    className="w-32 px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Amount"
+                  />
+                  <select
+                    value={expiryUnit}
+                    onChange={e => setExpiryUnit(e.target.value as any)}
+                    className="px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                    <option value="months">Months</option>
+                    <option value="years">Years</option>
+                  </select>
+                  <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <input type="checkbox" checked={clearExpiry} onChange={e => setClearExpiry(e.target.checked)} />
+                    Remove expiry
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">Enter amount 0 to keep existing expiry. Setting a new amount replaces current end time. If no current expiry and amount 0, card never expires.</p>
               </div>
 
               {/* Logo Upload */}
@@ -698,7 +754,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Use Case
                     </label>
-                    <select aria-label="Use Case"
+                    <select
                       value={aiReviewData.useCase}
                       onChange={(e) =>
                         handleAiDataChange("useCase", e.target.value)

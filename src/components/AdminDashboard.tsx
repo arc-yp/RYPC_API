@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Plus,
   Edit,
@@ -15,16 +15,21 @@ import {
   RefreshCw,
   ExternalLink,
   QrCode,
+  Filter,
+  ChevronDown,
+  ChevronUp,
+  X,
 } from "lucide-react";
 import { ReviewCard } from "../types";
 import { storage } from "../utils/storage";
-import { formatDate, addDays } from "../utils/helpers";
+import { formatDate } from "../utils/helpers";
 import { CompactAddCardModal } from "./CompactAddCardModal";
 import { EditCardModal } from "./EditCardModal";
 import { ConfirmDialog } from "./ConfirmDialog";
 import { auth } from "../utils/auth";
 import { isSupabaseConfigured } from "../utils/supabase";
 import { QRCodeModal } from "./QRCodeModal";
+import { SegmentedButtonGroup } from "./SegmentedButtonGroup";
 
 export const AdminDashboard: React.FC = () => {
   const [cards, setCards] = useState<ReviewCard[]>([]);
@@ -40,6 +45,12 @@ export const AdminDashboard: React.FC = () => {
   >("checking");
   const [selectedCategories] = useState<string[]>([]);
   const [qrCard, setQrCard] = useState<ReviewCard | null>(null);
+  const [nowTs, setNowTs] = useState<number>(Date.now());
+  // Filters
+  const [statusFilter, setStatusFilter] = useState<string>(""); // Active | Inactive
+  const [creationFilter, setCreationFilter] = useState<string>(""); // Today | 7d | 30d | Month | Year
+  const [expiryFilter, setExpiryFilter] = useState<string>(""); // Expiring 24h | 7d | 30d | 6m | Expired | No Expiry
+  const [showFilters, setShowFilters] = useState<boolean>(false);
   // Removed showInactive filter; inactive cards are always visible per requirements
 
   const initializeDashboard = useCallback(async () => {
@@ -60,6 +71,49 @@ export const AdminDashboard: React.FC = () => {
   useEffect(() => {
     initializeDashboard();
   }, [initializeDashboard]);
+
+  // Real-time ticking clock for countdowns
+  useEffect(() => {
+    const interval = setInterval(() => {
+      const current = Date.now();
+      setNowTs(current);
+      setCards(prev => {
+        let changed = false;
+        const updated = prev.map(c => {
+          if (c.active !== false && c.expiresAt && Date.parse(c.expiresAt) <= current) {
+            changed = true;
+            // fire & forget persistence
+            (async () => {
+              try {
+                const updatedCard = { ...c, active: false, updatedAt: new Date().toISOString() };
+                await storage.updateCard(updatedCard);
+              } catch {}
+            })();
+            return { ...c, active: false };
+          }
+          return c;
+        });
+        return changed ? updated : prev;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const formatRemaining = (card: ReviewCard): string | null => {
+    if (!card.expiresAt) return null;
+    const end = Date.parse(card.expiresAt);
+    const diffMs = end - nowTs;
+    if (diffMs <= 0) return 'Expired';
+    const totalSec = Math.floor(diffMs / 1000);
+    const days = Math.floor(totalSec / 86400);
+    const hrs = Math.floor((totalSec % 86400) / 3600);
+    const mins = Math.floor((totalSec % 3600) / 60);
+    const secs = totalSec % 60;
+    if (days > 0) return `${days}d ${hrs}h ${mins}m ${secs}s`;
+    if (hrs > 0) return `${hrs}h ${mins}m ${secs}s`;
+    if (mins > 0) return `${mins}m ${secs}s`;
+    return `${secs}s`;
+  };
 
   const loadCards = async () => {
     try {
@@ -163,15 +217,88 @@ export const AdminDashboard: React.FC = () => {
     }
   };
 
-  const filteredCards = cards.filter((card) => {
-    const matchesSearch =
-      card.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      card.slug.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory =
-      selectedCategories.length === 0 ||
-      selectedCategories.includes(card.category);
-    return matchesSearch && matchesCategory;
-  });
+  const filteredCards = useMemo(() => {
+    return cards.filter((card) => {
+      const matchesSearch =
+        card.businessName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        card.slug.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesCategory =
+        selectedCategories.length === 0 ||
+        selectedCategories.includes(card.category);
+
+      if (!matchesSearch || !matchesCategory) return false;
+
+      // Status filter
+      if (statusFilter === 'Active' && card.active === false) return false;
+      if (statusFilter === 'Inactive' && card.active !== false) return false;
+
+      // Creation date filter
+      if (creationFilter) {
+        const createdAt = Date.parse(card.createdAt);
+        const startOfToday = new Date();
+        startOfToday.setHours(0,0,0,0);
+        const now = nowTs;
+        let pass = true;
+        switch (creationFilter) {
+          case 'Today':
+            pass = createdAt >= startOfToday.getTime();
+            break;
+          case '7d':
+            pass = createdAt >= now - 7 * 86400000;
+            break;
+          case '30d':
+            pass = createdAt >= now - 30 * 86400000;
+            break;
+          case 'Month': { // current calendar month
+            const d = new Date(createdAt);
+            const today = new Date(now);
+            pass = d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
+            break; }
+          case 'Year': {
+            const d = new Date(createdAt);
+            const today = new Date(now);
+            pass = d.getFullYear() === today.getFullYear();
+            break; }
+          default:
+            pass = true;
+        }
+        if (!pass) return false;
+      }
+
+      // Expiry timeframe filter
+      if (expiryFilter) {
+        const endTs = card.expiresAt ? Date.parse(card.expiresAt) : null;
+        const diff = endTs ? endTs - nowTs : null;
+        let pass = true;
+        switch (expiryFilter) {
+          case 'Expiring 24h':
+            pass = !!endTs && diff! > 0 && diff! <= 24 * 3600000;
+            break;
+          case 'Expiring 7d':
+            pass = !!endTs && diff! > 0 && diff! <= 7 * 86400000 && diff! > 24 * 3600000;
+            break;
+          case 'Expiring 30d':
+            pass = !!endTs && diff! > 0 && diff! <= 30 * 86400000 && diff! > 7 * 86400000;
+            break;
+            case 'Expiring 6m': {
+              const sixMonthsMs = 182 * 86400000; // approx 6 months
+              pass = !!endTs && diff! > 0 && diff! <= sixMonthsMs && diff! > 30 * 86400000;
+              break; }
+          case 'Expired':
+            pass = !!endTs && diff! <= 0;
+            break;
+          case 'No Expiry':
+            pass = !endTs;
+            break;
+          default:
+            pass = true;
+        }
+        if (!pass) return false;
+      }
+
+      return true;
+    });
+  }, [cards, searchTerm, selectedCategories, statusFilter, creationFilter, expiryFilter, nowTs]);
 
   const handleViewCard = (slug: string) => {
     window.open(`/${slug}`, "_blank");
@@ -312,7 +439,7 @@ export const AdminDashboard: React.FC = () => {
             <Plus className="w-5 h-5 mr-2" />
             Add New Card
           </button>
-        </div>
+        </div>  
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -360,6 +487,127 @@ export const AdminDashboard: React.FC = () => {
               </div>
             </div>
           </div>
+        </div>
+
+         {/* Filters Row */}
+        <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 via-white/3 to-white/5 backdrop-blur-md mb-10">
+          <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-lg bg-blue-500/20 flex items-center justify-center border border-blue-400/30">
+                <Filter className="w-5 h-5 text-blue-300" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">Filters
+                  {(statusFilter || creationFilter || expiryFilter) && (
+                    <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-600/30 text-blue-200 border border-blue-400/30">{[statusFilter,creationFilter,expiryFilter].filter(Boolean).length} active</span>
+                  )}
+                </h3>
+                <p className="text-[11px] text-slate-400">Refine results. Showing {filteredCards.length} of {cards.length} cards.</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2">
+              {(statusFilter || creationFilter || expiryFilter) && (
+                <button
+                  onClick={() => { setStatusFilter(''); setCreationFilter(''); setExpiryFilter(''); }}
+                  className="text-[11px] px-2 py-1 rounded-md bg-white/10 text-slate-300 hover:bg-white/20 transition"
+                >Reset</button>
+              )}
+              <button
+                onClick={() => setShowFilters(v => !v)}
+                className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-md bg-blue-600/30 text-blue-100 hover:bg-blue-600/40 border border-blue-500/30 transition"
+              >
+                {showFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+                {showFilters ? 'Hide' : 'Show'}
+              </button>
+            </div>
+          </div>
+          {showFilters && (
+            <div className="px-5 py-5 space-y-8">
+              <div className="grid lg:grid-cols-3 gap-8">
+                <div className="group rounded-xl border border-white/10 bg-white/5 p-4 hover:border-blue-400/40 transition">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">Status
+                    {statusFilter && (
+                      <button onClick={()=>setStatusFilter('')} className="text-slate-400 hover:text-white" title="Clear">
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </p>
+                  <SegmentedButtonGroup
+                    options={['Active','Inactive']}
+                    selected={statusFilter}
+                    onChange={(v) => setStatusFilter(v as string)}
+                    size="sm"
+                  />
+                </div>
+                <div className="group rounded-xl border border-white/10 bg-white/5 p-4 hover:border-purple-400/40 transition">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">Created
+                    {creationFilter && (
+                      <button onClick={()=>setCreationFilter('')} className="text-slate-400 hover:text-white" title="Clear">
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </p>
+                  <SegmentedButtonGroup
+                    options={['Today','7d','30d','Month','Year']}
+                    selected={creationFilter}
+                    onChange={(v) => setCreationFilter(v as string)}
+                    size="sm"
+                  />
+                </div>
+                <div className="group rounded-xl border border-white/10 bg-white/5 p-4 hover:border-pink-400/40 transition">
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">Expiry
+                    {expiryFilter && (
+                      <button onClick={()=>setExpiryFilter('')} className="text-slate-400 hover:text-white" title="Clear">
+                        <X className="w-3 h-3" />
+                      </button>
+                    )}
+                  </p>
+                  <SegmentedButtonGroup
+                    options={['Expiring 24h','Expiring 7d','Expiring 30d','Expiring 6m','Expired','No Expiry']}
+                    selected={expiryFilter}
+                    onChange={(v) => setExpiryFilter(v as string)}
+                    size="sm"
+                  />
+                </div>
+              </div>
+
+              {(statusFilter || creationFilter || expiryFilter) && (
+                <div>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Active Filters</p>
+                  <div className="flex flex-wrap gap-2">
+                    {statusFilter && (
+                      <span className="group inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-blue-600/25 text-blue-100 border border-blue-500/30 text-[11px]">
+                        {statusFilter}
+                        <button onClick={()=>setStatusFilter('')} aria-label="Clear status filter" title="Clear status filter" className="p-0.5 rounded-full hover:bg-blue-500/40 transition">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {creationFilter && (
+                      <span className="group inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-purple-600/25 text-purple-100 border border-purple-500/30 text-[11px]">
+                        {creationFilter}
+                        <button onClick={()=>setCreationFilter('')} aria-label="Clear creation date filter" title="Clear creation date filter" className="p-0.5 rounded-full hover:bg-purple-500/40 transition">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    {expiryFilter && (
+                      <span className="group inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-pink-600/25 text-pink-100 border border-pink-500/30 text-[11px]">
+                        {expiryFilter}
+                        <button onClick={()=>setExpiryFilter('')} aria-label="Clear expiry filter" title="Clear expiry filter" className="p-0.5 rounded-full hover:bg-pink-500/40 transition">
+                          <X className="w-3 h-3" />
+                        </button>
+                      </span>
+                    )}
+                    <button
+                      onClick={() => { setStatusFilter(''); setCreationFilter(''); setExpiryFilter(''); }}
+                      className="text-[11px] text-slate-400 hover:text-white underline decoration-dotted ml-1"
+                    >Clear All</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {/* Loading State */}
@@ -463,12 +711,23 @@ export const AdminDashboard: React.FC = () => {
                         </p>
 
                         <div className="flex items-center justify-between mb-4">
-                          <p className="text-xs text-slate-400 mb-0">
-                            Created :{" "}
-                            <span className="text-sm text-slate-300">
-                              {formatDate(card.createdAt)} - {formatDate(addDays(card.createdAt, 365))}
-                            </span>
-                          </p>
+                          <div className="text-xs text-slate-400 mb-0">
+                            <p className="mb-0">
+                              Created :{" "}
+                              <span className="text-sm text-slate-300">
+                                {formatDate(card.createdAt)}
+                              </span>
+                            </p>
+                            {card.expiresAt && (
+                              <p className="mt-1 mb-0 text-xs text-slate-400">
+                                End: <span className="text-sm text-slate-300">{formatDate(card.expiresAt)}</span>{" "}
+                                <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] tracking-wide border ${formatRemaining(card)==='Expired' ? 'bg-red-500/20 text-red-300 border-red-400/30' : 'bg-blue-500/10 text-blue-200 border-blue-400/20'}`}>{formatRemaining(card)}</span>
+                              </p>
+                            )}
+                            {!card.expiresAt && (
+                              <p className="mt-1 mb-0 text-xs text-slate-500">No expiry</p>
+                            )}
+                          </div>
 
                           <div className="flex items-center justify-center gap-3">
                             {/* Active toggle switch (right side) */}
