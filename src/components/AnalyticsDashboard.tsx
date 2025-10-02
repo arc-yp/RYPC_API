@@ -321,7 +321,7 @@ export const AnalyticsDashboard: React.FC = () => {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-3">
             <button
-              onClick={() => (window.location.href = "/admin")}
+              onClick={() => (window.location.href = "/ai-admin")}
               className="inline-flex items-center px-3 py-2 bg-white/10 border border-white/20 text-white rounded-lg hover:bg-white/15"
             >
               <ArrowLeft className="w-4 h-4 mr-2" /> Back

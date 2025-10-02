@@ -81,6 +81,10 @@ export interface Database {
           gemini_model: string | null;
           created_at: string;
           updated_at: string;
+          view_count?: number | null;        // ensure optional
+          active?: boolean | null;
+            expires_at?: string | null;
+          allowed_languages?: string[] | null; // NEW
         };
         Insert: {
           id?: string;
@@ -97,6 +101,7 @@ export interface Database {
           gemini_model?: string | null;
           created_at?: string;
           updated_at?: string;
+          allowed_languages?: string[] | null; // NEW
         };
         Update: {
           id?: string;
@@ -113,6 +118,7 @@ export interface Database {
           gemini_model?: string | null;
           created_at?: string;
           updated_at?: string;
+          allowed_languages?: string[] | null; // NEW
         };
       };
     };

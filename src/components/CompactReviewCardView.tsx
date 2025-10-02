@@ -61,7 +61,9 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const [isGenerating, setIsGenerating] = useState(false);
   const [viewCount, setViewCount] = useState(card.viewCount || 0);
 
-  const languageOptions = ["English", "Gujarati", "Hindi"];
+  const languageOptions = (card.allowedLanguages && card.allowedLanguages.length > 0)
+    ? card.allowedLanguages
+    : ['English','Gujarati','Hindi']; // fallback
 
   useEffect(() => {
     // Generate initial review when component loads
@@ -179,6 +181,13 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
       {currentReview}
     </blockquote>
   );
+
+  useEffect(() => {
+    // if allowed languages changed (unlikely after mount), keep valid selection
+    if (!languageOptions.includes(selectedLanguage)) {
+      setSelectedLanguage(languageOptions[0]);
+    }
+  }, [languageOptions, selectedLanguage]);
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-4 sm:p-6 md:p-10 lg:p-16 bg-gradient-to-br from-blue-200 via-purple-200 to-slate-200">

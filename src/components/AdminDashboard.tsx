@@ -20,6 +20,7 @@ import {
   ChevronUp,
   X,
 } from "lucide-react";
+import { Link } from "react-router-dom";
 import { ReviewCard } from "../types";
 import { storage } from "../utils/storage";
 import { formatDate } from "../utils/helpers";
@@ -306,7 +307,7 @@ export const AdminDashboard: React.FC = () => {
 
   const handleLogout = () => {
     auth.logout();
-    window.location.href = "/login";
+    window.location.href = "/ai-login";
   };
 
   const getConnectionStatusDisplay = () => {
@@ -372,33 +373,34 @@ export const AdminDashboard: React.FC = () => {
           <div className="flex justify-between items-center mb-4">
             {getConnectionStatusDisplay()}
             <div className="flex items-center gap-3">
-              <a
-                href="/admin/analytics"
-                className="inline-flex items-center px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors duration-200 border border-white/20"
-                title="Analytics"
-              >
-                <Eye className="w-4 h-4 mr-2" /> Analytics
-              </a>
-              <button
-                onClick={handleRefresh}
-                disabled={isRefreshing}
-                className="inline-flex items-center px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors duration-200 disabled:opacity-50"
-                title="Refresh Data"
-              >
-                <RefreshCw
-                  className={`w-4 h-4 mr-2 ${
-                    isRefreshing ? "animate-spin" : ""
-                  }`}
-                />
-                {isRefreshing ? "Syncing..." : "Refresh"}
-              </button>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
-              >
-                <LogOut className="w-4 h-4 mr-2" />
-                Logout
-              </button>
+              {/* Changed <a> to <Link> */}
+                <Link
+                  to="/ai-admin/analytics"
+                  className="inline-flex items-center px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors duration-200 border border-white/20"
+                  title="Analytics"
+                >
+                  <Eye className="w-4 h-4 mr-2" /> Analytics
+                </Link>
+                <button
+                  onClick={handleRefresh}
+                  disabled={isRefreshing}
+                  className="inline-flex items-center px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors duration-200 disabled:opacity-50"
+                  title="Refresh Data"
+                >
+                  <RefreshCw
+                    className={`w-4 h-4 mr-2 ${
+                      isRefreshing ? "animate-spin" : ""
+                    }`}
+                  />
+                  {isRefreshing ? "Syncing..." : "Refresh"}
+                </button>
+                <button
+                  onClick={handleLogout}
+                  className="inline-flex items-center px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
+                >
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </button>
             </div>
           </div>
 

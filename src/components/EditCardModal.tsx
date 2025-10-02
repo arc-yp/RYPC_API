@@ -40,11 +40,14 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
     googleMapsUrl: card.googleMapsUrl,
     geminiApiKey: card.geminiApiKey || "",
     geminiModel: card.geminiModel || "gemini-2.0-flash",
+    allowedLanguages: card.allowedLanguages || ["English", "Gujarati", "Hindi"], // NEW
   });
   // Existing expiry and new duration inputs
   const existingExpiry = card.expiresAt ? new Date(card.expiresAt) : null;
   const [expiryAmount, setExpiryAmount] = useState<number>(0);
-  const [expiryUnit, setExpiryUnit] = useState<'minutes'|'hours'|'days'|'months'|'years'>('days');
+  const [expiryUnit, setExpiryUnit] = useState<
+    "minutes" | "hours" | "days" | "months" | "years"
+  >("days");
   const [clearExpiry, setClearExpiry] = useState(false);
 
   // AI Review Generation State
@@ -234,6 +237,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
         geminiApiKey: formData.geminiApiKey.trim(),
         geminiModel: formData.geminiModel,
         updatedAt: new Date().toISOString(),
+        allowedLanguages: formData.allowedLanguages, // NEW
       };
 
       // Determine new expiresAt
@@ -243,11 +247,21 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
         const now = new Date();
         const end = new Date(now);
         switch (expiryUnit) {
-          case 'minutes': end.setMinutes(end.getMinutes() + expiryAmount); break;
-          case 'hours': end.setHours(end.getHours() + expiryAmount); break;
-          case 'days': end.setDate(end.getDate() + expiryAmount); break;
-          case 'months': end.setMonth(end.getMonth() + expiryAmount); break;
-          case 'years': end.setFullYear(end.getFullYear() + expiryAmount); break;
+          case "minutes":
+            end.setMinutes(end.getMinutes() + expiryAmount);
+            break;
+          case "hours":
+            end.setHours(end.getHours() + expiryAmount);
+            break;
+          case "days":
+            end.setDate(end.getDate() + expiryAmount);
+            break;
+          case "months":
+            end.setMonth(end.getMonth() + expiryAmount);
+            break;
+          case "years":
+            end.setFullYear(end.getFullYear() + expiryAmount);
+            break;
         }
         updatedCard.expiresAt = end.toISOString();
       } else {
@@ -516,40 +530,6 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                 </p>
               </div>
 
-              {/* Expiry Duration */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Time Limit</label>
-                {existingExpiry && !clearExpiry && (
-                  <p className="text-xs text-gray-500 mb-2">Current End: {existingExpiry.toLocaleDateString()} {existingExpiry.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</p>
-                )}
-                <div className="flex flex-wrap items-center gap-3 mb-2">
-                  <input
-                    type="number"
-                    min={0}
-                    value={expiryAmount}
-                    onChange={e => setExpiryAmount(Number(e.target.value))}
-                    className="w-32 px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Amount"
-                  />
-                  <select
-                    value={expiryUnit}
-                    onChange={e => setExpiryUnit(e.target.value as any)}
-                    className="px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    <option value="minutes">Minutes</option>
-                    <option value="hours">Hours</option>
-                    <option value="days">Days</option>
-                    <option value="months">Months</option>
-                    <option value="years">Years</option>
-                  </select>
-                  <label className="flex items-center gap-2 text-sm text-gray-600">
-                    <input type="checkbox" checked={clearExpiry} onChange={e => setClearExpiry(e.target.checked)} />
-                    Remove expiry
-                  </label>
-                </div>
-                <p className="text-xs text-gray-500">Enter amount 0 to keep existing expiry. Setting a new amount replaces current end time. If no current expiry and amount 0, card never expires.</p>
-              </div>
-
               {/* Logo Upload */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -620,6 +600,75 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                 )}
                 <p className="mt-1 text-xs text-gray-500">
                   Get this URL from your Google My Business review link
+                </p>
+              </div>
+
+              {/* Expiry Duration */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Time Limit
+                </label>
+                {existingExpiry && !clearExpiry && (
+                  <p className="text-xs text-gray-500 mb-2">
+                    Current End: {existingExpiry.toLocaleDateString()}{" "}
+                    {existingExpiry.toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </p>
+                )}
+                <div className="flex flex-wrap items-center gap-3 mb-2">
+                  <input
+                    type="number"
+                    min={0}
+                    value={expiryAmount}
+                    onChange={(e) => setExpiryAmount(Number(e.target.value))}
+                    className="w-32 px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Amount"
+                  />
+                  <select
+                    value={expiryUnit}
+                    onChange={(e) => setExpiryUnit(e.target.value as any)}
+                    className="px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="minutes">Minutes</option>
+                    <option value="hours">Hours</option>
+                    <option value="days">Days</option>
+                    <option value="months">Months</option>
+                    <option value="years">Years</option>
+                  </select>
+                  <label className="flex items-center gap-2 text-sm text-gray-600">
+                    <input
+                      type="checkbox"
+                      checked={clearExpiry}
+                      onChange={(e) => setClearExpiry(e.target.checked)}
+                    />
+                    Remove expiry
+                  </label>
+                </div>
+                <p className="text-xs text-gray-500">
+                  Enter amount 0 to keep existing expiry. Setting a new amount
+                  replaces current end time. If no current expiry and amount 0,
+                  card never expires.
+                </p>
+              </div>
+
+              {/* Allowed Languages (Admin) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Allowed Languages *
+                </label>
+                <SegmentedButtonGroup
+                  options={["English", "Gujarati", "Hindi"]}
+                  multiple
+                  selected={formData.allowedLanguages}
+                  onChange={(v) =>
+                    handleInputChange("allowedLanguages", v as string[])
+                  }
+                  size="sm"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Limit which languages end users can choose.
                 </p>
               </div>
 

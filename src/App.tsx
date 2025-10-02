@@ -1,98 +1,118 @@
-import React, { useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import ReactGA from 'react-ga4';
+import React, { useEffect } from "react";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+  useLocation,
+  useParams,
+} from "react-router-dom";
+import ReactGA from "react-ga4";
 
-import { AdminDashboard } from './components/AdminDashboard';
-import { AnalyticsDashboard } from './components/AnalyticsDashboard';
-import { CompactReviewCardView } from './components/CompactReviewCardView';
-import { LoginPage } from './components/LoginPage';
-import { ProtectedRoute } from './components/ProtectedRoute';
-import { storage } from './utils/storage';
-import { auth } from './utils/auth';
-import { ReviewCard } from './types';
+import { AdminDashboard } from "./components/AdminDashboard";
+import { AnalyticsDashboard } from "./components/AnalyticsDashboard";
+import { CompactReviewCardView } from "./components/CompactReviewCardView";
+import { LoginPage } from "./components/LoginPage";
+import { ProtectedRoute } from "./components/ProtectedRoute";
+import { storage } from "./utils/storage";
+import { auth } from "./utils/auth";
+import { ReviewCard } from "./types";
+import PrivacyPolicy from "./HomePage/PrivacyPolicy";
+import TermsConditions from "./HomePage/TermsConditions";
+import RefundPolicy from "./HomePage/RefundPolicy";
+import HomeLink from "./HomePage/HomeLink";
 
 ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
 
 function App() {
+  const location = useLocation();
+
+  // Track every route change (GA4)
   useEffect(() => {
-    ReactGA.send({ hitType: "pageview", page: window.location.pathname });
-  }, []);
+    ReactGA.send({ hitType: "pageview", page: location.pathname });
+  }, [location]);
 
   return (
-    <Router>
-      <Routes>
-        {/* Login Route */}
-        <Route path="/login" element={<LoginPage />} />
-        
-        {/* Admin Dashboard Route */}
-        <Route 
-          path="/admin" 
-          element={
-            <ProtectedRoute>
-              <AdminDashboard />
-            </ProtectedRoute>
-          } 
-        />
-        {/* Analytics Route */}
-        <Route 
-          path="/admin/analytics" 
-          element={
-            <ProtectedRoute>
-              <AnalyticsDashboard />
-            </ProtectedRoute>
-          }
-        />
-        
-        {/* Default route redirects based on auth status */}
-        <Route 
-          path="/" 
-          element={
-            auth.isAuthenticated() 
-              ? <Navigate to="/admin" replace /> 
-              : <Navigate to="/login" replace />
-          } 
-        />
-        
-        {/* Dynamic Review Card Routes */}
-        <Route 
-          path="/:slug" 
-          element={<DynamicReviewCard />} 
-        />
-      </Routes>
-    </Router>
+    <Routes>
+      {/* Auth / Static */}
+      <Route path="/ai-login" element={<LoginPage />} />
+      <Route
+        path="/ai-admin"
+        element={
+          <ProtectedRoute>
+            <AdminDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-admin/analytics"
+        element={
+          <ProtectedRoute>
+            <AnalyticsDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route path="/" element={<HomeLink />} />
+      <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+      <Route path="/terms" element={<TermsConditions />} />
+      <Route path="/refund-policy" element={<RefundPolicy />} />
+
+      {/* Dynamic card at root level */}
+      <Route path="/:slug" element={<DynamicReviewCard />} />
+
+      {/* Fallback */}
+      <Route path="*" element={<NotFoundFallback />} />
+    </Routes>
   );
 }
 
+// Wrap App with Router (moved Router out so useLocation works)
+const AppWithRouter = () => (
+  <Router>
+    <App />
+  </Router>
+);
+
 // Component to handle dynamic review card routing
 const DynamicReviewCard: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
   const [card, setCard] = React.useState<ReviewCard | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const slug = window.location.pathname.slice(1); // Remove leading slash
+
+  // Guard: ignore blank or asset-like slugs
+  if (!slug || slug.includes(".") || slug === "favicon.ico") {
+    return <Navigate to="/" replace />;
+  }
 
   React.useEffect(() => {
+    let cancelled = false;
     const loadCard = async () => {
+      setLoading(true);
       try {
         const foundCard = await storage.getCardBySlug(slug);
-        setCard(foundCard);
-      } catch (error) {
-        console.error('Error loading card:', error);
-        setCard(null);
+        if (!cancelled) setCard(foundCard);
+      } catch (e) {
+        if (!cancelled) setCard(null);
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     };
-
     loadCard();
+    return () => {
+      cancelled = true;
+    };
   }, [slug]);
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-200 via-purple-200 to-slate-200 flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-200 via-purple-200 to-slate-200">
         <div className="text-center">
           <div className="w-16 h-16 bg-blue-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
+            <div className="w-8 h-8 border-2 border-blue-400 border-t-transparent rounded-full animate-spin" />
           </div>
-          <h1 className="text-2xl font-bold text-blue-900 mb-4">Loading Review Card</h1>
+          <h1 className="text-2xl font-bold text-blue-900 mb-2">
+            Loading Review Card
+          </h1>
           <p className="text-slate-900">Please wait...</p>
         </div>
       </div>
@@ -106,7 +126,6 @@ const DynamicReviewCard: React.FC = () => {
           <div className="w-24 h-24 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">❌</span>
           </div>
-          {/* QR Code Image */}
           <img
             src="/aireviewsystm_qrcode.png"
             alt="AI Review System QR Code"
@@ -139,11 +158,17 @@ const DynamicReviewCard: React.FC = () => {
           <div className="w-24 h-24 bg-yellow-500/20 rounded-full flex items-center justify-center mx-auto mb-6">
             <span className="text-4xl">⚠️</span>
           </div>
-          <h1 className="text-3xl font-bold text-white mb-4">Temporarily Unavailable</h1>
-          
-          <p className="text-slate-300 mb-4">The review card for "/{slug}" is currently inactive.</p>
-          <p className="text-slate-400 text-sm">Please check back later or contact the business owner if you believe this is an error.</p>
-           <h1 className="text-sm text-white mb-4">
+          <h1 className="text-3xl font-bold text-white mb-4">
+            Temporarily Unavailable
+          </h1>
+          <p className="text-slate-300 mb-4">
+            The review card for "/{slug}" is currently inactive.
+          </p>
+          <p className="text-slate-400 text-sm">
+            Please check back later or contact the business owner if you believe
+            this is an error.
+          </p>
+          <h1 className="text-sm text-white mb-4">
             Please! Contact Admin&nbsp;
             <a
               href="https://www.aireviewsystem.com/"
@@ -162,4 +187,17 @@ const DynamicReviewCard: React.FC = () => {
   return <CompactReviewCardView card={card} />;
 };
 
-export default App;
+// Simple fallback for any unmatched path
+const NotFoundFallback = () => (
+  <div className="min-h-screen flex items-center justify-center bg-slate-900 text-white">
+    <div className="text-center space-y-4">
+      <h1 className="text-4xl font-bold">404</h1>
+      <p className="text-slate-300">Page not found</p>
+      <a href="/" className="text-blue-400 underline">
+        Go Home
+      </a>
+    </div>
+  </div>
+);
+
+export default AppWithRouter;

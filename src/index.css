@@ -285,6 +285,29 @@
   transform: scale(1.05);
 }
 
+/* Hide scrollbar (still scrollable) */
+html, body {
+  overflow-x: hidden;            /* Avoid horizontal scrollbar */
+  -ms-overflow-style: none;      /* IE & old Edge */
+  scrollbar-width: none;         /* Firefox */
+}
+
+body::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;                 /* Chrome / Safari */
+}
+
+/* Optional utility if you want selective usage */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Hover Effects */
 button:hover {
   transform-style: preserve-3d;

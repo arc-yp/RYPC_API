@@ -3,9 +3,9 @@ export interface ReviewCard {
   businessName: string;
   category: string;
   type: string;
-  description?: string;
-  location?: string;
-  services?: string[];
+  description: string;
+  location: string;
+  services: string[];
   slug: string;
   logoUrl: string;
   googleMapsUrl: string;
@@ -18,6 +18,7 @@ export interface ReviewCard {
   expiresAt?: string;
   createdAt: string;
   updatedAt: string;
+  allowedLanguages?: string[]; // NEW
 }
 
 export interface ReviewTemplates {

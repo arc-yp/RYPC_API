@@ -14,7 +14,7 @@ export const LoginPage: React.FC = () => {
 
   // Redirect if already authenticated
   if (auth.isAuthenticated()) {
-    return <Navigate to="/admin" replace />;
+    return <Navigate to="/ai-admin" replace />;
   }
 
   const handleInputChange = (field: string, value: string) => {
@@ -32,7 +32,7 @@ export const LoginPage: React.FC = () => {
 
     if (auth.login(formData.mobile, formData.password)) {
       // Login successful - redirect will happen via Navigate component
-      window.location.href = '/admin';
+      window.location.href = '/ai-admin';
     } else {
       setError('Invalid mobile number or password');
     }
