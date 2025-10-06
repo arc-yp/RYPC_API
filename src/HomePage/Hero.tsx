@@ -3,6 +3,7 @@ import { Star, ArrowRight, Play, X } from 'lucide-react';
 
 const Hero = () => {
   const [isVideoOpen, setIsVideoOpen] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
 
   const scrollToLeadForm = () => {
     const leadFormElement = document.querySelector('#lead-form');
@@ -13,6 +14,11 @@ const Hero = () => {
       });
     }
   };
+
+  // Trigger animations on mount
+  useEffect(() => {
+    setIsVisible(true);
+  }, []);
 
   // Close modal on ESC and lock scroll when open
   useEffect(() => {
@@ -45,45 +51,67 @@ const Hero = () => {
             {/* Left Column - Content */}
             <div className="text-center lg:text-left">
               {/* Trust Badge */}
-              <div className="inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-6 animate-fade-in">
-                <Star className="w-4 h-4 mr-2 fill-current" />
+              <div className={`inline-flex items-center bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-medium mb-6 transform transition-all duration-700 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
+              }`}>
+                <Star className="w-4 h-4 mr-2 fill-current animate-spin-slow" />
                 Trusted by 500+ Local Businesses
               </div>
               
               {/* Main Headline */}
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-0 leading-tight">
-                Get More 
- </h1>
-              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
-                Google Reviews
-                
-                <span className="block"><span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent"> Effortlessly</span> with AI</span>
-              </h1>
+              <div className={`transform transition-all duration-1000 delay-200 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-0 leading-tight">
+                  <span className="inline-block animate-fade-in-up">Get</span>{' '}
+                  <span className="inline-block animate-fade-in-up animation-delay-100">More</span>
+                </h1>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-900 mb-6 leading-tight">
+                  <span className="inline-block animate-fade-in-up animation-delay-200">Google</span>{' '}
+                  <span className="inline-block animate-fade-in-up animation-delay-300">Reviews</span>
+                  <span className="block">
+                    <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent animate-gradient-x inline-block animate-fade-in-up animation-delay-400">
+                      Effortlessly
+                    </span>{' '}
+                    <span className="inline-block animate-fade-in-up animation-delay-500">with</span>{' '}
+                    <span className="inline-block animate-fade-in-up animation-delay-600">AI</span>
+                  </span>
+                </h1>
+              </div>
               
               {/* Subheadline */}
-              <p className="text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl">
+              <p className={`text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl transform transition-all duration-1000 delay-500 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}>
                 Turn happy customers into loyal promoters in just one tap - powered by smart AI-generated reviews that sound natural and authentic.
               </p>
               
               {/* CTA Buttons */} 
-              <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
+              <div className={`flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8 transform transition-all duration-1000 delay-700 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}>
                 <button 
                   onClick={scrollToLeadForm}
-                  className="group bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-600 hover:to-green-600 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center"
+                  className="group bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl hover:-translate-y-1 flex items-center justify-center animate-pulse-slow"
                 >
                   Book Free Demo
-                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                  <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
                 </button>
-                <button onClick={() => setIsVideoOpen(true)} className="group bg-white hover:bg-gray-50 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 flex items-center justify-center">
-                  <Play className="mr-2 w-5 h-5" />
+                <button 
+                  onClick={() => setIsVideoOpen(true)} 
+                  className="group bg-white hover:bg-gray-50 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl hover:-translate-y-1 flex items-center justify-center"
+                >
+                  <Play className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
                   Watch Demo
                 </button>
               </div>
               
               {/* Social Proof */}
-              <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-500">
-                <div className="flex items-center">
-                    <div className="flex -space-x-2 mr-3">
+              <div className={`flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-500 transform transition-all duration-1000 delay-1000 ${
+                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+              }`}>
+                <div className="flex items-center group">
+                  <div className="flex -space-x-2 mr-3">
                     {[
                       "https://randomuser.me/api/portraits/men/32.jpg",
                       "https://randomuser.me/api/portraits/women/44.jpg",
@@ -91,36 +119,43 @@ const Hero = () => {
                       "https://randomuser.me/api/portraits/women/65.jpg"
                     ].map((src, i) => (
                       <img
-                      key={i}
-                      src={src}
-                      alt={`User ${i + 1}`}
-                      className="w-8 h-8 rounded-full border-2 border-white object-cover"
+                        key={i}
+                        src={src}
+                        alt={`User ${i + 1}`}
+                        className="w-8 h-8 rounded-full border-2 border-white object-cover transition-transform duration-300 hover:scale-110 hover:z-10 relative"
+                        style={{ animationDelay: `${i * 0.1}s` }}
                       />
                     ))}
-                    </div>
-                  <span>500+ businesses trust us</span>
+                  </div>
+                  <span className="group-hover:text-gray-700 transition-colors duration-300">500+ businesses trust us</span>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center group">
                   <div className="flex text-yellow-400 mr-2">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-4 h-4 fill-current" />
+                      <Star 
+                        key={i} 
+                        className="w-4 h-4 fill-current hover:scale-125 transition-transform duration-300 cursor-pointer"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      />
                     ))}
                   </div>
-                  <span>4.9/5 rating</span>
+                  <span className="group-hover:text-gray-700 transition-colors duration-300">4.9/5 rating</span>
                 </div>
               </div>
             </div>
             
             {/* Right Column - Visual */}
-            <div className="relative">
-              <div className="relative bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-transform duration-500">
-                <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold">
+            <div className={`relative transform transition-all duration-1200 delay-300 ${
+              isVisible ? 'translate-x-0 opacity-100' : 'translate-x-12 opacity-0'
+            }`}>
+              <div className="relative bg-white rounded-2xl shadow-2xl p-8 transform rotate-3 hover:rotate-0 transition-all duration-700 hover:shadow-3xl hover:scale-105">
+                <div className="absolute -top-4 -right-4 bg-green-500 text-white px-4 py-2 rounded-full text-sm font-semibold animate-bounce">
                   AI Powered ✨
                 </div>
                 
                 {/* Mock Phone Interface */}
                 <div className="bg-gray-50 rounded-xl p-6">
-                  <div className="flex items-center mb-4">
+                  <div className="flex items-center mb-4 animate-fade-in-up">
                     <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
                       AI
                     </div>
@@ -132,54 +167,59 @@ const Hero = () => {
                   
                   <div className="flex justify-center mb-4">
                     {[1, 2, 3, 4, 5].map((i) => (
-                      <Star key={i} className="w-8 h-8 text-yellow-400 fill-current mx-1" />
+                      <Star 
+                        key={i} 
+                        className="w-8 h-8 text-yellow-400 fill-current mx-1 hover:scale-125 transition-all duration-300 cursor-pointer animate-fade-in-up"
+                        style={{ animationDelay: `${i * 0.1}s` }}
+                      />
                     ))}
                   </div>
                   
-                  <div className="bg-white rounded-lg p-4 mb-4 border-l-4 border-blue-500">
+                  <div className="bg-white rounded-lg p-4 mb-4 border-l-4 border-blue-500 hover:shadow-md transition-all duration-300 animate-fade-in-up animation-delay-500">
                     <p className="text-gray-700 text-sm italic">
                       "Amazing service! The staff was incredibly helpful and the food was delicious. Highly recommend this restaurant to anyone looking for great dining experience!"
                     </p>
                   </div>
                   
-                  <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg transition-shadow">
+                  <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 animate-fade-in-up animation-delay-700">
                     📋 Copy & Post to Google
                   </button>
                 </div>
               </div>
               
               {/* Floating Elements */}
-              <div className="absolute -top-8 -left-8 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full text-sm font-semibold animate-bounce">
+              <div className="absolute -top-8 -left-8 bg-yellow-400 text-yellow-900 px-4 py-2 rounded-full text-sm font-semibold animate-bounce hover:animate-pulse cursor-pointer">
                 🚀 +300% Reviews
               </div>
-              <div className="absolute -bottom-8 -right-8 bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold animate-pulse">
+              <div className="absolute -bottom-8 -right-8 bg-purple-500 text-white px-4 py-2 rounded-full text-sm font-semibold animate-pulse hover:animate-bounce cursor-pointer">
                 🌟 5-Star Reviews
               </div>
             </div>
           </div>
         </div>
       </div>
+
       {/* Video Lightbox Modal */}
       {isVideoOpen && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm animate-fade-in"
           onClick={() => setIsVideoOpen(false)}
           role="dialog"
           aria-modal="true"
           aria-label="Watch demo video"
         >
           <div
-            className="relative w-auto"
+            className="relative w-auto animate-scale-in"
             onClick={(e) => e.stopPropagation()}
           >
             <button
-              className="absolute -top-10 right-0 sm:top-3 sm:right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white hover:scale-105 transition"
+              className="absolute -top-10 right-0 sm:top-3 sm:right-3 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white hover:scale-110 hover:rotate-90 transition-all duration-300"
               onClick={() => setIsVideoOpen(false)}
               aria-label="Close video"
             >
               <X className="w-5 h-5" />
             </button>
-            {/* 9:16 Responsive Video Wrapper sized by viewport height for desktops */}
+            {/* 9:16 Responsive Video Wrapper */}
             <div className="relative aspect-[9/16] h-[70vh] sm:h-[75vh] md:h-[85vh] max-h-[900px] rounded-2xl overflow-hidden bg-gray-900 shadow-2xl border border-white/10">
               <iframe
                 className="absolute inset-0 w-full h-full"
@@ -193,6 +233,125 @@ const Hero = () => {
           </div>
         </div>
       )}
+
+      {/* Custom Styles */}
+      <style jsx>{`
+        @keyframes fade-in-up {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+        
+        @keyframes scale-in {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+          }
+          to {
+            opacity: 1;
+          }
+        }
+        
+        @keyframes spin-slow {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+        
+        @keyframes gradient-x {
+          0%, 100% {
+            background-size: 200% 200%;
+            background-position: left center;
+          }
+          50% {
+            background-size: 200% 200%;
+            background-position: right center;
+          }
+        }
+        
+        @keyframes pulse-slow {
+          0%, 100% {
+            box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.4);
+          }
+          50% {
+            box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+          }
+        }
+        
+        .animate-fade-in-up {
+          animation: fade-in-up 0.8s ease-out forwards;
+        }
+        
+        .animate-scale-in {
+          animation: scale-in 0.3s ease-out forwards;
+        }
+        
+        .animate-fade-in {
+          animation: fade-in 0.3s ease-out forwards;
+        }
+        
+        .animate-spin-slow {
+          animation: spin-slow 3s linear infinite;
+        }
+        
+        .animate-gradient-x {
+          animation: gradient-x 3s ease infinite;
+        }
+        
+        .animate-pulse-slow {
+          animation: pulse-slow 2s infinite;
+        }
+        
+        .animation-delay-100 {
+          animation-delay: 0.1s;
+        }
+        
+        .animation-delay-200 {
+          animation-delay: 0.2s;
+        }
+        
+        .animation-delay-300 {
+          animation-delay: 0.3s;
+        }
+        
+        .animation-delay-400 {
+          animation-delay: 0.4s;
+        }
+        
+        .animation-delay-500 {
+          animation-delay: 0.5s;
+        }
+        
+        .animation-delay-600 {
+          animation-delay: 0.6s;
+        }
+        
+        .animation-delay-700 {
+          animation-delay: 0.7s;
+        }
+        
+        .hover\\:shadow-3xl:hover {
+          box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+      `}</style>
     </section>
   );
 };

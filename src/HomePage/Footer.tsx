@@ -1,5 +1,13 @@
-import { Mail, Phone, MapPin, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
-import type { MouseEvent } from 'react';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Facebook,
+  Twitter,
+  Instagram,
+  Linkedin,
+} from "lucide-react";
+import type { MouseEvent } from "react";
 
 const Footer = () => {
   return (
@@ -19,10 +27,11 @@ const Footer = () => {
                 {/* <span className="text-2xl font-bold">AI Review System</span> */}
               </div>
               <p className="text-gray-300 mb-6 max-w-md leading-relaxed">
-                Helping local businesses grow their online reputation with AI-powered review generation. 
-                Get more Google reviews effortlessly and build trust with your customers.
+                Helping local businesses grow their online reputation with
+                AI-powered review generation. Get more Google reviews
+                effortlessly and build trust with your customers.
               </p>
-              
+
               {/* Contact Info */}
               <div className="space-y-3">
                 <div className="flex items-center text-gray-300">
@@ -39,66 +48,98 @@ const Footer = () => {
                 </div>
               </div>
             </div>
-            
+
             {/* Quick Links */}
             <div>
               <h3 className="text-lg font-semibold mb-6">Quick Links</h3>
               <ul className="space-y-3">
                 {(() => {
-                  const handleDemoClick = (e: MouseEvent<HTMLAnchorElement>) => {
-                    if (typeof window === 'undefined') return;
-                    if (window.location.pathname === '/') {
+                  const handleDemoClick = (
+                    e: MouseEvent<HTMLAnchorElement>
+                  ) => {
+                    if (typeof window === "undefined") return;
+                    if (window.location.pathname === "/") {
                       e.preventDefault();
-                      const el = document.getElementById('lead-form');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      const el = document.getElementById("lead-form");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
                     }
                     // If not on home, allow navigation to '/#lead-form' via href
                   };
 
-                  const handleFeaturesClick = (e: MouseEvent<HTMLAnchorElement>) => {
-                    if (typeof window === 'undefined') return;
-                    if (window.location.pathname === '/') {
+                  const handleFeaturesClick = (
+                    e: MouseEvent<HTMLAnchorElement>
+                  ) => {
+                    if (typeof window === "undefined") return;
+                    if (window.location.pathname === "/") {
                       e.preventDefault();
-                      const el = document.getElementById('features');
-                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                      const el = document.getElementById("features");
+                      if (el) el.scrollIntoView({ behavior: "smooth" });
                     }
                   };
 
-                  const links: Array<{ label: string; href: string; onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void }>= [
-                    { label: 'How It Works', href: '/#how-it-works', onClick: (e) => {
-                      if (typeof window === 'undefined') return;
-                      if (window.location.pathname === '/') {
-                        e.preventDefault();
-                        const el = document.getElementById('how-it-works');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    } },
-                      { label: 'Industries', href: '/#industries', onClick: (e) => {
-                        if (typeof window === 'undefined') return;
-                        if (window.location.pathname === '/') {
+                  const links: Array<{
+                    label: string;
+                    href: string;
+                    onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+                  }> = [
+                    {
+                      label: "How It Works",
+                      href: "/#how-it-works",
+                      onClick: (e) => {
+                        if (typeof window === "undefined") return;
+                        if (window.location.pathname === "/") {
                           e.preventDefault();
-                          const el = document.getElementById('industries');
-                          if (el) el.scrollIntoView({ behavior: 'smooth' });
+                          const el = document.getElementById("how-it-works");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
                         }
-                      } },
-                    { label: 'Features', href: '/#features', onClick: handleFeaturesClick },
-                    { label: 'Pricing', href: '/#pricing', onClick: (e) => {
-                      if (typeof window === 'undefined') return;
-                      if (window.location.pathname === '/') {
-                        e.preventDefault();
-                        const el = document.getElementById('pricing');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    } },
-                    { label: 'Demo', href: '/#lead-form', onClick: handleDemoClick },
-                    { label: 'Contact Us', href: '/#faq', onClick: (e) => {
-                      if (typeof window === 'undefined') return;
-                      if (window.location.pathname === '/') {
-                        e.preventDefault();
-                        const el = document.getElementById('faq');
-                        if (el) el.scrollIntoView({ behavior: 'smooth' });
-                      }
-                    } }
+                      },
+                    },
+                    {
+                      label: "Industries",
+                      href: "/#industries",
+                      onClick: (e) => {
+                        if (typeof window === "undefined") return;
+                        if (window.location.pathname === "/") {
+                          e.preventDefault();
+                          const el = document.getElementById("industries");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }
+                      },
+                    },
+                    {
+                      label: "Features",
+                      href: "/#features",
+                      onClick: handleFeaturesClick,
+                    },
+                    {
+                      label: "Pricing",
+                      href: "/#pricing",
+                      onClick: (e) => {
+                        if (typeof window === "undefined") return;
+                        if (window.location.pathname === "/") {
+                          e.preventDefault();
+                          const el = document.getElementById("pricing");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }
+                      },
+                    },
+                    {
+                      label: "Demo",
+                      href: "/#lead-form",
+                      onClick: handleDemoClick,
+                    },
+                    {
+                      label: "Contact Us",
+                      href: "/#faq",
+                      onClick: (e) => {
+                        if (typeof window === "undefined") return;
+                        if (window.location.pathname === "/") {
+                          e.preventDefault();
+                          const el = document.getElementById("faq");
+                          if (el) el.scrollIntoView({ behavior: "smooth" });
+                        }
+                      },
+                    },
                   ];
 
                   return links.map((item) => (
@@ -116,25 +157,38 @@ const Footer = () => {
               </ul>
             </div>
 
-{/* Resources */}
+            {/* Resources */}
             <div>
               <h3 className="text-lg font-semibold mb-6">Policies</h3>
               <ul className="space-y-3">
-               
                 <li>
-                  <a href="/privacy-policy" className="text-gray-300 hover:text-white transition-colors duration-300">Privacy Policy</a>
+                  <a
+                    href="/privacy-policy"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
+                    Privacy Policy
+                  </a>
                 </li>
                 <li>
-                  <a href="/terms" className="text-gray-300 hover:text-white transition-colors duration-300">Terms &amp; Conditions</a>
+                  <a
+                    href="/terms"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
+                    Terms &amp; Conditions
+                  </a>
                 </li>
                 <li>
-                  <a href="/refund-policy" className="text-gray-300 hover:text-white transition-colors duration-300">Refund &amp; Cancellation</a>
+                  <a
+                    href="/refund-policy"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
+                    Refund &amp; Cancellation
+                  </a>
                 </li>
               </ul>
             </div>
-           
           </div>
-          
+
           {/* Newsletter Signup */}
           <div className="border-t border-gray-800 mt-12 pt-12">
             <div className="max-w-2xl mx-auto text-center">
@@ -142,7 +196,8 @@ const Footer = () => {
                 Stay Updated with AI Review Tips
               </h3>
               <p className="text-gray-300 mb-6">
-                Get the latest strategies for growing your business reviews and online reputation.
+                Get the latest strategies for growing your business reviews and
+                online reputation.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 max-w-md mx-auto">
                 <input
@@ -158,7 +213,7 @@ const Footer = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Bottom Footer */}
       <div className="border-t border-gray-800">
         <div className="container mx-auto px-6 py-6">
@@ -166,23 +221,69 @@ const Footer = () => {
             <div className="text-gray-400 text-sm mb-4 md:mb-0">
               © 2025 AI Review System. All rights reserved.
             </div>
-            
+
             {/* Social Links */}
             <div className="flex items-center space-x-4">
               {[
-                { icon: Facebook, href: '#', label: 'Facebook' },
-                { icon: Twitter, href: '#', label: 'Twitter' },
-                { icon: Instagram, href: '#', label: 'Instagram' },
-                { icon: Linkedin, href: '#', label: 'LinkedIn' }
+                {
+                  icon: Facebook,
+                  href: "#",
+                  label: "Facebook",
+                  hoverColor: "hover:bg-blue-600",
+                  bgColor: "bg-blue-600/20",
+                  iconColor: "text-blue-400 group-hover:text-white",
+                },
+                {
+                  icon: Twitter,
+                  href: "#",
+                  label: "Twitter",
+                  hoverColor: "hover:bg-sky-500",
+                  bgColor: "bg-sky-500/20",
+                  iconColor: "text-sky-400 group-hover:text-white",
+                },
+                {
+                  icon: Instagram,
+                  href: "https://www.instagram.com/ai_review_system?igsh=MTIxdzZwaDJ5ZjdrYg==",
+                  label: "Instagram",
+                  hoverColor:
+                    "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500",
+                  bgColor: "bg-gradient-to-r from-purple-500/20 to-pink-500/20",
+                  iconColor: "text-pink-400 group-hover:text-white",
+                },
+                {
+                  icon: Linkedin,
+                  href: "#",
+                  label: "LinkedIn",
+                  hoverColor: "hover:bg-blue-700",
+                  bgColor: "bg-blue-700/20",
+                  iconColor: "text-blue-500 group-hover:text-white",
+                },
               ].map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
+                  target={social.href.startsWith("http") ? "_blank" : "_self"}
+                  rel={
+                    social.href.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
+                  }
                   aria-label={social.label}
                   title={social.label}
-                  className="w-10 h-10 bg-gray-800 hover:bg-gradient-to-r hover:from-blue-600 hover:to-green-600 rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110"
+                  className={`group w-12 h-12 ${social.bgColor} ${social.hoverColor} rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-lg`}
+                  style={{
+                    animationDelay: `${index * 100}ms`,
+                  }}
                 >
-                  <social.icon className="w-5 h-5 text-gray-400 hover:text-white" />
+                  <social.icon
+                    className={`w-5 h-5 ${social.iconColor} transition-all duration-300 group-hover:scale-110`}
+                  />
+
+                  {/* Animated ring effect on hover */}
+                  <div className="absolute inset-0 rounded-xl border-2 border-transparent group-hover:border-white/20 transition-all duration-300"></div>
+
+                  {/* Subtle glow effect */}
+                  <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"></div>
                 </a>
               ))}
             </div>
