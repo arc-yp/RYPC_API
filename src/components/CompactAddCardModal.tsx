@@ -412,23 +412,23 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
               </div>
 
               {/* Business Description */}
-              <div>
+                <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Description
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) =>
-                    handleInputChange("description", e.target.value)
+                  handleInputChange("description", e.target.value)
                   }
                   placeholder="Brief description of your business, services, or specialties..."
-                  rows={3}
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={4}
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-y"
                 />
                 <p className="text-xs text-gray-500 mt-1">
                   This helps generate more relevant reviews
                 </p>
-              </div>
+                </div>
 
               {/* Location */}
               <div>
