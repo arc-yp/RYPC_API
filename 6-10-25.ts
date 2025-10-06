@@ -63,19 +63,16 @@ export class AIReviewService {
     request: ReviewRequest,
     maxRetries: number = 5
   ): Promise<GeneratedReview> {
-    const apiKey =
-      request.geminiApiKey || (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
-    const modelName =
-      request.geminiModel ||
-      (import.meta as any).env?.VITE_GEMINI_MODEL ||
-      "gemini-2.0-flash";
+    const { geminiApiKey, geminiModel = "gemini-2.0-flash" } = request;
 
     // Create model instance with provided API key
-    const model = this.createModel(apiKey, modelName);
+    const model = this.createModel(geminiApiKey || "", geminiModel);
 
     // Check if model is available
     if (!model) {
-      console.warn("Gemini API key not provided or invalid, using fallback review");
+      console.warn(
+        "Gemini API key not provided or invalid, using fallback review"
+      );
       return this.getFallbackReview(request);
     }
 
@@ -153,8 +150,8 @@ Customer specifically wants to highlight these services: ${selectedServices.join
 
 Star Rating: ${starRating}/5
 Sentiment: ${sentimentGuide[starRating as keyof typeof sentimentGuide]}
-Tone: ${selectedTone}
-Use Case: ${selectedUseCase}
+Tone: ${selectedTone} - ${toneInstructions[selectedTone]}
+Use Case: ${selectedUseCase} - ${useCaseInstructions[selectedUseCase]}
 ${highlights ? `Customer highlights: ${highlights}` : ""}
 ${serviceInstructions}
 
@@ -164,7 +161,7 @@ Strict instructions:
 - First sentence must always be different.
 - Use fresh adjectives and sentence tone.
 - Tone: Human, real, warm, and natural.
-- in gujarati starting line not write "Kem chho!, Majaa aavi gai!, Majaa padi gai! "
+- in gujarati starting line not write "Kem chho!"
 - not use exclamation mark
 
 Requirements:
@@ -180,6 +177,7 @@ Requirements:
 - No fake exaggeration, keep it credible and locally relevant
 - Don't mention the star rating in the text
 - Make it unique - avoid common phrases or structures
+- Use varied sentence structures and vocabulary
 ${
   highlights
     ? `- Try to incorporate these highlights naturally: ${highlights}`
@@ -193,6 +191,8 @@ ${
     : ""
 }
 - ${languageInstruction}
+- For mixed languages, ensure both languages flow naturally together
+- Use authentic regional expressions and terminology
 - Avoid generic templates or repetitive structures
 - Return only the review text, no quotes, no instructions, no extra formatting, and no introductory sentences.`;
 
@@ -255,32 +255,32 @@ ${
     const fallbacks: Record<number, Record<string, string[]>> = {
       4: {
         English: [
-          "Professional service and quality work, just a minor wait time.",
-          "Service quality was good and staff was helpful.",
-          "Professional approach with smooth experience overall.",
+          `Professional service and quality work, just a minor wait time.`,
+          ` Great service quality and friendly staff. Highly recommend.`,
+          `Professional approach and excellent customer service.`,
         ],
         Gujarati: [
-          "Seva sari hati ane kaam pan saaru thayu, thodi wait thai.",
-          "Staff madadgar hato, anubhav saaro rayo.",
+          `વ્યાવસાયિક સેવા અને ગુણવત્તાયુક્ત કામ, માત્ર થોડી રાહ જોવી પડી.`,
+          `${businessName} માં ખૂબ સારી સેવા મળી. કર્મચારીઓ મદદગાર હતા અને કામ પણ સારું થયું.`,
         ],
         Hindi: [
-          "Service acchi thi aur kaam quality ka tha, thoda intezar karna pada.",
-          "Staff sahayak tha, overall anubhav achha raha.",
+          `${businessName} में अच्छा अनुभव रहा। प्रोफेशनल सर्विस और क्वालिटी वर्क, बस थोड़ा इंतजार करना पड़ा।`,
+          `${businessName} में बहुत अच्छी सेवा मिली। स्टाफ सहयोगी था और काम भी बेहतरीन हुआ।`,
         ],
       },
       5: {
         English: [
-          `${serviceText} Great experience for ${category.toLowerCase()}.`,
+          `${serviceText} Highly recommend for ${category.toLowerCase()}.`,
           `${serviceText} Will definitely return.`,
-          `${serviceText} Truly satisfied with the visit.`,
+          `${serviceText} Five stars!`,
         ],
         Gujarati: [
-          `${serviceText} Kharekhar saaro anubhav.`,
-          `${serviceText} Pacho avish.`,
+          `${serviceText} ${category} માટે ભલામણ કરું છું.`,
+          `${serviceText} ફરીથી આવીશ.`,
         ],
         Hindi: [
-          `${serviceText} Bahut achha anubhav raha.`,
-          `${serviceText} Zaroor wapas aaunga.`,
+          ` प्रोफेशनल ${type} और उत्कृष्ट सेवा.${serviceText} ${category} के लिए सिफारिश करता हूं.`,
+          ` गुणवत्तापूर्ण सेवा और दोस्ताना स्टाफ.${serviceText} फिर से आऊंगा.`,
         ],
       },
     };
@@ -293,7 +293,10 @@ ${
     const randomIndex = Math.floor(Math.random() * languageFallbacks.length);
     const selectedFallback = languageFallbacks[randomIndex];
     // Make it unique by adding timestamp-based variation
-    const uniqueFallback = selectedFallback; // keep text clean
+    const uniqueFallback = `${selectedFallback} (${timestamp})`.replace(
+      ` (${timestamp})`,
+      ""
+    );
     return {
       text: uniqueFallback,
       hash: this.generateHash(uniqueFallback + timestamp),
