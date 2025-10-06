@@ -42,7 +42,7 @@ export class AIReviewService {
     for (let i = 0; i < content.length; i++) {
       const char = content.charCodeAt(i);
       hash = (hash << 5) - hash + char;
-      hash = hash & hash; // Convert to 32-bit integer
+      hash |= 0; // force 32-bit
     }
     return Math.abs(hash).toString(36);
   }
@@ -59,21 +59,41 @@ export class AIReviewService {
     usedReviewHashes.add(hash);
   }
 
+  // Basic validation for key constraints we care about
+  private validateReview(
+    text: string,
+    lang: string,
+    minChars = 150,
+    maxChars = 200
+  ): boolean {
+    const t = text.trim();
+
+    // Length
+    if (t.length < minChars || t.length > maxChars) return false;
+
+    // No exclamation marks
+    if (/[!]/.test(t)) return false;
+
+    // Don't mention star rating explicitly
+    if (/\b([1-5]\s*stars?|one|two|three|four|five\s*stars?)\b/i.test(t)) return false;
+
+    // Romanization checks: disallow Gujarati/Devanagari scripts in any language
+    const hasGujarati = /[\u0A80-\u0AFF]/.test(t);
+    const hasDevanagari = /[\u0900-\u097F]/.test(t);
+    if (lang === "Gujarati" && (hasGujarati || hasDevanagari)) return false;
+    if (lang === "Hindi" && (hasGujarati || hasDevanagari)) return false;
+    if (lang === "English" && (hasGujarati || hasDevanagari)) return false;
+
+    return true;
+  }
+
   async generateReview(
     request: ReviewRequest,
     maxRetries: number = 5
   ): Promise<GeneratedReview> {
-    const apiKey =
-      request.geminiApiKey || (import.meta as any).env?.VITE_GEMINI_API_KEY || "";
-    const modelName =
-      request.geminiModel ||
-      (import.meta as any).env?.VITE_GEMINI_MODEL ||
-      "gemini-2.0-flash";
+    const { geminiApiKey, geminiModel = "gemini-2.0-flash" } = request;
 
-    // Create model instance with provided API key
-    const model = this.createModel(apiKey, modelName);
-
-    // Check if model is available
+    const model = this.createModel(geminiApiKey || "", geminiModel);
     if (!model) {
       console.warn("Gemini API key not provided or invalid, using fallback review");
       return this.getFallbackReview(request);
@@ -99,29 +119,22 @@ export class AIReviewService {
       5: "Highly enthusiastic- warm, detailed praise, showing full satisfaction.",
     };
 
-    // Language options and random selection logic
     const languageOptions = ["English", "Gujarati", "Hindi"];
-
     const selectedLanguage =
-      language ||
-      languageOptions[Math.floor(Math.random() * languageOptions.length)];
+      language || languageOptions[Math.floor(Math.random() * languageOptions.length)];
     const selectedTone = tone || "Friendly";
     const selectedUseCase = useCase || "Customer review";
 
-    // Build service-specific instructions
     let serviceInstructions = "";
     if (selectedServices && selectedServices.length > 0) {
       serviceInstructions = `
-Customer specifically wants to highlight these services: ${selectedServices.join(
-        ", "
-      )}
+Customer specifically wants to highlight these services: ${selectedServices.join(", ")}
 - Mention these services naturally in the review context
 - Don't list them generically, weave them into the experience narrative
 - Focus on how these specific aspects contributed to the ${starRating}-star experience
 - Use authentic language that reflects real customer experience with these services`;
     }
 
-    // Language-specific instructions
     let languageInstruction = "";
     switch (selectedLanguage) {
       case "English":
@@ -138,16 +151,7 @@ Customer specifically wants to highlight these services: ${selectedServices.join
         break;
     }
 
-    // Tone instructions
-    const toneInstructions = {
-      // Add specific tone instructions if needed
-    };
-
-    // Use case instructions
-    const useCaseInstructions = {
-      // Add specific use case instructions if needed
-    };
-
+    // Removed undefined-producing parts
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       const prompt = `Generate a realistic Google review for "${businessName}" which is a ${type} in the ${category} category.
 
@@ -155,7 +159,7 @@ Star Rating: ${starRating}/5
 Sentiment: ${sentimentGuide[starRating as keyof typeof sentimentGuide]}
 Tone: ${selectedTone}
 Use Case: ${selectedUseCase}
-${highlights ? `Customer highlights: ${highlights}` : ""}
+${highlights ? `Customer highlights: ${highlights}` : "" }
 ${serviceInstructions}
 
 Strict instructions:
@@ -164,7 +168,7 @@ Strict instructions:
 - First sentence must always be different.
 - Use fresh adjectives and sentence tone.
 - Tone: Human, real, warm, and natural.
-- in gujarati starting line not write "Kem chho!, Majaa aavi gai!, Majaa padi gai! "
+- in gujarati starting line not write "Kem chho!"
 - not use exclamation mark
 
 Requirements:
@@ -180,19 +184,10 @@ Requirements:
 - No fake exaggeration, keep it credible and locally relevant
 - Don't mention the star rating in the text
 - Make it unique - avoid common phrases or structures
-${
-  highlights
-    ? `- Try to incorporate these highlights naturally: ${highlights}`
-    : ""
-}
-${
-  selectedServices && selectedServices.length > 0
-    ? `- Naturally incorporate these service experiences: ${selectedServices.join(
-        ", "
-      )}`
-    : ""
-}
+${highlights ? `- Try to incorporate these highlights naturally: ${highlights}` : "" }
+${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate these service experiences: ${selectedServices.join(", ")}` : "" }
 - ${languageInstruction}
+- Use authentic regional expressions and terminology
 - Avoid generic templates or repetitive structures
 - Return only the review text, no quotes, no instructions, no extra formatting, and no introductory sentences.`;
 
@@ -201,7 +196,13 @@ ${
         const response = await result.response;
         const reviewText = response.text().trim();
 
-        // Check if review is unique
+        // Validate constraints
+        if (!this.validateReview(reviewText, selectedLanguage)) {
+          console.log(`Attempt ${attempt + 1}: Validation failed, retrying...`);
+          continue;
+        }
+
+        // Uniqueness
         if (this.isReviewUnique(reviewText)) {
           this.markReviewAsUsed(reviewText);
           return {
@@ -212,18 +213,12 @@ ${
           };
         }
 
-        console.log(
-          `Attempt ${attempt + 1}: Generated duplicate review, retrying...`
-        );
+        console.log(`Attempt ${attempt + 1}: Generated duplicate review, retrying...`);
       } catch (error) {
-        console.error(
-          `AI Review Generation Error (attempt ${attempt + 1}):`,
-          error
-        );
+        console.error(`AI Review Generation Error (attempt ${attempt + 1}):`, error);
       }
     }
 
-    // Fallback to unique hardcoded review if all attempts fail
     return this.getFallbackReview(request);
   }
 
@@ -236,9 +231,7 @@ ${
       starRating,
       language,
     } = request;
-    const timestamp = Date.now();
 
-    // Generate service-specific text
     let serviceText = "";
     if (selectedServices && selectedServices.length > 0) {
       if (selectedServices.length === 1) {
@@ -246,57 +239,54 @@ ${
       } else if (selectedServices.length === 2) {
         serviceText = ` The ${selectedServices[0]} and ${selectedServices[1]} were particularly good.`;
       } else {
-        serviceText = ` The ${selectedServices
-          .slice(0, 2)
-          .join(", ")} and other services were particularly good.`;
+        serviceText = ` The ${selectedServices.slice(0, 2).join(", ")} and other services were particularly good.`;
       }
     }
 
     const fallbacks: Record<number, Record<string, string[]>> = {
       4: {
         English: [
-          "Professional service and quality work, just a minor wait time.",
-          "Service quality was good and staff was helpful.",
-          "Professional approach with smooth experience overall.",
+          `Professional service and quality work, just a minor wait time. Team stayed helpful and the process felt smooth from start to finish.${serviceText}`,
+          `Good experience overall with attentive staff and neat handling. A tiny delay, but the outcome showed care and consistency.${serviceText}`,
+          `Friendly approach and reliable work made the visit easy. One small area to improve, yet the value was clear.${serviceText}`,
         ],
         Gujarati: [
-          "Seva sari hati ane kaam pan saaru thayu, thodi wait thai.",
-          "Staff madadgar hato, anubhav saaro rayo.",
+          `Seva sari ane kaam ni quality pan jamti hati. Thodu wait karvu padiyu, pan staff madadru hato ane process saral lagi.${serviceText}`,
+          `${businessName} par anubhav saru rahyo. Team vinamra hati, ane karya shantithi puru thayu. Nanakdu sudharo shakya che.${serviceText}`,
         ],
         Hindi: [
-          "Service acchi thi aur kaam quality ka tha, thoda intezar karna pada.",
-          "Staff sahayak tha, overall anubhav achha raha.",
+          `${businessName} par anubhav accha raha. Staff sahayak tha aur kaam dhang se hua. Bas thoda intezar karna pada.${serviceText}`,
+          `Seva badhiya lagi, prakriya bhi asan rahi. Chhota sa sudhar ho sakta hai, par kul mila kar santusht hoon.${serviceText}`,
         ],
       },
       5: {
         English: [
-          `${serviceText} Great experience for ${category.toLowerCase()}.`,
-          `${serviceText} Will definitely return.`,
-          `${serviceText} Truly satisfied with the visit.`,
+          `Warm service, clear guidance, and careful work made the whole experience effortless and genuinely satisfying. Staff stayed attentive and respectful throughout.${serviceText}`,
+          `Excellent care with smooth coordination and thoughtful follow-up. Everything felt simple, timely, and genuinely customer-focused from start to end.${serviceText}`,
+          `From greeting to finish, the process felt easy and precise. Courteous team, clean handling, and result matched expectation well.${serviceText}`,
         ],
         Gujarati: [
-          `${serviceText} Kharekhar saaro anubhav.`,
-          `${serviceText} Pacho avish.`,
+          `Namr service, spasht margdarshan ane dhyanpurvak kaam thi anubhav saral ane santoshjanak lagyo. Team lagatar dhyanma rahi.${serviceText}`,
+          `Saras care, yogya samay par kaam ane vinamra vyavhar. Badhu saral rite thayu ane grahak par kendrit rahyu.${serviceText}`,
         ],
         Hindi: [
-          `${serviceText} Bahut achha anubhav raha.`,
-          `${serviceText} Zaroor wapas aaunga.`,
+          `Namr seva, spasht nirdesh aur dhyan se kiya gaya kaam. Puri prakriya aaram se aur samay par puri hui, anubhav santoshjanak raha.${serviceText}`,
+          `Shuruaat se ant tak sab kuchh aasan aur samay par raha. Team vinamra rahi aur parinam ummeed ke anuroop the.${serviceText}`,
         ],
       },
     };
 
-    // Select random fallback from available options
-    const ratingFallbacks = fallbacks[starRating] || fallbacks[5];
-    const langKey =
-      language && ratingFallbacks[language] ? language : "English";
+    const ratingFallbacks = fallbacks[starRating] || fallbacks[4];
+    const langKey = language && ratingFallbacks[language] ? language : "English";
     const languageFallbacks = ratingFallbacks[langKey];
     const randomIndex = Math.floor(Math.random() * languageFallbacks.length);
-    const selectedFallback = languageFallbacks[randomIndex];
-    // Make it unique by adding timestamp-based variation
-    const uniqueFallback = selectedFallback; // keep text clean
+    const selectedFallback = languageFallbacks[randomIndex].trim();
+
+    // Mark as used and return consistent hash based on content
+    this.markReviewAsUsed(selectedFallback);
     return {
-      text: uniqueFallback,
-      hash: this.generateHash(uniqueFallback + timestamp),
+      text: selectedFallback,
+      hash: this.generateHash(selectedFallback),
       language: langKey,
       rating: starRating,
     };
