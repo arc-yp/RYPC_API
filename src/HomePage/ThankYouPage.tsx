@@ -1,5 +1,13 @@
 import { useEffect, useState } from "react";
-import { CheckCircle, ArrowRight, Home, MessageCircle } from "lucide-react";
+import {
+  CheckCircle,
+  Instagram,
+  Linkedin,
+  Youtube,
+  Mail,
+  ArrowRight,
+  Facebook,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 const ThankYouPage = () => {
@@ -14,9 +22,36 @@ const ThankYouPage = () => {
     navigate("/");
   };
 
-  const handleContactSupport = () => {
-    window.open("https://wa.me/919909908230", "_blank");
-  };
+  const socialLinks = [
+    {
+      name: "Instagram",
+      icon: Instagram,
+      url: "https://www.instagram.com/ai_review_system?igsh=MTIxdzZwaDJ5ZjdrYg==",
+      color: "from-pink-500 to-purple-600",
+      hoverColor: "hover:from-pink-600 hover:to-purple-700",
+    },
+    {
+      name: "Facebook",
+      icon: Facebook,
+      url: "https://www.facebook.com/share/1A4NKVy36W/",
+      color: "from-blue-600 to-blue-700",
+      hoverColor: "hover:from-blue-700 hover:to-blue-800",
+    },
+    {
+      name: "YouTube",
+      icon: Youtube,
+      url: "https://www.youtube.com/@your-channel",
+      color: "from-red-600 to-red-700",
+      hoverColor: "hover:from-red-700 hover:to-red-800",
+    },
+    {
+      name: "Email",
+      icon: Mail,
+      url: "mailto:aireviewsystem@gmail.com",
+      color: "from-green-600 to-green-700",
+      hoverColor: "hover:from-green-700 hover:to-green-800",
+    },
+  ];
 
   return (
     <section className="relative min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center overflow-hidden">
@@ -118,28 +153,44 @@ const ThankYouPage = () => {
             </div>
           </div>
 
-          {/* CTA Buttons */}
+          {/* Social Media Icons */}
           <div
-            className={`flex flex-col sm:flex-row gap-4 justify-center transform transition-all duration-1000 delay-800 ${
+            className={`transform transition-all duration-1000 delay-800 ${
               isVisible
                 ? "translate-y-0 opacity-100"
                 : "translate-y-8 opacity-0"
             }`}
           >
+            <div className="bg-white/60 backdrop-blur rounded-2xl p-8 mb-8 border border-gray-100">
+              <h3 className="text-xl font-semibold text-gray-900 mb-4">
+                Stay Connected With Us
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Follow us on social media for updates, tips, and exclusive
+                offers!
+              </p>
+              <div className="flex justify-center gap-4 flex-wrap">
+                {socialLinks.map((social, index) => (
+                  <a
+                    key={index}
+                    href={social.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`group bg-gradient-to-r ${social.color} ${social.hoverColor} text-white p-4 rounded-xl transition-all duration-300 transform hover:scale-110 hover:shadow-2xl flex items-center justify-center`}
+                    title={social.name}
+                  >
+                    <social.icon className="w-6 h-6 group-hover:rotate-12 transition-transform duration-300" />
+                  </a>
+                ))}
+              </div>
+            </div>
+
             <button
               onClick={handleGoHome}
-              className="group bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl flex items-center justify-center"
+              className="group bg-gradient-to-r from-blue-600 to-green-600 hover:from-blue-700 hover:to-green-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-105 hover:shadow-2xl inline-flex items-center justify-center"
             >
-              <Home className="mr-2 w-5 h-5" />
               Back to Home
               <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform duration-300" />
-            </button>
-            <button
-              onClick={handleContactSupport}
-              className="group bg-white hover:bg-gray-50 text-gray-700 px-8 py-4 rounded-xl font-semibold text-lg border-2 border-gray-200 hover:border-gray-300 transition-all duration-300 transform hover:scale-105 hover:shadow-xl flex items-center justify-center"
-            >
-              <MessageCircle className="mr-2 w-5 h-5 group-hover:scale-110 transition-transform duration-300" />
-              Contact on WhatsApp
             </button>
           </div>
 

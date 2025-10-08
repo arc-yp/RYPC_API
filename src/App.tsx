@@ -61,7 +61,7 @@ function App() {
       <Route path="/refund-policy" element={<RefundPolicy />} />
       <Route path="/renewalplanform" element={<RenewalPlanForm />} />
       <Route path="/ars" element={<ArsPage />} />
-      <Route path="/thanks" element={<ThankYouPage />} />
+      <Route path="/thank-you" element={<ThankYouPage />} />
 
       {/* Dynamic card at root level */}
       <Route path="/:slug" element={<DynamicReviewCard />} />

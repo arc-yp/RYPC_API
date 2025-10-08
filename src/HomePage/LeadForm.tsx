@@ -86,7 +86,7 @@ const LeadForm = () => {
     });
     
     // Navigate to thank you page
-    navigate('/thanks');
+    navigate('/thank-you');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {

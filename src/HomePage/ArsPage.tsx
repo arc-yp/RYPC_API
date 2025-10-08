@@ -48,7 +48,7 @@ const ArsPage = () => {
     setFormData(initialFormState);
     
     // Navigate to thank you page
-    navigate("/thanks");
+    navigate("/thanks-you");
   };
 
   const scrollToLeadForm = () => {
