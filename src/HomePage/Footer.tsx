@@ -6,6 +6,8 @@ import {
   Twitter,
   Instagram,
   Linkedin,
+  X,
+  Youtube,
 } from "lucide-react";
 import type { MouseEvent } from "react";
 
@@ -224,31 +226,31 @@ const Footer = () => {
 
             {/* Social Links */}
             <div className="flex items-center space-x-4">
-              {[
+                {[
                 {
                   icon: Facebook,
-                  href: "#",
+                  href: "https://www.facebook.com/share/1A4NKVy36W/",
                   label: "Facebook",
                   hoverColor: "hover:bg-blue-600",
                   bgColor: "bg-blue-600/20",
                   iconColor: "text-blue-400 group-hover:text-white",
                 },
                 {
-                  icon: Twitter,
-                  href: "#",
-                  label: "Twitter",
-                  hoverColor: "hover:bg-sky-500",
-                  bgColor: "bg-sky-500/20",
-                  iconColor: "text-sky-400 group-hover:text-white",
-                },
-                {
                   icon: Instagram,
                   href: "https://www.instagram.com/ai_review_system?igsh=MTIxdzZwaDJ5ZjdrYg==",
                   label: "Instagram",
                   hoverColor:
-                    "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500",
+                  "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500",
                   bgColor: "bg-gradient-to-r from-purple-500/20 to-pink-500/20",
                   iconColor: "text-pink-400 group-hover:text-white",
+                },
+                {
+                  icon: Youtube,
+                  href: "#",
+                  label: "YouTube",
+                  hoverColor: "hover:bg-red-600",
+                  bgColor: "bg-red-600/20",
+                  iconColor: "text-red-500 group-hover:text-white",
                 },
                 {
                   icon: Linkedin,
@@ -258,25 +260,25 @@ const Footer = () => {
                   bgColor: "bg-blue-700/20",
                   iconColor: "text-blue-500 group-hover:text-white",
                 },
-              ].map((social, index) => (
+                ].map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
                   target={social.href.startsWith("http") ? "_blank" : "_self"}
                   rel={
-                    social.href.startsWith("http")
-                      ? "noopener noreferrer"
-                      : undefined
+                  social.href.startsWith("http")
+                    ? "noopener noreferrer"
+                    : undefined
                   }
                   aria-label={social.label}
                   title={social.label}
                   className={`group w-12 h-12 ${social.bgColor} ${social.hoverColor} rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-lg`}
                   style={{
-                    animationDelay: `${index * 100}ms`,
+                  animationDelay: `${index * 100}ms`,
                   }}
                 >
                   <social.icon
-                    className={`w-5 h-5 ${social.iconColor} transition-all duration-300 group-hover:scale-110`}
+                  className={`w-6 h-6 ${social.iconColor} transition-all duration-300 group-hover:scale-110`}
                   />
 
                   {/* Animated ring effect on hover */}
@@ -285,7 +287,7 @@ const Footer = () => {
                   {/* Subtle glow effect */}
                   <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"></div>
                 </a>
-              ))}
+                ))}
             </div>
           </div>
         </div>
