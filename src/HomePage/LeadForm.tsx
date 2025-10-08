@@ -1,7 +1,9 @@
 import { useState } from 'react';
 import { ArrowRight, CheckCircle } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const LeadForm = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -11,7 +13,6 @@ const LeadForm = () => {
     businessDescription: '',
     businessServices: ''
   });
-  const [isSubmitted, setIsSubmitted] = useState(false);
 
   const businessTypes = [
     'Restaurant/Cafe',
@@ -70,9 +71,22 @@ const LeadForm = () => {
       }).catch(() => { /* ignore */ });
     } catch { /* ignore */ }
 
-    // Open WhatsApp in a new tab; if blocked, still mark submitted
+    // Open WhatsApp in a new tab
     window.open(waUrl, '_blank', 'noopener,noreferrer');
-    setIsSubmitted(true);
+    
+    // Reset form
+    setFormData({
+      name: '',
+      phone: '',
+      businessName: '',
+      businessType: '',
+      city: '',
+      businessDescription: '',
+      businessServices: ''
+    });
+    
+    // Navigate to thank you page
+    navigate('/thanks');
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
@@ -81,34 +95,6 @@ const LeadForm = () => {
       [e.target.name]: e.target.value
     });
   };
-
-  if (isSubmitted) {
-    return (
-      <section className="py-20 bg-gradient-to-r from-blue-600 to-green-600">
-        <div className="container mx-auto px-6">
-          <div className="max-w-2xl mx-auto text-center">
-            <div className="bg-white rounded-3xl p-12 shadow-2xl">
-              <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-                <CheckCircle className="w-10 h-10 text-green-600" />
-              </div>
-              <h2 className="text-3xl font-bold text-gray-900 mb-4">
-                Thank You! 🎉
-              </h2>
-              <p className="text-xl text-gray-600 mb-6">
-                We've received your demo request. Our team will contact you within 24 hours to schedule your personalized demo.
-              </p>
-              <div className="bg-blue-50 rounded-xl p-6">
-                <p className="text-blue-800 font-medium">
-                  📞 Expect a call from our team soon!<br />
-                  📧 Check your email for confirmation details.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-    );
-  }
 
   return (
     <section id="lead-form" className="py-20 bg-gradient-to-r from-blue-600 to-green-600">
@@ -139,8 +125,6 @@ const LeadForm = () => {
                   </div>
                 ))}
               </div>
-              
-              
             </div>
             
             {/* Right Column - Form */}

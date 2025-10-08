@@ -362,14 +362,14 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         </div>
 
         {/* View Counter */}
-        <div className="flex items-center justify-center gap-2 mb-4 mt-3">
+        {/* <div className="flex items-center justify-center gap-2 mb-4 mt-3">
           <div className="px-3 py-1.5 rounded-full bg-white border border-neutral-200 shadow-sm flex items-center gap-2">
             <Eye className="w-4 h-4 text-neutral-500" />
             <span className="text-xs text-neutral-600 font-medium">
               {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}
             </span>
           </div>
-        </div>
+        </div> */}
       </div>
     </div>
   );

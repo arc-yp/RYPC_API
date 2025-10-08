@@ -147,7 +147,7 @@ const Pricing = () => {
             </ul>
 
             <a
-              href="/#lead-form"
+              href="/renewalplanform"
               className="mt-8 w-full inline-flex items-center justify-center gap-2 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-500 hover:to-orange-600 text-white px-6 py-4 rounded-xl font-semibold shadow-lg transition-all"
             >
               Renew Your Access <ArrowRight className="w-5 h-5" />

@@ -21,6 +21,9 @@ import PrivacyPolicy from "./HomePage/PrivacyPolicy";
 import TermsConditions from "./HomePage/TermsConditions";
 import RefundPolicy from "./HomePage/RefundPolicy";
 import HomeLink from "./HomePage/HomeLink";
+import RenewalPlanForm from "./HomePage/RenewalPlanForm";
+import ArsPage from "./HomePage/ArsPage";
+import ThankYouPage from "./HomePage/ThankYouPage";
 
 ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
 
@@ -56,6 +59,9 @@ function App() {
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsConditions />} />
       <Route path="/refund-policy" element={<RefundPolicy />} />
+      <Route path="/renewalplanform" element={<RenewalPlanForm />} />
+      <Route path="/ars" element={<ArsPage />} />
+      <Route path="/thanks" element={<ThankYouPage />} />
 
       {/* Dynamic card at root level */}
       <Route path="/:slug" element={<DynamicReviewCard />} />
