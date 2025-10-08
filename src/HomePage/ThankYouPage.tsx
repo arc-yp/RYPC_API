@@ -168,7 +168,7 @@ const ThankYouPage = () => {
       </div>
 
       {/* Custom Styles */}
-      <style jsx>{`
+      <style>{`
         @keyframes bounce-slow {
           0%,
           100% {

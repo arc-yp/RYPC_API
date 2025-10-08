@@ -230,7 +230,7 @@ const HowItWorks = () => {
       </div>
 
       {/* Custom Styles */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%,
           100% {

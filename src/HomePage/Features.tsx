@@ -373,7 +373,7 @@ const Features = () => {
       )}
 
       {/* Custom Styles */}
-      <style jsx>{`
+      <style>{`
         @keyframes float {
           0%,
           100% {
