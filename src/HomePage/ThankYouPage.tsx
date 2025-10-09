@@ -40,7 +40,7 @@ const ThankYouPage = () => {
     {
       name: "YouTube",
       icon: Youtube,
-      url: "https://www.youtube.com/@your-channel",
+      url: "https://www.youtube.com/@AI_Review_System",
       color: "from-red-600 to-red-700",
       hoverColor: "hover:from-red-700 hover:to-red-800",
     },

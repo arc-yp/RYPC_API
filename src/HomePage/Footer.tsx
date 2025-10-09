@@ -246,7 +246,7 @@ const Footer = () => {
                 },
                 {
                   icon: Youtube,
-                  href: "#",
+                  href: "https://www.youtube.com/@AI_Review_System",
                   label: "YouTube",
                   hoverColor: "hover:bg-red-600",
                   bgColor: "bg-red-600/20",
