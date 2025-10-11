@@ -160,11 +160,16 @@ const Hero = () => {
                 {/* Mock Phone Interface */}
                 <div className="bg-gray-50 rounded-xl p-6">
                   <div className="flex items-center mb-4 animate-fade-in-up">
-                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-bold text-xl">
-                      AI
+                    <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-200 shadow">
+                      <img
+                      src="/testimonials/integrityworld.png"
+                      alt="Integrity World logo"
+                      className="w-full h-full object-cover bg-white"
+                      loading="lazy"
+                      />
                     </div>
                     <div className="ml-3">
-                      <h3 className="font-semibold text-gray-900">Review Generator</h3>
+                      <h3 className="font-semibold text-gray-900">Integrity World</h3>
                       <p className="text-sm text-gray-500">Rate your experience</p>
                     </div>
                   </div>
@@ -181,13 +186,18 @@ const Hero = () => {
                   
                   <div className="bg-white rounded-lg p-4 mb-4 border-l-4 border-blue-500 hover:shadow-md transition-all duration-300 animate-fade-in-up animation-delay-500">
                     <p className="text-gray-700 text-sm italic">
-                      "Amazing service! The staff was incredibly helpful and the food was delicious. Highly recommend this restaurant to anyone looking for great dining experience!"
+                      "Bhautik Sir's best ai coaching at Integrity World truly boosted my confidence. I feel more articulate during presentations now, and my team has definitely noticed the change. Super helpful."
                     </p>
                   </div>
                   
-                  <button className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 animate-fade-in-up animation-delay-700">
+                  <a
+                    href="https://www.aireviewsystem.com/integrity-world"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-green-500 to-green-600 text-white py-3 rounded-lg font-semibold hover:shadow-lg hover:scale-105 transition-all duration-300 animate-fade-in-up animation-delay-700 text-center block"
+                  >
                     📋 Copy & Post to Google
-                  </button>
+                  </a>
                 </div>
               </div>
               

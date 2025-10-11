@@ -22,7 +22,7 @@ const FAQ = () => {
     },
     {
       question: "What languages are supported?",
-      answer: "We support English, Hindi, and Gujarati. All reviews are written in Roman script (English letters) for easy reading and posting on Google Reviews, even for Hindi and Gujarati content.",
+      answer: "We support English and Hindi. All reviews are written in Roman script (English letters) for easy reading and posting on Google Reviews.",
       icon: "🌐"
     },
     {
@@ -50,16 +50,6 @@ const FAQ = () => {
       answer: "No limits! Generate as many reviews as you need. Our pricing is based on your business size, not the number of reviews generated.",
       icon: "♾️"
     },
-    {
-      question: "How much does it cost?",
-      answer: "We offer flexible pricing plans starting from ₹999/month for small businesses. During your demo call, we'll recommend the best plan for your needs. Plus, get 3 months free when you sign up during your demo!",
-      icon: "💰"
-    },
-    {
-      question: "Can I track my review performance?",
-      answer: "Yes! You get access to a dashboard showing review generation stats, rating distributions, and performance analytics to help you understand your customer satisfaction trends.",
-      icon: "📊"
-    }
   ];
 
   const toggleFAQ = (index: number) => {
@@ -216,7 +206,7 @@ const FAQ = () => {
                     {/* Animated Icon */}
                     <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center mr-4 transition-all duration-300 ${
                       openIndex === index
-                        ? 'bg-gradient-to-r from-blue-600 to-purple-600 scale-110'
+                        ? 'bg-gradient-to-r from-blue-600 to-green-600 scale-110'
                         : 'bg-gray-100 group-hover:bg-blue-100 group-hover:scale-110'
                     }`}>
                       <span className="text-xl transition-transform duration-300 group-hover:scale-125">
@@ -236,7 +226,7 @@ const FAQ = () => {
                     openIndex === index ? 'rotate-180 scale-110' : 'rotate-0 scale-100'
                   }`}>
                     {openIndex === index ? (
-                      <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-full flex items-center justify-center">
+                      <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-green-600 rounded-full flex items-center justify-center">
                         <Minus className="w-5 h-5 text-white" />
                       </div>
                     ) : (
