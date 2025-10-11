@@ -92,7 +92,7 @@ const Features = () => {
       icon: <Globe className="w-6 h-6" />,
       title: "Multilingual Support",
       description:
-        "English, Hindi, and Gujarati reviews (all in Roman script for easy reading)",
+        "English and Hindi reviews (all in Roman script for easy reading)",
       color: "from-blue-500 to-cyan-500",
     },
     {

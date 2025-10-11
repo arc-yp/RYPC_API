@@ -158,7 +158,7 @@ const HowItWorks = () => {
                       boxShadow: "0 4px 15px rgba(59, 130, 246, 0.4)",
                     }}
                   >
-                    <span className="relative z-10 transition-transform duration-300 group-hover:scale-110">
+                    <span className="relative z-10 mr-1 transition-transform duration-300 group-hover:scale-110">
                       {index + 1}
                     </span>
                     {/* Animated ring effect */}

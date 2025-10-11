@@ -27,15 +27,6 @@ const Pricing = () => {
         </div>
       </div>
 
-      {/* Decorative Festive Lights
-      <div className="absolute top-14 sm:top-16 left-0 w-full flex justify-center z-10 pointer-events-none">
-        <img
-          src="/diwali-lights.png"
-          alt="Diwali Lights"
-          className="w-full max-w-xs sm:max-w-3xl opacity-80"
-        />
-      </div> */}
-
       <div className="container mx-auto px-3 sm:px-6 mt-16 sm:mt-8 relative z-10">
         <div className="text-center mb-10 sm:mb-20">
           <h2 className="text-2xl sm:text-3xl md:text-4xl font-extrabold text-yellow-700 drop-shadow-lg">
@@ -62,10 +53,10 @@ const Pricing = () => {
             </h3>
             <div className="text-center mt-2 mb-1">
               <span className="text-base sm:text-xl md:text-2xl font-semibold text-gray-400 line-through mr-2">
-                ₹7,500
+                ₹9,500
               </span>
               <span className="text-2xl sm:text-4xl md:text-5xl font-extrabold text-blue-700">
-                ₹6,500
+                ₹8,500
               </span>
               <span className="text-lg sm:text-2xl font-extrabold text-blue-700">
                 /-

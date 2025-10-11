@@ -55,7 +55,7 @@ const Hero = () => {
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
               }`}>
                 <Star className="w-4 h-4 mr-2 fill-current animate-spin-slow" />
-                Trusted by 500+ Local Businesses
+                Trusted by 10+ Businesses
               </div>
               
               {/* Main Headline */}
@@ -79,12 +79,14 @@ const Hero = () => {
                 </h1>
               </div>
               
-              {/* Subheadline */}
-              <p className={`text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl transform transition-all duration-1000 delay-500 ${
-                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-              }`}>
-                Turn happy customers into loyal promoters in just one tap - powered by smart AI-generated reviews that sound natural and authentic.
-              </p>
+                {/* Subheadline */}
+                <p
+                className={`text-xl text-gray-600 mb-8 leading-relaxed max-w-2xl text-justify transform transition-all duration-1000 delay-500 ${
+                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                }`}
+                >
+                Turn happy customers into loyal promoters in just one tapr powered by smart AI-generated reviews that sound natural and authentic.
+                </p>
               
               {/* CTA Buttons */} 
               <div className={`flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8 transform transition-all duration-1000 delay-700 ${
@@ -107,41 +109,43 @@ const Hero = () => {
               </div>
               
               {/* Social Proof */}
-              <div className={`flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-500 transform transition-all duration-1000 delay-1000 ${
-                isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
-              }`}>
+                <div
+                className={`flex flex-col sm:flex-row items-center justify-center lg:justify-start text-sm text-gray-500 space-y-4 sm:space-y-0 sm:space-x-6 transform transition-all duration-1000 delay-1000 ${
+                  isVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'
+                }`}
+                >
                 <div className="flex items-center group">
                   <div className="flex -space-x-2 mr-3">
-                    {[
-                      "https://randomuser.me/api/portraits/men/32.jpg",
-                      "https://randomuser.me/api/portraits/women/44.jpg",
-                      "https://randomuser.me/api/portraits/men/54.jpg",
-                      "https://randomuser.me/api/portraits/women/65.jpg"
-                    ].map((src, i) => (
-                      <img
-                        key={i}
-                        src={src}
-                        alt={`User ${i + 1}`}
-                        className="w-8 h-8 rounded-full border-2 border-white object-cover transition-transform duration-300 hover:scale-110 hover:z-10 relative"
-                        style={{ animationDelay: `${i * 0.1}s` }}
-                      />
-                    ))}
+                  {[
+                    "/testimonials/smit hospital.png",
+                    "/testimonials/Dr harshal kheni.jpg",
+                    "/testimonials/dr jaydev dhameliya.jpg",
+                    "/testimonials/bina- krishnaa tourism.png"
+                  ].map((src, i) => (
+                    <img
+                    key={i}
+                    src={src}
+                    alt={`User ${i + 1}`}
+                    className="w-8 h-8 rounded-full border-2 border-white object-cover transition-transform duration-300 hover:scale-110 hover:z-10 relative"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                    />
+                  ))}
                   </div>
-                  <span className="group-hover:text-gray-700 transition-colors duration-300">500+ businesses trust us</span>
+                  <span className="group-hover:text-gray-700 transition-colors duration-300">Trusted By 10+ Businesses</span>
                 </div>
                 <div className="flex items-center group">
                   <div className="flex text-yellow-400 mr-2">
-                    {[1, 2, 3, 4, 5].map((i) => (
-                      <Star 
-                        key={i} 
-                        className="w-4 h-4 fill-current hover:scale-125 transition-transform duration-300 cursor-pointer"
-                        style={{ animationDelay: `${i * 0.1}s` }}
-                      />
-                    ))}
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Star
+                    key={i}
+                    className="w-4 h-4 fill-current hover:scale-125 transition-transform duration-300 cursor-pointer"
+                    style={{ animationDelay: `${i * 0.1}s` }}
+                    />
+                  ))}
                   </div>
                   <span className="group-hover:text-gray-700 transition-colors duration-300">4.9/5 rating</span>
                 </div>
-              </div>
+                </div>
             </div>
             
             {/* Right Column - Visual */}

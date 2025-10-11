@@ -11,6 +11,10 @@ import {
 } from "lucide-react";
 import type { MouseEvent } from "react";
 
+const newLocal = <div className="flex items-center text-gray-300">
+  <Phone className="w-5 h-5 mr-3 text-green-400" />
+  <span>+91 99099 08230</span>
+</div>;
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
@@ -40,13 +44,19 @@ const Footer = () => {
                   <Mail className="w-5 h-5 mr-3 text-blue-400" />
                   <span>aireviewsystem@gmail.com</span>
                 </div>
-                <div className="flex items-center text-gray-300">
-                  <Phone className="w-5 h-5 mr-3 text-green-400" />
-                  <span>+91 99099 08230</span>
-                </div>
+                {newLocal}
                 <div className="flex items-center text-gray-300">
                   <MapPin className="w-5 h-5 mr-3 text-purple-400" />
-                  <span>Mumbai, India</span>
+                  <a
+                    href="https://share.google/odZ7YfvUeGORlWIme"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="hover:text-white transition-colors duration-300"
+                    aria-label="Open location in Google Maps"
+                    title="Open location in Google Maps"
+                  >
+                    11th Floor, Milestone Citadel, Adajan, Surat, India 395009
+                  </a>
                 </div>
               </div>
             </div>
