@@ -63,8 +63,8 @@ export class AIReviewService {
   private validateReview(
     text: string,
     lang: string,
-    minChars = 150,
-    maxChars = 200
+    minChars = 250,
+    maxChars = 300
   ): boolean {
     const t = text.trim();
 
@@ -163,7 +163,7 @@ ${highlights ? `Customer highlights: ${highlights}` : "" }
 ${serviceInstructions}
 
 Strict instructions:
-- Review must be between 150 and 200 characters.
+- Review must be between 300 and 350 characters.
 - No repetition of ideas or sentence structures.
 - First sentence must always be different.
 - Use fresh adjectives and sentence tone.

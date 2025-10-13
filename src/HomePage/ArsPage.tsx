@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import Features from "./Features";
 import Testimonials from "./Testimonials";
-import Pricing from "./Pricing";
+import Pricing from "./ars/Pricing";
 import FAQ from "./FAQ";
 
 const ArsPage = () => {
