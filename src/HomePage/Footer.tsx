@@ -264,7 +264,7 @@ const Footer = () => {
                 },
                 {
                   icon: Linkedin,
-                  href: "#",
+                  href: "https://www.linkedin.com/company/ai-review-system/",
                   label: "LinkedIn",
                   hoverColor: "hover:bg-blue-700",
                   bgColor: "bg-blue-700/20",

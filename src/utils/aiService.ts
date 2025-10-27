@@ -225,53 +225,39 @@ ${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate the
   private getFallbackReview(request: ReviewRequest): GeneratedReview {
     const {
       businessName,
-      category,
-      type,
-      selectedServices,
       starRating,
       language,
     } = request;
 
-    let serviceText = "";
-    if (selectedServices && selectedServices.length > 0) {
-      if (selectedServices.length === 1) {
-        serviceText = ` The ${selectedServices[0]} was particularly good.`;
-      } else if (selectedServices.length === 2) {
-        serviceText = ` The ${selectedServices[0]} and ${selectedServices[1]} were particularly good.`;
-      } else {
-        serviceText = ` The ${selectedServices.slice(0, 2).join(", ")} and other services were particularly good.`;
-      }
-    }
-
     const fallbacks: Record<number, Record<string, string[]>> = {
       4: {
         English: [
-          `Professional service and quality work, just a minor wait time. Team stayed helpful and the process felt smooth from start to finish.${serviceText}`,
-          `Good experience overall with attentive staff and neat handling. A tiny delay, but the outcome showed care and consistency.${serviceText}`,
-          `Friendly approach and reliable work made the visit easy. One small area to improve, yet the value was clear.${serviceText}`,
+          `Professional service and quality work, just a minor wait time. Team stayed helpful and the process felt smooth from start to finish.`,
+          `Good experience overall with attentive staff and neat handling. A tiny delay, but the outcome showed care and consistency.`,
+          `Friendly approach and reliable work made the visit easy. One small area to improve, yet the value was clear.`,
         ],
         Gujarati: [
-          `Seva sari ane kaam ni quality pan jamti hati. Thodu wait karvu padiyu, pan staff madadru hato ane process saral lagi.${serviceText}`,
-          `${businessName} par anubhav saru rahyo. Team vinamra hati, ane karya shantithi puru thayu. Nanakdu sudharo shakya che.${serviceText}`,
+          `Seva sari ane kaam ni quality pan jamti hati. Thodu wait karvu padiyu, pan staff madadru hato ane process saral lagi.`,
+          `${businessName} par anubhav saru rahyo. Team vinamra hati, ane karya shantithi puru thayu. Nanakdu sudharo shakya che.`,
         ],
         Hindi: [
-          `${businessName} par anubhav accha raha. Staff sahayak tha aur kaam dhang se hua. Bas thoda intezar karna pada.${serviceText}`,
-          `Seva badhiya lagi, prakriya bhi asan rahi. Chhota sa sudhar ho sakta hai, par kul mila kar santusht hoon.${serviceText}`,
+          `${businessName} par anubhav accha raha. Staff sahayak tha aur kaam dhang se hua. Bas thoda intezar karna pada.`,
+          `Seva badhiya lagi, prakriya bhi asan rahi. Chhota sa sudhar ho sakta hai, par kul mila kar santusht hoon.`,
         ],
       },
       5: {
         English: [
-          `Warm service, clear guidance, and careful work made the whole experience effortless and genuinely satisfying. Staff stayed attentive and respectful throughout.${serviceText}`,
-          `Excellent care with smooth coordination and thoughtful follow-up. Everything felt simple, timely, and genuinely customer-focused from start to end.${serviceText}`,
-          `From greeting to finish, the process felt easy and precise. Courteous team, clean handling, and result matched expectation well.${serviceText}`,
+          `Warm service, clear guidance, and careful work made the whole experience effortless and genuinely satisfying. Staff stayed attentive and respectful throughout.`,
+          `Excellent care with smooth coordination and thoughtful follow-up. Everything felt simple, timely, and genuinely customer-focused from start to end.`,
+          `From greeting to finish, the process felt easy and precise. Courteous team, clean handling, and result matched expectation well.`,
         ],
         Gujarati: [
-          `Namr service, spasht margdarshan ane dhyanpurvak kaam thi anubhav saral ane santoshjanak lagyo. Team lagatar dhyanma rahi.${serviceText}`,
-          `Saras care, yogya samay par kaam ane vinamra vyavhar. Badhu saral rite thayu ane grahak par kendrit rahyu.${serviceText}`,
+          `Namr service, spasht margdarshan ane dhyanpurvak kaam thi anubhav saral ane santoshjanak lagyo. Team lagatar dhyanma rahi.`,
+          `Saras care, yogya samay par kaam ane vinamra vyavhar. Badhu saral rite thayu ane grahak par kendrit rahyu.`,
         ],
         Hindi: [
-          `Namr seva, spasht nirdesh aur dhyan se kiya gaya kaam. Puri prakriya aaram se aur samay par puri hui, anubhav santoshjanak raha.${serviceText}`,
-          `Shuruaat se ant tak sab kuchh aasan aur samay par raha. Team vinamra rahi aur parinam ummeed ke anuroop the.${serviceText}`,
+          `Namr seva, spasht nirdesh aur dhyan se kiya gaya kaam. Puri prakriya aaram se aur samay par puri hui, anubhav santoshjanak raha.`,
+          `Shuruaat se ant tak sab kuchh aasan aur samay par raha. Team vinamra rahi aur parinam ummeed ke anuroop the.`,
         ],
       },
     };
