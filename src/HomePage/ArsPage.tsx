@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import Footer from "./Footer";
 import Features from "./Features";
 import Testimonials from "./Testimonials";
-import Pricing from "./ars/Pricing";
+import Pricing from "./ars/Pricing1";
 import FAQ from "./FAQ";
 
 const ArsPage = () => {
@@ -106,7 +106,7 @@ const ArsPage = () => {
                 isVisible ? 'translate-y-0 opacity-100' : 'translate-y-4 opacity-0'
               }`}>
                 <Star className="w-4 h-4 mr-2 fill-current animate-spin-slow" />
-                Trusted by 10+ Businesses
+                Trusted by 30+ Businesses
               </div>
               
               {/* Main Headline */}
@@ -182,7 +182,7 @@ const ArsPage = () => {
                     />
                   ))}
                   </div>
-                  <span className="group-hover:text-gray-700 transition-colors duration-300">Trusted By 10+ Businesses</span>
+                  <span className="group-hover:text-gray-700 transition-colors duration-300">Trusted By 30+ Businesses</span>
                 </div>
                 <div className="flex items-center group">
                   <div className="flex text-yellow-400 mr-2">

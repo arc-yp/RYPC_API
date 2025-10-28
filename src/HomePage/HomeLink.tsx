@@ -4,7 +4,7 @@ import HowItWorks from "./HowItWorks";
 import Industries from "./Industries";
 import Features from "./Features";
 import Testimonials from "./Testimonials";
-import Pricing from "./Pricing";
+import Pricing from "./Pricing1";
 import LeadForm from "./LeadForm";
 import FAQ from "./FAQ";
 import Footer from "./Footer";
