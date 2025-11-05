@@ -111,7 +111,7 @@ const Pricing = () => {
             </h3>
             <div className="text-center mt-2 mb-1">
               <span className="text-4xl md:text-5xl font-extrabold text-blue-700">
-                ₹2,000
+                ₹9,500
               </span>
               <span className="text-2xl font-extrabold text-blue-700">/-</span>
             </div>
