@@ -21,6 +21,7 @@ import { StarRating } from "./StarRating";
 import { SegmentedButtonGroup } from "./SegmentedButtonGroup";
 import { TagInput } from "./TagInput";
 import { Link as LinkIcon } from "lucide-react";
+import { sendReviewCardToSheet } from "../utils/googleSheets";
 
 interface CompactAddCardModalProps {
   onClose: () => void;
@@ -269,6 +270,11 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
       };
 
       onSave(newCard);
+
+      // Fire-and-forget: send to Google Sheets if configured (don't block UI)
+      sendReviewCardToSheet(newCard).catch((err) => {
+        console.warn("[Sheets] Unable to send to Google Sheets:", err);
+      });
     } catch (error) {
       console.error("Error creating card:", error);
     } finally {
@@ -308,6 +314,8 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
             </h2>
             <button
               onClick={onClose}
+              aria-label="Close"
+              title="Close"
               className="p-2 hover:bg-gray-100 rounded-lg transition-colors duration-200"
             >
               <X className="w-5 h-5 text-gray-500" />
@@ -412,14 +420,14 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
               </div>
 
               {/* Business Description */}
-                <div>
+              <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
                   Business Description
                 </label>
                 <textarea
                   value={formData.description}
                   onChange={(e) =>
-                  handleInputChange("description", e.target.value)
+                    handleInputChange("description", e.target.value)
                   }
                   placeholder="Brief description of your business, services, or specialties..."
                   rows={4}
@@ -428,7 +436,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
                 <p className="text-xs text-gray-500 mt-1">
                   This helps generate more relevant reviews
                 </p>
-                </div>
+              </div>
 
               {/* Location */}
               <div>
@@ -620,7 +628,10 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
 
               {/* Expiry Duration */}
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="expiryAmount"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Time Limit (optional)
                 </label>
                 <div className="flex gap-3">
@@ -628,13 +639,25 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
                     type="number"
                     min={0}
                     value={expiryAmount}
+                    id="expiryAmount"
                     onChange={(e) => setExpiryAmount(Number(e.target.value))}
                     className="w-32 px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder="Amount"
                   />
                   <select
+                    id="expiryUnit"
                     value={expiryUnit}
-                    onChange={(e) => setExpiryUnit(e.target.value as any)}
+                    aria-labelledby="expiryAmount"
+                    onChange={(e) =>
+                      setExpiryUnit(
+                        e.target.value as
+                          | "minutes"
+                          | "hours"
+                          | "days"
+                          | "months"
+                          | "years"
+                      )
+                    }
                     className="px-3 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="minutes">Minutes</option>
