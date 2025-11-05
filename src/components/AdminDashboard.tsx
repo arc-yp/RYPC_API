@@ -381,6 +381,13 @@ export const AdminDashboard: React.FC = () => {
                 >
                   <Eye className="w-4 h-4 mr-2" /> Analytics
                 </Link>
+                <Link
+                  to="/ai-admin/pricing"
+                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 rounded-lg hover:from-yellow-500/30 hover:to-orange-500/30 transition-colors duration-200 border border-yellow-500/30"
+                  title="Manage Pricing"
+                >
+                  <Building2 className="w-4 h-4 mr-2" /> Pricing
+                </Link>
                 <button
                   onClick={handleRefresh}
                   disabled={isRefreshing}

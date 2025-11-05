@@ -24,6 +24,7 @@ import HomeLink from "./HomePage/HomeLink";
 import RenewalPlanForm from "./HomePage/RenewalPlanForm";
 import ArsPage from "./HomePage/ArsPage";
 import ThankYouPage from "./HomePage/ThankYouPage";
+import { PricingAdmin } from "./HomePage/HomePage-Admin/PricingAdmin";
 
 ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
 
@@ -52,6 +53,14 @@ function App() {
         element={
           <ProtectedRoute>
             <AnalyticsDashboard />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/ai-admin/pricing"
+        element={
+          <ProtectedRoute>
+            <PricingAdmin />
           </ProtectedRoute>
         }
       />
