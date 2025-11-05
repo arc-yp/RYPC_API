@@ -9,8 +9,10 @@ import {
   Sparkles,
   Mail,
   MapPin,
+  Loader2,
 } from "lucide-react";
 import Footer from "./Footer";
+import { pricingService } from "../utils/pricingService";
 
 const RenewalPlanForm = () => {
   const [formData, setFormData] = useState({
@@ -22,9 +24,31 @@ const RenewalPlanForm = () => {
     notes: "",
   });
   const [isVisible, setIsVisible] = useState(false);
+  const [renewalPrice, setRenewalPrice] = useState<number | null>(null);
+  const [priceLoading, setPriceLoading] = useState(true);
 
   useEffect(() => {
     setIsVisible(true);
+
+    // Fetch renewal plan price from database
+    const fetchRenewalPrice = async () => {
+      setPriceLoading(true);
+      try {
+        const renewalPlan = await pricingService.getPlanByType("renewal");
+        if (renewalPlan) {
+          setRenewalPrice(renewalPlan.current_price);
+        } else {
+          setRenewalPrice(10500); // Fallback price
+        }
+      } catch (error) {
+        console.error("Error fetching renewal price:", error);
+        setRenewalPrice(10500); // Fallback price
+      } finally {
+        setPriceLoading(false);
+      }
+    };
+
+    fetchRenewalPrice();
   }, []);
 
   return (
@@ -39,7 +63,7 @@ const RenewalPlanForm = () => {
 
         <div className="max-w-6xl mx-auto relative z-10">
           {/* Back Button with Animation */}
-            <div
+          <div
             className={`mb-10 flex flex-col md:flex
               isVisible
                 ? "translate-x-0 opacity-100"
@@ -135,9 +159,18 @@ const RenewalPlanForm = () => {
                   <div className="relative z-10">
                     <div className="flex items-center justify-between">
                       <span className="font-medium">Annual Renewal Fee:</span>
-                      <span className="text-3xl font-extrabold bg-gradient-to-r from-emerald-700 to-green-700 bg-clip-text text-transparent">
-                        ₹2,000/-
-                      </span>
+                      {priceLoading ? (
+                        <div className="flex items-center gap-2">
+                          <Loader2 className="w-5 h-5 animate-spin text-emerald-600" />
+                          <span className="text-sm text-emerald-600">
+                            Loading...
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-3xl font-extrabold bg-gradient-to-r from-emerald-700 to-green-700 bg-clip-text text-transparent">
+                          ₹{renewalPrice?.toLocaleString("en-IN")}/-
+                        </span>
+                      )}
                     </div>
                     <p className="text-xs text-emerald-700 mt-2">
                       Inclusive of all services & support
@@ -356,7 +389,7 @@ const RenewalPlanForm = () => {
         </div>
       </section>
 
-      <Footer/>
+      <Footer />
 
       {/* Custom Styles */}
       <style>{`
