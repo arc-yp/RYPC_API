@@ -196,11 +196,11 @@ ${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate the
         const response = await result.response;
         const reviewText = response.text().trim();
 
-        // Validate constraints
-        if (!this.validateReview(reviewText, selectedLanguage)) {
-          console.log(`Attempt ${attempt + 1}: Validation failed, retrying...`);
-          continue;
-        }
+        // // Validate constraints
+        // if (!this.validateReview(reviewText, selectedLanguage)) {
+        //   console.log(`Attempt ${attempt + 1}: Validation failed, retrying...`);
+        //   continue;
+        // }
 
         // Uniqueness
         if (this.isReviewUnique(reviewText)) {
