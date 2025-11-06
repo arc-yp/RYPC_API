@@ -75,7 +75,8 @@ export class AIReviewService {
     if (/[!]/.test(t)) return false;
 
     // Don't mention star rating explicitly
-    if (/\b([1-5]\s*stars?|one|two|three|four|five\s*stars?)\b/i.test(t)) return false;
+    if (/\b([1-5]\s*stars?|one|two|three|four|five\s*stars?)\b/i.test(t))
+      return false;
 
     // Romanization checks: disallow Gujarati/Devanagari scripts in any language
     const hasGujarati = /[\u0A80-\u0AFF]/.test(t);
@@ -95,7 +96,9 @@ export class AIReviewService {
 
     const model = this.createModel(geminiApiKey || "", geminiModel);
     if (!model) {
-      console.warn("Gemini API key not provided or invalid, using fallback review");
+      console.warn(
+        "Gemini API key not provided or invalid, using fallback review"
+      );
       return this.getFallbackReview(request);
     }
 
@@ -121,14 +124,17 @@ export class AIReviewService {
 
     const languageOptions = ["English", "Gujarati", "Hindi"];
     const selectedLanguage =
-      language || languageOptions[Math.floor(Math.random() * languageOptions.length)];
+      language ||
+      languageOptions[Math.floor(Math.random() * languageOptions.length)];
     const selectedTone = tone || "Professional";
     const selectedUseCase = useCase || "Customer review";
 
     let serviceInstructions = "";
     if (selectedServices && selectedServices.length > 0) {
       serviceInstructions = `
-Customer specifically wants to highlight these services: ${selectedServices.join(", ")}
+Customer specifically wants to highlight these services: ${selectedServices.join(
+        ", "
+      )}
 - Mention these services naturally in the review context
 - Don't list them generically, weave them into the experience narrative
 - Focus on how these specific aspects contributed to the ${starRating}-star experience
@@ -159,7 +165,7 @@ Star Rating: ${starRating}/5
 Sentiment: ${sentimentGuide[starRating as keyof typeof sentimentGuide]}
 Tone: ${selectedTone}
 Use Case: ${selectedUseCase}
-${highlights ? `Customer highlights: ${highlights}` : "" }
+${highlights ? `Customer highlights: ${highlights}` : ""}
 ${serviceInstructions}
 
 Strict instructions:
@@ -184,8 +190,18 @@ Requirements:
 - No fake exaggeration, keep it credible and locally relevant
 - Don't mention the star rating in the text
 - Make it unique - avoid common phrases or structures
-${highlights ? `- Try to incorporate these highlights naturally: ${highlights}` : "" }
-${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate these service experiences: ${selectedServices.join(", ")}` : "" }
+${
+  highlights
+    ? `- Try to incorporate these highlights naturally: ${highlights}`
+    : ""
+}
+${
+  selectedServices && selectedServices.length > 0
+    ? `- Naturally incorporate these service experiences: ${selectedServices.join(
+        ", "
+      )}`
+    : ""
+}
 - ${languageInstruction}
 - Use authentic regional expressions and terminology
 - Avoid generic templates or repetitive structures
@@ -204,6 +220,24 @@ ${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate the
 
         // Uniqueness
         if (this.isReviewUnique(reviewText)) {
+          // Log token usage only for successful unique review
+          if (response.usageMetadata) {
+            console.log(`📊 Token Usage (Attempt ${attempt + 1}):`);
+            console.log(
+              `   Prompt Tokens: ${response.usageMetadata.promptTokenCount}`
+            );
+            console.log(
+              `   Response Tokens: ${response.usageMetadata.candidatesTokenCount}`
+            );
+            console.log(
+              `   Total Tokens: ${response.usageMetadata.totalTokenCount}`
+            );
+            console.log(
+              `   Generated Review Length: ${reviewText.length} characters`
+            );
+            console.log(`   Review: "${reviewText.substring(0, 50)}..."`);
+          }
+
           this.markReviewAsUsed(reviewText);
           return {
             text: reviewText,
@@ -213,9 +247,14 @@ ${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate the
           };
         }
 
-        console.log(`Attempt ${attempt + 1}: Generated duplicate review, retrying...`);
+        console.log(
+          `Attempt ${attempt + 1}: Generated duplicate review, retrying...`
+        );
       } catch (error) {
-        console.error(`AI Review Generation Error (attempt ${attempt + 1}):`, error);
+        console.error(
+          `AI Review Generation Error (attempt ${attempt + 1}):`,
+          error
+        );
       }
     }
 
@@ -223,11 +262,7 @@ ${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate the
   }
 
   private getFallbackReview(request: ReviewRequest): GeneratedReview {
-    const {
-      businessName,
-      starRating,
-      language,
-    } = request;
+    const { businessName, starRating, language } = request;
 
     const fallbacks: Record<number, Record<string, string[]>> = {
       4: {
@@ -263,7 +298,8 @@ ${selectedServices && selectedServices.length > 0 ? `- Naturally incorporate the
     };
 
     const ratingFallbacks = fallbacks[starRating] || fallbacks[4];
-    const langKey = language && ratingFallbacks[language] ? language : "English";
+    const langKey =
+      language && ratingFallbacks[language] ? language : "English";
     const languageFallbacks = ratingFallbacks[langKey];
     const randomIndex = Math.floor(Math.random() * languageFallbacks.length);
     const selectedFallback = languageFallbacks[randomIndex].trim();
@@ -343,7 +379,24 @@ Return only the tagline, no quotes or extra text.`;
     try {
       const result = await model.generateContent(prompt);
       const response = await result.response;
-      return response.text().trim();
+      const taglineText = response.text().trim();
+
+      // Log token usage for tagline
+      if (response.usageMetadata) {
+        console.log("📊 Tagline Generation - Token Usage:");
+        console.log(
+          `   Prompt Tokens: ${response.usageMetadata.promptTokenCount}`
+        );
+        console.log(
+          `   Response Tokens: ${response.usageMetadata.candidatesTokenCount}`
+        );
+        console.log(
+          `   Total Tokens: ${response.usageMetadata.totalTokenCount}`
+        );
+        console.log(`   Generated Tagline: "${taglineText}"`);
+      }
+
+      return taglineText;
     } catch (error) {
       console.error("Tagline generation error:", error);
       // Fallback taglines based on category

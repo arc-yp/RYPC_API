@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Copy,
   CheckCircle,
@@ -25,31 +25,7 @@ interface CompactReviewCardViewProps {
 export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   card,
 }) => {
-  // If the card is inactive, do not render the interactive review UI
-  if (card.active === false) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-6">
-        <div className="max-w-md w-full text-center bg-white rounded-xl border border-neutral-200 p-8 shadow-sm">
-          <h1 className="text-xl font-semibold text-neutral-800 mb-2">
-            {card.businessName}
-          </h1>
-          <p className="text-neutral-500 text-sm mb-4">This review card is currently inactive.</p>
-          <p className="text-neutral-400 text-xs">Please check back later.</p>
-          <h1 className="text-sm text-white mb-4">
-            Please! Contact Admin&nbsp;
-            <a
-              href="https://www.aireviewsystem.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-blue-400 hover:text-blue-600"
-            >
-              https://www.aireviewsystem.com/
-            </a>
-          </h1>
-        </div>
-      </div>
-    );
-  }
+  // All hooks must be called before any early returns
   const [currentReview, setCurrentReview] = useState("");
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
@@ -60,14 +36,19 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
   const [viewCount, setViewCount] = useState(card.viewCount || 0);
+  const hasGeneratedInitialReview = useRef(false);
 
-  const languageOptions = (card.allowedLanguages && card.allowedLanguages.length > 0)
-    ? card.allowedLanguages
-    : ['English','Gujarati','Hindi']; // fallback
+  const languageOptions =
+    card.allowedLanguages && card.allowedLanguages.length > 0
+      ? card.allowedLanguages
+      : ["English", "Gujarati", "Hindi"]; // fallback
 
   useEffect(() => {
-    // Generate initial review when component loads
-    generateReviewForRating(5, "English", "Professional", []);
+    // Generate initial review when component loads (only once, prevent double call in React Strict Mode)
+    if (!hasGeneratedInitialReview.current) {
+      hasGeneratedInitialReview.current = true;
+      generateReviewForRating(5, "English", "Professional", []);
+    }
 
     // Increment view count when component loads
     const incrementView = async () => {
@@ -87,7 +68,36 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     };
 
     incrementView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [card.id]);
+
+  // If the card is inactive, do not render the interactive review UI
+  if (card.active === false) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-6">
+        <div className="max-w-md w-full text-center bg-white rounded-xl border border-neutral-200 p-8 shadow-sm">
+          <h1 className="text-xl font-semibold text-neutral-800 mb-2">
+            {card.businessName}
+          </h1>
+          <p className="text-neutral-500 text-sm mb-4">
+            This review card is currently inactive.
+          </p>
+          <p className="text-neutral-400 text-xs">Please check back later.</p>
+          <h1 className="text-sm text-white mb-4">
+            Please! Contact Admin&nbsp;
+            <a
+              href="https://www.aireviewsystem.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400 hover:text-blue-600"
+            >
+              https://www.aireviewsystem.com/
+            </a>
+          </h1>
+        </div>
+      </div>
+    );
+  }
 
   const generateReviewForRating = async (
     rating: number,
@@ -192,8 +202,8 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-4 sm:p-6 md:p-10 lg:p-16 bg-gradient-to-br from-blue-200 via-purple-200 to-slate-200">
       <div className="w-full max-w-xl sm:max-w-2xl">
-    {/* Main Card */}
-    <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-[0_10px_18px_rgba(59,131,246,0.36),0_2px_8px_rgba(199,29,251,0.58)]">
+        {/* Main Card */}
+        <div className="relative bg-white w-full rounded-xl sm:rounded-2xl p-4 sm:p-8 border-4 border-neutral-200 duration-200 shadow-[0_10px_18px_rgba(59,131,246,0.36),0_2px_8px_rgba(199,29,251,0.58)]">
           {/* Colored Dots (Top-Left) */}
           <div className="absolute top-4 right-4 sm:top-5 sm:right-10 flex gap-2">
             <span className="w-3 h-3 sm:w-4 sm:h-4 rounded-full bg-blue-500 shadow-sm shadow-blue-300" />
@@ -225,17 +235,21 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
                     alt="Map icon"
                     className="w-6 h-6 sm:w-6 sm:h-6 object-contain shrink-0 mt-0 sm:mt-0"
                   />
-                 
+
                   <a
                     href={
                       card.googleMapsUrl ||
-                      `https://www.google.com/maps/search/${encodeURIComponent(card.location)}`
+                      `https://www.google.com/maps/search/${encodeURIComponent(
+                        card.location
+                      )}`
                     }
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-[13px] sm:text-sm text-neutral-600 hover:text-blue-700 underline-offset-2 hover:underline leading-snug break-words"
                   >
-                    <span className="sm:hidden break-words">{card.location}</span>
+                    <span className="sm:hidden break-words">
+                      {card.location}
+                    </span>
                     <span className="hidden sm:inline" title={card.location}>
                       {card.location}
                     </span>
@@ -335,12 +349,16 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
               {copied ? (
                 <>
                   <CheckCircle className="w-5 h-5" />
-                  <span className="whitespace-nowrap">Copied! Opening Google...</span>
+                  <span className="whitespace-nowrap">
+                    Copied! Opening Google...
+                  </span>
                 </>
               ) : (
                 <>
                   <Copy className="w-5 h-5" />
-                  <span className="whitespace-nowrap">Copy & Post to Google</span>
+                  <span className="whitespace-nowrap">
+                    Copy & Post to Google
+                  </span>
                 </>
               )}
             </button>
