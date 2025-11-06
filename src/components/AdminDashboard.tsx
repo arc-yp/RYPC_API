@@ -26,7 +26,7 @@ import { storage } from "../utils/storage";
 import { formatDate } from "../utils/helpers";
 import { CompactAddCardModal } from "./CompactAddCardModal";
 import { EditCardModal } from "./EditCardModal";
-import { ConfirmDialog } from "./ConfirmDialog";
+import { DeleteCardConfirmDialog } from "./DeleteCardConfirmDialog";
 import { auth } from "../utils/auth";
 import { isSupabaseConfigured } from "../utils/supabase";
 import { QRCodeModal } from "./QRCodeModal";
@@ -822,9 +822,8 @@ export const AdminDashboard: React.FC = () => {
         )}
 
         {deletingCard && (
-          <ConfirmDialog
-            title="Delete Review Card"
-            message={`Are you sure you want to delete the review card for "${deletingCard.businessName}"? This action cannot be undone.`}
+          <DeleteCardConfirmDialog
+            businessName={deletingCard.businessName}
             onConfirm={handleDeleteCard}
             onCancel={() => setDeletingCard(null)}
           />
