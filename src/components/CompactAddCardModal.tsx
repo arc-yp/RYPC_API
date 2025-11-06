@@ -55,7 +55,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
   const [aiReviewData, setAiReviewData] = useState({
     starRating: 5,
     language: "English",
-    tone: "Friendly" as "Professional" | "Friendly" | "Casual" | "Grateful",
+    tone: "Professional" as "Professional" | "Friendly" | "Grateful",
     useCase: "Customer review" as
       | "Customer review"
       | "Student feedback"
@@ -284,7 +284,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
 
   const languageOptions = ["English", "Gujarati", "Hindi"];
 
-  const toneOptions = ["Friendly", "Professional", "Casual", "Grateful"];
+  const toneOptions = [ "Professional","Friendly", "Grateful"];
 
   const modelOptions = [
     "gemini-2.0-flash",

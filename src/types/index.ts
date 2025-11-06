@@ -12,9 +12,7 @@ export interface ReviewCard {
   geminiApiKey?: string;
   geminiModel?: string;
   viewCount?: number;
-  // Whether the card is active (visible/usable). Newly created cards default to true.
   active?: boolean;
-  // When the card should automatically become inactive. ISO string timestamp.
   expiresAt?: string;
   createdAt: string;
   updatedAt: string;

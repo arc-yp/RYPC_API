@@ -55,7 +55,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedTone] = useState<
     "Professional" | "Friendly" | "Casual" | "Grateful"
-  >("Friendly");
+  >("Professional");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -67,7 +67,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
 
   useEffect(() => {
     // Generate initial review when component loads
-    generateReviewForRating(5, "English", "Friendly", []);
+    generateReviewForRating(5, "English", "Professional", []);
 
     // Increment view count when component loads
     const incrementView = async () => {
@@ -92,7 +92,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const generateReviewForRating = async (
     rating: number,
     language?: string,
-    tone?: "Professional" | "Friendly" | "Casual" | "Grateful",
+    tone?: "Professional" | "Friendly" | "Grateful",
     services?: string[]
   ) => {
     setIsGenerating(true);
@@ -119,7 +119,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         .join(", ");
       const fallback = `${rating} star experience at ${card.businessName}${
         includedServices ? " for " + includedServices : ""
-      }. Great service and friendly staff.`;
+      }.`;
       setCurrentReview(fallback);
     } finally {
       setIsGenerating(false);

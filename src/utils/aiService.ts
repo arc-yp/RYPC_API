@@ -8,7 +8,7 @@ export interface ReviewRequest {
   selectedServices?: string[];
   starRating: number;
   language?: string;
-  tone?: "Professional" | "Friendly" | "Casual" | "Grateful";
+  tone?: "Professional" | "Friendly" | "Grateful";
   useCase?: "Customer review" | "Student feedback" | "Patient experience";
   geminiApiKey?: string;
   geminiModel?: string;
@@ -122,7 +122,7 @@ export class AIReviewService {
     const languageOptions = ["English", "Gujarati", "Hindi"];
     const selectedLanguage =
       language || languageOptions[Math.floor(Math.random() * languageOptions.length)];
-    const selectedTone = tone || "Friendly";
+    const selectedTone = tone || "Professional";
     const selectedUseCase = useCase || "Customer review";
 
     let serviceInstructions = "";
