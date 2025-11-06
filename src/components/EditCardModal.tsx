@@ -681,14 +681,14 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                 >
                   Cancel
                 </button>
-                {/* <button
+                 <button
                   type="button"
                   onClick={() => setShowAiPanel(!showAiPanel)}
                   className="px-4 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors duration-200 flex items-center"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   AI Tools
-                </button> */}
+                </button> 
                 <button
                   type="submit"
                   disabled={isLoading}
