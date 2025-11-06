@@ -223,19 +223,27 @@ ${
           // Log token usage only for successful unique review
           if (response.usageMetadata) {
             console.log(`📊 Token Usage (Attempt ${attempt + 1}):`);
+            console.log(`   ⭐ Star Rating: ${starRating}/5`);
+            console.log(`   🌐 Language: ${selectedLanguage}`);
+            console.log(`   🎭 Tone: ${selectedTone}`);
+            console.log(`   📝 Use Case: ${selectedUseCase}`);
+            console.log(`   ---`);
             console.log(
-              `   Prompt Tokens: ${response.usageMetadata.promptTokenCount}`
+              `   📤 Prompt Tokens: ${response.usageMetadata.promptTokenCount}`
             );
             console.log(
-              `   Response Tokens: ${response.usageMetadata.candidatesTokenCount}`
+              `   📥 Response Tokens: ${response.usageMetadata.candidatesTokenCount}`
             );
             console.log(
-              `   Total Tokens: ${response.usageMetadata.totalTokenCount}`
+              `   📊 Total Tokens: ${response.usageMetadata.totalTokenCount}`
             );
             console.log(
-              `   Generated Review Length: ${reviewText.length} characters`
+              `   📏 Generated Review Length: ${reviewText.length} characters`
             );
-            console.log(`   Review: "${reviewText.substring(0, 50)}..."`);
+            console.log(`   ---`);
+            console.log(
+              `   📄 Review Preview: "${reviewText.substring(0, 80)}..."`
+            );
           }
 
           this.markReviewAsUsed(reviewText);
