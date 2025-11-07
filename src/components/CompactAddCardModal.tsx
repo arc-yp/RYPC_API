@@ -5,7 +5,6 @@ import {
   Building2,
   AlertCircle,
   Sparkles,
-  Wand2,
   RefreshCw,
   Key,
   Bot,
@@ -62,13 +61,11 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
       | "Patient experience",
     highlights: "",
     generatedReview: "",
-    generatedTagline: "",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
-  const [isGeneratingTagline, setIsGeneratingTagline] = useState(false);
   const [showAiPanel] = useState(false); // AI panel currently disabled; keep state for future enablement
 
   const handleInputChange = (field: string, value: string | string[]) => {
@@ -149,45 +146,6 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
       }));
     } finally {
       setIsGeneratingReview(false);
-    }
-  };
-
-  const generateTagline = async () => {
-    if (!formData.businessName || !formData.category || !formData.type) {
-      setErrors((prev) => ({
-        ...prev,
-        tagline: "Please fill business name, category, and type first",
-      }));
-      return;
-    }
-
-    if (!formData.geminiApiKey) {
-      setErrors((prev) => ({
-        ...prev,
-        tagline: "Please provide Gemini API key first",
-      }));
-      return;
-    }
-    setIsGeneratingTagline(true);
-    setErrors((prev) => ({ ...prev, tagline: "" }));
-
-    try {
-      const tagline = await aiService.generateTagline(
-        formData.businessName,
-        formData.category,
-        formData.type,
-        formData.geminiApiKey,
-        formData.geminiModel
-      );
-      setAiReviewData((prev) => ({ ...prev, generatedTagline: tagline }));
-    } catch (error) {
-      console.error("Error generating tagline:", error);
-      setErrors((prev) => ({
-        ...prev,
-        tagline: "Failed to generate tagline. Please try again.",
-      }));
-    } finally {
-      setIsGeneratingTagline(false);
     }
   };
 
@@ -284,7 +242,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
 
   const languageOptions = ["English", "Gujarati", "Hindi"];
 
-  const toneOptions = [ "Professional","Friendly", "Grateful"];
+  const toneOptions = ["Professional", "Friendly", "Grateful"];
 
   const modelOptions = [
     "gemini-2.0-flash",
@@ -708,14 +666,14 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
                 >
                   Cancel
                 </button>
-               <button
+                <button
                   type="button"
                   onClick={() => setShowAiPanel(!showAiPanel)}
                   className="px-4 py-3 bg-purple-100 text-purple-700 rounded-lg hover:bg-purple-200 transition-colors duration-200 flex items-center"
                 >
                   <Sparkles className="w-4 h-4 mr-2" />
                   AI Tools
-                </button> 
+                </button>
                 <button
                   type="submit"
                   disabled={isLoading}
@@ -736,44 +694,6 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
                     <Sparkles className="w-5 h-5 mr-2 text-purple-600" />
                     AI Tools
                   </h3>
-                </div>
-
-                {/* Tagline Generator */}
-                <div className="bg-white rounded-lg p-4 border border-gray-200">
-                  <h4 className="font-medium text-gray-800 mb-3">
-                    Generate Tagline
-                  </h4>
-                  <button
-                    onClick={generateTagline}
-                    disabled={
-                      isGeneratingTagline ||
-                      !formData.businessName ||
-                      !formData.category ||
-                      !formData.type
-                    }
-                    className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:from-purple-700 hover:to-pink-700 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {isGeneratingTagline ? (
-                      <RefreshCw className="w-4 h-4 animate-spin" />
-                    ) : (
-                      <Wand2 className="w-4 h-4" />
-                    )}
-                    {isGeneratingTagline ? "Generating..." : "Generate Tagline"}
-                  </button>
-
-                  {aiReviewData.generatedTagline && (
-                    <div className="mt-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
-                      <p className="text-sm text-purple-800 font-medium">
-                        "{aiReviewData.generatedTagline}"
-                      </p>
-                    </div>
-                  )}
-
-                  {errors.tagline && (
-                    <p className="mt-2 text-sm text-red-600">
-                      {errors.tagline}
-                    </p>
-                  )}
                 </div>
 
                 {/* Review Generator */}

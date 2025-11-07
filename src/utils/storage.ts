@@ -4,6 +4,10 @@ import { supabase, isSupabaseConfigured } from './supabase';
 const STORAGE_KEY = 'scc_review_cards';
 const DELETED_IDS_KEY = 'scc_review_cards_deleted_ids'; // tombstones for deleted cards
 
+// In-memory caches to avoid duplicate fetches in React 18 Strict Mode
+const cardCache = new Map<string, ReviewCard | null>();
+const inFlightCardFetch = new Map<string, Promise<ReviewCard | null>>();
+
 // Helper function to validate UUID format
 const isValidUuid = (id: string): boolean => {
   const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
@@ -365,31 +369,55 @@ export const storage = {
 
   async getCardBySlug(slug: string): Promise<ReviewCard | null> {
     try {
+      // Serve from cache immediately if available
+      if (cardCache.has(slug)) {
+        const cached = cardCache.get(slug) ?? null;
+        console.log('Card served from cache:', slug);
+        return cached;
+      }
+
+      // If there is an in-flight request for the same slug, reuse it
+      const existing = inFlightCardFetch.get(slug);
+      if (existing) {
+        console.log('Reusing in-flight card fetch for slug:', slug);
+        return await existing;
+      }
+
       console.log('Looking for card with slug:', slug);
       
       // Try Supabase first if configured
       if (isSupabaseConfigured() && supabase) {
         try {
           console.log('Searching Supabase for card...');
-          const { data, error } = await supabase
+          const fetchPromise = (async (): Promise<ReviewCard | null> => {
+            const { data, error } = await supabase
             .from('review_cards')
             .select('*')
             .eq('slug', slug)
             .maybeSingle();
+            if (error) {
+              console.error('Supabase error, falling back to localStorage:', error);
+              return this._getLocalCardBySlug(slug);
+            }
 
-          if (error) {
-            console.error('Supabase error, falling back to localStorage:', error);
+            if (data) {
+              console.log('Card found in Supabase:', data.business_name);
+              return transformDbRowToCard(data);
+            }
+
+            console.log('Card not found in Supabase, checking localStorage...');
+            // If not found in Supabase, check localStorage
             return this._getLocalCardBySlug(slug);
-          }
+          })();
 
-          if (data) {
-            console.log('Card found in Supabase:', data.business_name);
-            return transformDbRowToCard(data);
-          }
-          
-          console.log('Card not found in Supabase, checking localStorage...');
-          // If not found in Supabase, check localStorage
-          return this._getLocalCardBySlug(slug);
+          // Track the in-flight request to deduplicate parallel calls
+          inFlightCardFetch.set(slug, fetchPromise);
+
+          const result = await fetchPromise;
+          // Cache the result for the remainder of the page session
+          cardCache.set(slug, result);
+          inFlightCardFetch.delete(slug);
+          return result;
         } catch (supabaseError) {
           console.error('Supabase connection failed, using localStorage:', supabaseError);
           return this._getLocalCardBySlug(slug);

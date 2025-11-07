@@ -30,7 +30,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedTone] = useState<
-    "Professional" | "Friendly" | "Casual" | "Grateful"
+    "Professional" | "Friendly" | "Grateful"
   >("Professional");
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
