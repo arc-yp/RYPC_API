@@ -130,7 +130,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         useCase: "Customer review",
         geminiApiKey: card.geminiApiKey,
         geminiModel: card.geminiModel,
-        allowServiceHighlight: card.highlightServices !== false,
+        allowServiceHighlight: card.highlightServices === true,
       });
       setCurrentReview(review.text);
     } catch (error) {

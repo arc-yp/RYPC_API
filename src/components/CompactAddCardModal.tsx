@@ -43,7 +43,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
     geminiApiKey: "",
     geminiModel: "gemini-2.0-flash",
     allowedLanguages: ["English", "Gujarati", "Hindi"] as string[], // NEW
-    highlightServices: true, // Admin permission: service bold highlighting enabled by default
+    highlightServices: false, // Default OFF: admin must enable explicitly
   });
   // Expiry duration state: number + unit
   const [expiryAmount, setExpiryAmount] = useState<number>(0); // 0 means no expiry
