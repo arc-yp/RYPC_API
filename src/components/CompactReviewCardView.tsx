@@ -29,9 +29,9 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const [currentReview, setCurrentReview] = useState("");
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
-  const [selectedTone] = useState<
-    "Professional" | "Friendly" | "Grateful"
-  >("Professional");
+  const [selectedTone] = useState<"Professional" | "Friendly" | "Grateful">(
+    "Professional"
+  );
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -109,7 +109,11 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     try {
       // If no services selected but services are available, randomly select one
       let servicesToUse = services || selectedServices;
-      if ((!servicesToUse || servicesToUse.length === 0) && card.services && card.services.length > 0) {
+      if (
+        (!servicesToUse || servicesToUse.length === 0) &&
+        card.services &&
+        card.services.length > 0
+      ) {
         const randomIndex = Math.floor(Math.random() * card.services.length);
         servicesToUse = [card.services[randomIndex]];
       }
@@ -126,6 +130,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         useCase: "Customer review",
         geminiApiKey: card.geminiApiKey,
         geminiModel: card.geminiModel,
+        allowServiceHighlight: card.highlightServices !== false,
       });
       setCurrentReview(review.text);
     } catch (error) {
@@ -176,7 +181,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const handleCopyAndRedirect = async () => {
     try {
       // Remove ** markers before copying (for plain text paste)
-      const plainText = currentReview.replace(/\*\*/g, '');
+      const plainText = currentReview.replace(/\*\*/g, "");
       await navigator.clipboard.writeText(plainText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -196,14 +201,22 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   };
 
   const renderReviewText = () => {
-    // Parse the review text to make **bold** text actually bold
+    // If admin disabled highlight, return plain text directly
+    if (card.highlightServices === false) {
+      return (
+        <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
+          {currentReview}
+        </blockquote>
+      );
+    }
+    // Parse the review text to make **bold** text actually bold when allowed
     const parts = currentReview.split(/(\*\*[^*]+\*\*)/g);
-    
+
     return (
       <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
         {parts.map((part, index) => {
           // Check if part is wrapped with **
-          if (part.startsWith('**') && part.endsWith('**')) {
+          if (part.startsWith("**") && part.endsWith("**")) {
             const boldText = part.slice(2, -2);
             return (
               <strong key={index} className="font-bold text-blue-700">
@@ -354,7 +367,9 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
                 <span>
                   {selectedLanguage} • {selectedRating}★
                 </span>
-                <span className="font-mono">{currentReview.replace(/\*\*/g, '').length} chars</span>
+                <span className="font-mono">
+                  {currentReview.replace(/\*\*/g, "").length} chars
+                </span>
               </div>
             )}
           </div>

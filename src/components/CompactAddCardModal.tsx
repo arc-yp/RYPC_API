@@ -43,6 +43,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
     geminiApiKey: "",
     geminiModel: "gemini-2.0-flash",
     allowedLanguages: ["English", "Gujarati", "Hindi"] as string[], // NEW
+    highlightServices: true, // Admin permission: service bold highlighting enabled by default
   });
   // Expiry duration state: number + unit
   const [expiryAmount, setExpiryAmount] = useState<number>(0); // 0 means no expiry
@@ -66,7 +67,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const [isGeneratingReview, setIsGeneratingReview] = useState(false);
-  const [showAiPanel] = useState(false); // AI panel currently disabled; keep state for future enablement
+  const [showAiPanel, setShowAiPanel] = useState(false); // AI panel currently disabled; keep state for future enablement
 
   const handleInputChange = (field: string, value: string | string[]) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -135,6 +136,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
         useCase: aiReviewData.useCase,
         geminiApiKey: formData.geminiApiKey,
         geminiModel: formData.geminiModel,
+        allowServiceHighlight: formData.highlightServices,
       });
 
       setAiReviewData((prev) => ({ ...prev, generatedReview: review.text }));
@@ -223,6 +225,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
         active: true,
         expiresAt,
         allowedLanguages: formData.allowedLanguages, // NEW
+        highlightServices: formData.highlightServices,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -655,6 +658,30 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
                     Select at least one language.
                   </p>
                 )}
+              </div>
+
+              {/* Service Highlight Permission (Admin) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Service Highlight Permission
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.highlightServices}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        highlightServices: e.target.checked,
+                      }))
+                    }
+                  />
+                  Show selected services in bold blue text in reviews
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Uncheck to keep service names plain (no emphasis or markdown
+                  markers).
+                </p>
               </div>
 
               {/* Actions */}

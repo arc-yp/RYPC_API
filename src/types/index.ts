@@ -17,6 +17,8 @@ export interface ReviewCard {
   createdAt: string;
   updatedAt: string;
   allowedLanguages?: string[]; // NEW
+  // Admin control: whether selected services should appear bold/blue in UI
+  highlightServices?: boolean; // default true when undefined
 }
 
 export interface ReviewTemplates {
