@@ -19,6 +19,7 @@ export interface GeneratedReview {
   hash: string;
   language: string;
   rating: number;
+  selectedServices?: string[];
 }
 
 // Store used review hashes to prevent duplicates
@@ -138,7 +139,10 @@ Customer specifically wants to highlight these services: ${selectedServices.join
 - Mention these services naturally in the review context
 - Don't list them generically, weave them into the experience narrative
 - Focus on how these specific aspects contributed to the ${starRating}-star experience
-- Use authentic language that reflects real customer experience with these services`;
+- Use authentic language that reflects real customer experience with these services
+- IMPORTANT: When mentioning any of these services (${selectedServices.join(
+        ", "
+      )}), wrap them with **double asterisks** like **service name** to make them bold in the final display`;
     }
 
     let languageInstruction = "";
@@ -252,6 +256,7 @@ ${
             hash: this.generateHash(reviewText),
             language: selectedLanguage,
             rating: starRating,
+            selectedServices: selectedServices,
           };
         }
 
@@ -319,6 +324,7 @@ ${
       hash: this.generateHash(selectedFallback),
       language: langKey,
       rating: starRating,
+      selectedServices: request.selectedServices,
     };
   }
 

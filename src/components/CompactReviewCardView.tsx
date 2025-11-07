@@ -107,12 +107,19 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   ) => {
     setIsGenerating(true);
     try {
+      // If no services selected but services are available, randomly select one
+      let servicesToUse = services || selectedServices;
+      if ((!servicesToUse || servicesToUse.length === 0) && card.services && card.services.length > 0) {
+        const randomIndex = Math.floor(Math.random() * card.services.length);
+        servicesToUse = [card.services[randomIndex]];
+      }
+
       const review = await aiService.generateReview({
         businessName: card.businessName,
         category: card.category,
         type: card.type,
         highlights: card.description,
-        selectedServices: services || selectedServices,
+        selectedServices: servicesToUse,
         starRating: rating,
         language: language || selectedLanguage,
         tone: tone || selectedTone,
@@ -168,7 +175,9 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
 
   const handleCopyAndRedirect = async () => {
     try {
-      await navigator.clipboard.writeText(currentReview);
+      // Remove ** markers before copying (for plain text paste)
+      const plainText = currentReview.replace(/\*\*/g, '');
+      await navigator.clipboard.writeText(plainText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
       window.location.href = card.googleMapsUrl;
@@ -186,11 +195,27 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     );
   };
 
-  const renderReviewText = () => (
-    <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
-      {currentReview}
-    </blockquote>
-  );
+  const renderReviewText = () => {
+    // Parse the review text to make **bold** text actually bold
+    const parts = currentReview.split(/(\*\*[^*]+\*\*)/g);
+    
+    return (
+      <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
+        {parts.map((part, index) => {
+          // Check if part is wrapped with **
+          if (part.startsWith('**') && part.endsWith('**')) {
+            const boldText = part.slice(2, -2);
+            return (
+              <strong key={index} className="font-bold text-blue-700">
+                {boldText}
+              </strong>
+            );
+          }
+          return <span key={index}>{part}</span>;
+        })}
+      </blockquote>
+    );
+  };
 
   useEffect(() => {
     // if allowed languages changed (unlikely after mount), keep valid selection
@@ -329,7 +354,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
                 <span>
                   {selectedLanguage} • {selectedRating}★
                 </span>
-                <span className="font-mono">{currentReview.length} chars</span>
+                <span className="font-mono">{currentReview.replace(/\*\*/g, '').length} chars</span>
               </div>
             )}
           </div>
