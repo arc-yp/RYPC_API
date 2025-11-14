@@ -1,10 +1,9 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   Copy,
   CheckCircle,
   Sparkles,
   RefreshCw,
-  Eye,
   Languages,
 } from "lucide-react";
 import { ReviewCard } from "../types";
@@ -13,6 +12,12 @@ import { SegmentedButtonGroup } from "./SegmentedButtonGroup";
 import { ServiceSelector } from "./ServiceSelector";
 import { aiService } from "../utils/aiService";
 import { storage } from "../utils/storage";
+import {
+  addSpellingMistakes,
+  parseReviewWithMistakes,
+  type Mistake,
+  type TextSegment,
+} from "../utils/mistakeGenerator";
 
 // Prevent double increments in React 18 Strict Mode
 // Track view increments per card id for this page load to avoid double increments in Strict Mode
@@ -27,6 +32,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
 }) => {
   // All hooks must be called before any early returns
   const [currentReview, setCurrentReview] = useState("");
+  const [mistakes, setMistakes] = useState<Mistake[]>([]);
   const [selectedRating, setSelectedRating] = useState(5);
   const [selectedLanguage, setSelectedLanguage] = useState("English");
   const [selectedTone] = useState<"Professional" | "Friendly" | "Grateful">(
@@ -35,69 +41,17 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
   const [copied, setCopied] = useState(false);
   const [isGenerating, setIsGenerating] = useState(false);
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewCount, setViewCount] = useState(card.viewCount || 0);
   const hasGeneratedInitialReview = useRef(false);
 
-  const languageOptions =
-    card.allowedLanguages && card.allowedLanguages.length > 0
-      ? card.allowedLanguages
-      : ["English", "Gujarati", "Hindi"]; // fallback
-
-  useEffect(() => {
-    // Generate initial review when component loads (only once, prevent double call in React Strict Mode)
-    if (!hasGeneratedInitialReview.current) {
-      hasGeneratedInitialReview.current = true;
-      generateReviewForRating(5, "English", "Professional", []);
-    }
-
-    // Increment view count when component loads
-    const incrementView = async () => {
-      // Guard: if we've already incremented this card during this page load, skip
-      if (hasIncrementedThisLoad[card.id]) return;
-
-      hasIncrementedThisLoad[card.id] = true;
-      try {
-        await storage.incrementViewCount(card.id);
-        const newViewCount = await storage.getViewCount(card.id);
-        setViewCount(newViewCount);
-      } catch (error) {
-        console.error("Failed to increment view count:", error);
-        // In case of error, allow retry on next render attempt
-        delete hasIncrementedThisLoad[card.id];
-      }
-    };
-
-    incrementView();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [card.id]);
-
-  // If the card is inactive, do not render the interactive review UI
-  if (card.active === false) {
-    return (
-      <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-6">
-        <div className="max-w-md w-full text-center bg-white rounded-xl border border-neutral-200 p-8 shadow-sm">
-          <h1 className="text-xl font-semibold text-neutral-800 mb-2">
-            {card.businessName}
-          </h1>
-          <p className="text-neutral-500 text-sm mb-4">
-            This review card is currently inactive.
-          </p>
-          <p className="text-neutral-400 text-xs">Please check back later.</p>
-          <h1 className="text-sm text-white mb-4">
-            Please! Contact Admin&nbsp;
-            <a
-              href="https://www.aireviewsystem.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="underline text-blue-400 hover:text-blue-600"
-            >
-              https://www.aireviewsystem.com/
-            </a>
-          </h1>
-        </div>
-      </div>
-    );
-  }
+  const languageOptions = useMemo(
+    () =>
+      card.allowedLanguages && card.allowedLanguages.length > 0
+        ? card.allowedLanguages
+        : ["English", "Gujarati", "Hindi"],
+    [card.allowedLanguages]
+  );
 
   const generateReviewForRating = async (
     rating: number,
@@ -132,7 +86,11 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         geminiModel: card.geminiModel,
         allowServiceHighlight: card.highlightServices === true,
       });
-      setCurrentReview(review.text);
+
+      // Add random spelling mistakes (1-3 mistakes)
+      const reviewWithMistakes = addSpellingMistakes(review.text);
+      setCurrentReview(reviewWithMistakes.text);
+      setMistakes(reviewWithMistakes.mistakes);
     } catch (error) {
       console.error("Failed to generate review:", error);
       // Use contextual fallback review
@@ -143,6 +101,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         includedServices ? " for " + includedServices : ""
       }.`;
       setCurrentReview(fallback);
+      setMistakes([]);
     } finally {
       setIsGenerating(false);
     }
@@ -180,8 +139,14 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
 
   const handleCopyAndRedirect = async () => {
     try {
-      // Remove ** markers before copying (for plain text paste)
+      // Copy the review WITH mistakes (current review as displayed)
       const plainText = currentReview.replace(/\*\*/g, "");
+
+      console.log("📋 Copying to clipboard:");
+      console.log("Review with mistakes:", currentReview);
+      console.log("Copied text:", plainText);
+      console.log("Number of mistakes:", mistakes.length);
+
       await navigator.clipboard.writeText(plainText);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
@@ -201,34 +166,80 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   };
 
   const renderReviewText = () => {
-    // If admin disabled highlight, return plain text directly
-    if (card.highlightServices === false) {
-      return (
-        <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
-          {currentReview}
-        </blockquote>
-      );
-    }
-    // Parse the review text to make **bold** text actually bold when allowed
-    const parts = currentReview.split(/(\*\*[^*]+\*\*)/g);
+    // Parse review into segments with mistakes highlighted
+    const segments = parseReviewWithMistakes(currentReview, mistakes);
 
     return (
       <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
-        {parts.map((part, index) => {
-          // Check if part is wrapped with **
-          if (part.startsWith("**") && part.endsWith("**")) {
-            const boldText = part.slice(2, -2);
+        {segments.map((segment: TextSegment, segmentIndex: number) => {
+          // Handle mistake segments - highlight in red
+          if (segment.isMistake) {
             return (
-              <strong key={index} className="font-bold text-blue-700">
-                {boldText}
-              </strong>
+              <span
+                key={segmentIndex}
+                className="text-red-600 font-medium underline decoration-red-600 decoration-wavy cursor-help"
+                title={`Correct spelling: "${segment.original}"`}
+              >
+                {segment.text}
+              </span>
             );
           }
-          return <span key={index}>{part}</span>;
+
+          // Handle normal text with possible service highlighting
+          if (card.highlightServices === false) {
+            return <span key={segmentIndex}>{segment.text}</span>;
+          }
+
+          // Parse for **bold** service highlights
+          const parts = segment.text.split(/(\*\*[^*]+\*\*)/g);
+
+          return (
+            <span key={segmentIndex}>
+              {parts.map((part, partIndex) => {
+                if (part.startsWith("**") && part.endsWith("**")) {
+                  const boldText = part.slice(2, -2);
+                  return (
+                    <strong key={partIndex} className="font-bold text-blue-700">
+                      {boldText}
+                    </strong>
+                  );
+                }
+                return <span key={partIndex}>{part}</span>;
+              })}
+            </span>
+          );
         })}
       </blockquote>
     );
   };
+
+  useEffect(() => {
+    // Generate initial review when component loads (only once, prevent double call in React Strict Mode)
+    if (!hasGeneratedInitialReview.current) {
+      hasGeneratedInitialReview.current = true;
+      generateReviewForRating(5, "English", "Professional", []);
+    }
+
+    // Increment view count when component loads
+    const incrementView = async () => {
+      // Guard: if we've already incremented this card during this page load, skip
+      if (hasIncrementedThisLoad[card.id]) return;
+
+      hasIncrementedThisLoad[card.id] = true;
+      try {
+        await storage.incrementViewCount(card.id);
+        const newViewCount = await storage.getViewCount(card.id);
+        setViewCount(newViewCount);
+      } catch (error) {
+        console.error("Failed to increment view count:", error);
+        // In case of error, allow retry on next render attempt
+        delete hasIncrementedThisLoad[card.id];
+      }
+    };
+
+    incrementView();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [card.id]);
 
   useEffect(() => {
     // if allowed languages changed (unlikely after mount), keep valid selection
@@ -236,6 +247,34 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
       setSelectedLanguage(languageOptions[0]);
     }
   }, [languageOptions, selectedLanguage]);
+
+  // If the card is inactive, do not render the interactive review UI
+  if (card.active === false) {
+    return (
+      <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-6">
+        <div className="max-w-md w-full text-center bg-white rounded-xl border border-neutral-200 p-8 shadow-sm">
+          <h1 className="text-xl font-semibold text-neutral-800 mb-2">
+            {card.businessName}
+          </h1>
+          <p className="text-neutral-500 text-sm mb-4">
+            This review card is currently inactive.
+          </p>
+          <p className="text-neutral-400 text-xs">Please check back later.</p>
+          <h1 className="text-sm text-white mb-4">
+            Please! Contact Admin&nbsp;
+            <a
+              href="https://www.aireviewsystem.com/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline text-blue-400 hover:text-blue-600"
+            >
+              https://www.aireviewsystem.com/
+            </a>
+          </h1>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="w-full min-h-screen flex items-center justify-center bg-neutral-50 p-4 sm:p-6 md:p-10 lg:p-16 bg-gradient-to-br from-blue-200 via-purple-200 to-slate-200">
@@ -343,6 +382,20 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
 
           {/* Review Text */}
           <div className="mb-3">
+            {/* Mistakes indicator */}
+            {/* {mistakes.length > 0 && !isGenerating && (
+              <div className="mb-2 flex flex-col gap-1">
+                <div className="flex items-center gap-2 text-xs text-red-600">
+                  <span className="bg-red-50 px-2 py-1 rounded border border-red-200">
+                    {mistakes.length} spelling mistake{mistakes.length > 1 ? 's' : ''} (hover to see correct spelling)
+                  </span>
+                </div>
+                <div className="text-[10px] text-blue-700 bg-blue-50 px-2 py-1 rounded border border-blue-200 inline-block">
+                  ℹ️ These mistakes will appear in your copied review to make it look more natural and human-written.
+                </div>
+              </div>
+            )} */}
+
             <div className="rounded-xl p-4 border border-neutral-500 bg-neutral-50 min-h-[110px] flex items-center">
               {isGenerating ? (
                 <div className="flex items-center justify-center w-full">

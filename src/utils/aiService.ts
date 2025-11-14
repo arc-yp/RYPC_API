@@ -223,12 +223,6 @@ ${
         const response = await result.response;
         const reviewText = response.text().trim();
 
-        // // Validate constraints
-        // if (!this.validateReview(reviewText, selectedLanguage)) {
-        //   console.log(`Attempt ${attempt + 1}: Validation failed, retrying...`);
-        //   continue;
-        // }
-
         // Uniqueness
         if (this.isReviewUnique(reviewText)) {
           // Log token usage only for successful unique review
@@ -284,6 +278,10 @@ ${
   private getFallbackReview(request: ReviewRequest): GeneratedReview {
     const { businessName, starRating, language } = request;
 
+// ❌ Gemini API key is missing or invalid
+// ❌ AI generation fails after all retries (5 attempts)
+// ❌ Network errors or API errors occur
+// ❌ All generated reviews are duplicates
     const fallbacks: Record<number, Record<string, string[]>> = {
       4: {
         English: [
