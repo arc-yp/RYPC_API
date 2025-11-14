@@ -87,10 +87,15 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         allowServiceHighlight: card.highlightServices === true,
       });
 
-      // Add random spelling mistakes (1-3 mistakes)
-      const reviewWithMistakes = addSpellingMistakes(review.text);
-      setCurrentReview(reviewWithMistakes.text);
-      setMistakes(reviewWithMistakes.mistakes);
+      // Optionally add random spelling mistakes (1-3 mistakes) if admin allows
+      if (card.allowSpellingMistakes === true) {
+        const reviewWithMistakes = addSpellingMistakes(review.text);
+        setCurrentReview(reviewWithMistakes.text);
+        setMistakes(reviewWithMistakes.mistakes);
+      } else {
+        setCurrentReview(review.text);
+        setMistakes([]);
+      }
     } catch (error) {
       console.error("Failed to generate review:", error);
       // Use contextual fallback review
@@ -166,8 +171,11 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   };
 
   const renderReviewText = () => {
-    // Parse review into segments with mistakes highlighted
-    const segments = parseReviewWithMistakes(currentReview, mistakes);
+    // Parse review into segments with mistakes highlighted (only if present)
+    const segments = parseReviewWithMistakes(
+      currentReview,
+      card.allowSpellingMistakes === true ? mistakes : []
+    );
 
     return (
       <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">

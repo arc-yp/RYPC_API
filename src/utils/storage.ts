@@ -37,6 +37,8 @@ const transformDbRowToCard = (row: any): ReviewCard => ({
   allowedLanguages: row.allowed_languages || ["English", "Gujarati", "Hindi"], // NEW
   highlightServices:
     typeof row.highlight_services === "boolean" ? row.highlight_services : true,
+  allowSpellingMistakes:
+    typeof row.allow_spelling_mistakes === "boolean" ? row.allow_spelling_mistakes : false,
 });
 
 // Transform ReviewCard to database insert format
@@ -65,6 +67,10 @@ const transformCardToDbInsert = (card: ReviewCard) => {
       typeof card.highlightServices === "boolean"
         ? card.highlightServices
         : true,
+    allow_spelling_mistakes:
+      typeof card.allowSpellingMistakes === "boolean"
+        ? card.allowSpellingMistakes
+        : false,
     created_at: card.createdAt || new Date().toISOString(),
     updated_at: card.updatedAt || new Date().toISOString(),
   };
@@ -96,6 +102,10 @@ const transformCardToDbUpdate = (card: ReviewCard) => ({
   allowed_languages: card.allowedLanguages || ["English", "Gujarati", "Hindi"], // NEW
   highlight_services:
     typeof card.highlightServices === "boolean" ? card.highlightServices : true,
+  allow_spelling_mistakes:
+    typeof card.allowSpellingMistakes === "boolean"
+      ? card.allowSpellingMistakes
+      : false,
   updated_at: new Date().toISOString(),
 });
 

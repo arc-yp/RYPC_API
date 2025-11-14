@@ -44,6 +44,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
     geminiModel: "gemini-2.0-flash",
     allowedLanguages: ["English", "Gujarati", "Hindi"] as string[], // NEW
     highlightServices: false, // Default OFF: admin must enable explicitly
+    allowSpellingMistakes: false, // Default OFF per requirement
   });
   // Expiry duration state: number + unit
   const [expiryAmount, setExpiryAmount] = useState<number>(0); // 0 means no expiry
@@ -226,6 +227,7 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
         expiresAt,
         allowedLanguages: formData.allowedLanguages, // NEW
         highlightServices: formData.highlightServices,
+        allowSpellingMistakes: formData.allowSpellingMistakes,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -681,6 +683,30 @@ export const CompactAddCardModal: React.FC<CompactAddCardModalProps> = ({
                 <p className="text-xs text-gray-500 mt-1">
                   Uncheck to keep service names plain (no emphasis or markdown
                   markers).
+                </p>
+              </div>
+
+              {/* Spelling Mistake Highlight (Admin) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Spelling Mistake Highlight
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowSpellingMistakes}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        allowSpellingMistakes: e.target.checked,
+                      }))
+                    }
+                  />
+                  Show subtle red underlined spelling mistakes in reviews
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Default OFF. When enabled, generated reviews include a few
+                  human-like spelling mistakes highlighted in red.
                 </p>
               </div>
 

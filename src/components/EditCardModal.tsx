@@ -41,6 +41,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
     geminiModel: card.geminiModel || "gemini-2.0-flash",
     allowedLanguages: card.allowedLanguages || ["English", "Gujarati", "Hindi"], // NEW
     highlightServices: card.highlightServices !== false, // Admin toggle - default true
+    allowSpellingMistakes: card.allowSpellingMistakes === true ? true : false, // default OFF
   });
   // Existing expiry and new duration inputs
   const existingExpiry = card.expiresAt ? new Date(card.expiresAt) : null;
@@ -199,6 +200,7 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
         updatedAt: new Date().toISOString(),
         allowedLanguages: formData.allowedLanguages, // NEW
         highlightServices: formData.highlightServices,
+        allowSpellingMistakes: formData.allowSpellingMistakes,
       };
 
       // Determine new expiresAt
@@ -654,6 +656,29 @@ export const EditCardModal: React.FC<EditCardModalProps> = ({
                 <p className="text-xs text-gray-500 mt-1">
                   When unchecked, services will not be emphasized and the AI
                   won't add markdown markers.
+                </p>
+              </div>
+
+              {/* Spelling Mistake Highlight (Admin) */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Spelling Mistake Highlight
+                </label>
+                <label className="inline-flex items-center gap-2 text-sm text-gray-700">
+                  <input
+                    type="checkbox"
+                    checked={formData.allowSpellingMistakes}
+                    onChange={(e) =>
+                      setFormData((prev) => ({
+                        ...prev,
+                        allowSpellingMistakes: e.target.checked,
+                      }))
+                    }
+                  />
+                  Show subtle red underlined spelling mistakes in reviews
+                </label>
+                <p className="text-xs text-gray-500 mt-1">
+                  Default OFF. Enable to make reviews feel more human.
                 </p>
               </div>
 
