@@ -87,15 +87,10 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
         allowServiceHighlight: card.highlightServices === true,
       });
 
-      // Optionally add random spelling mistakes (1-3 mistakes) if admin allows
-      if (card.allowSpellingMistakes === true) {
-        const reviewWithMistakes = addSpellingMistakes(review.text);
-        setCurrentReview(reviewWithMistakes.text);
-        setMistakes(reviewWithMistakes.mistakes);
-      } else {
-        setCurrentReview(review.text);
-        setMistakes([]);
-      }
+      // Always inject a few random spelling mistakes (1-3). Highlight depends on toggle.
+      const reviewWithMistakes = addSpellingMistakes(review.text);
+      setCurrentReview(reviewWithMistakes.text);
+      setMistakes(reviewWithMistakes.mistakes);
     } catch (error) {
       console.error("Failed to generate review:", error);
       // Use contextual fallback review
@@ -171,26 +166,27 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   };
 
   const renderReviewText = () => {
-    // Parse review into segments with mistakes highlighted (only if present)
-    const segments = parseReviewWithMistakes(
-      currentReview,
-      card.allowSpellingMistakes === true ? mistakes : []
-    );
+    // Parse full review including mistakes. Styling applied conditionally.
+    const segments = parseReviewWithMistakes(currentReview, mistakes);
 
     return (
       <blockquote className="text-gray-800 text-sm leading-relaxed whitespace-pre-line">
         {segments.map((segment: TextSegment, segmentIndex: number) => {
-          // Handle mistake segments - highlight in red
+          // Handle mistake segments: highlight only if admin toggle ON
           if (segment.isMistake) {
-            return (
-              <span
-                key={segmentIndex}
-                className="text-red-600 font-medium underline decoration-red-600 decoration-wavy cursor-help"
-                title={`Correct spelling: "${segment.original}"`}
-              >
-                {segment.text}
-              </span>
-            );
+            if (card.allowSpellingMistakes === true) {
+              return (
+                <span
+                  key={segmentIndex}
+                  className="text-red-600 font-medium underline decoration-red-600 decoration-wavy cursor-help"
+                  title={`Correct spelling: "${segment.original}"`}
+                >
+                  {segment.text}
+                </span>
+              );
+            }
+            // Toggle OFF: show incorrect word plainly (still human-like)
+            return <span key={segmentIndex}>{segment.text}</span>;
           }
 
           // Handle normal text with possible service highlighting

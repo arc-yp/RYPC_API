@@ -1,31 +1,32 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "";
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || "";
 
 // Only create client if environment variables are available
-export const supabase = supabaseUrl && supabaseAnonKey 
-  ? createClient(supabaseUrl, supabaseAnonKey, {
-      auth: {
-        persistSession: false // Disable auth since we're using local auth
-      }
-    })
-  : null;
+export const supabase =
+  supabaseUrl && supabaseAnonKey
+    ? createClient(supabaseUrl, supabaseAnonKey, {
+        auth: {
+          persistSession: false, // Disable auth since we're using local auth
+        },
+      })
+    : null;
 
 export const isSupabaseConfigured = () => {
   const isConfigured = !!(
-    supabaseUrl && 
-    supabaseAnonKey && 
-    supabaseUrl !== 'your_supabase_project_url_here' &&
-    supabaseUrl.includes('supabase.co')
+    supabaseUrl &&
+    supabaseAnonKey &&
+    supabaseUrl !== "your_supabase_project_url_here" &&
+    supabaseUrl.includes("supabase.co")
   );
-  
+
   if (isConfigured) {
-    console.log('Supabase is properly configured');
+    console.log("Supabase is properly configured");
   } else {
-    console.log('Supabase not configured - using localStorage only');
+    console.log("Supabase not configured - using localStorage only");
   }
-  
+
   return isConfigured;
 };
 
@@ -37,26 +38,29 @@ export const testSupabaseConnection = async (): Promise<boolean> => {
 
   try {
     // Add a timeout to prevent hanging
-    const timeoutPromise = new Promise((_, reject) => 
-      setTimeout(() => reject(new Error('Connection timeout')), 5000)
+    const timeoutPromise = new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Connection timeout")), 5000)
     );
-    
+
     const connectionPromise = supabase
-      .from('review_cards')
-      .select('count')
+      .from("review_cards")
+      .select("count")
       .limit(1);
-    
-    const { data, error } = await Promise.race([connectionPromise, timeoutPromise]) as any;
-    
+
+    const { data, error } = (await Promise.race([
+      connectionPromise,
+      timeoutPromise,
+    ])) as any;
+
     if (error) {
-      console.error('Supabase connection test failed:', error);
+      console.error("Supabase connection test failed:", error);
       return false;
     }
-    
-    console.log('Supabase connection test successful');
+
+    console.log("Supabase connection test successful");
     return true;
   } catch (error) {
-    console.error('Supabase connection test error:', error);
+    console.error("Supabase connection test error:", error);
     return false;
   }
 };
@@ -81,9 +85,9 @@ export interface Database {
           gemini_model: string | null;
           created_at: string;
           updated_at: string;
-          view_count?: number | null;        // ensure optional
+          view_count?: number | null; // ensure optional
           active?: boolean | null;
-            expires_at?: string | null;
+          expires_at?: string | null;
           allowed_languages?: string[] | null; // NEW
           allow_spelling_mistakes?: boolean | null; // NEW
           highlight_services?: boolean | null; // keep explicit

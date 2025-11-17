@@ -38,7 +38,9 @@ const transformDbRowToCard = (row: any): ReviewCard => ({
   highlightServices:
     typeof row.highlight_services === "boolean" ? row.highlight_services : true,
   allowSpellingMistakes:
-    typeof row.allow_spelling_mistakes === "boolean" ? row.allow_spelling_mistakes : false,
+    typeof row.allow_spelling_mistakes === "boolean"
+      ? row.allow_spelling_mistakes
+      : false,
 });
 
 // Transform ReviewCard to database insert format
@@ -227,15 +229,13 @@ export const storage = {
             // Fire and forget update to Supabase to persist deactivation
             if (isSupabaseConfigured() && supabase) {
               try {
-                await supabase
-                  .from("review_cards")
-                  .upsert(
-                    expiredActiveCards.map((c) => ({
-                      id: c.id,
-                      active: false,
-                      updated_at: new Date().toISOString(),
-                    }))
-                  );
+                await supabase.from("review_cards").upsert(
+                  expiredActiveCards.map((c) => ({
+                    id: c.id,
+                    active: false,
+                    updated_at: new Date().toISOString(),
+                  }))
+                );
               } catch (e) {
                 console.warn("Failed to persist expiry deactivations:", e);
               }
@@ -656,15 +656,13 @@ export const storage = {
           card.active = false;
         }
         try {
-          await supabase
-            .from("review_cards")
-            .upsert(
-              expiredActiveCards.map((c) => ({
-                id: c.id,
-                active: false,
-                updated_at: new Date().toISOString(),
-              }))
-            );
+          await supabase.from("review_cards").upsert(
+            expiredActiveCards.map((c) => ({
+              id: c.id,
+              active: false,
+              updated_at: new Date().toISOString(),
+            }))
+          );
         } catch (e) {
           console.warn(
             "Failed to persist expiry deactivations during sync:",
