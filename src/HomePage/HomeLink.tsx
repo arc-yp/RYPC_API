@@ -8,6 +8,7 @@ import Pricing from "./Pricing";
 import LeadForm from "./LeadForm";
 import FAQ from "./FAQ";
 import Footer from "./Footer";
+import TestimonialsGallery from "./TestimonialsGallery";
 
 function HomeLink() {
   return (
@@ -23,6 +24,9 @@ function HomeLink() {
         </section>
         <section id="features">
           <Features />
+        </section>
+        <section id="testimonials-gallery">
+          <TestimonialsGallery />
         </section>
         <section id="testimonials">
           <Testimonials />
