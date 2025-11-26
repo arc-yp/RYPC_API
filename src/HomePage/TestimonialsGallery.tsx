@@ -20,7 +20,7 @@ const testimonialsData: Testimonial[] = [
     businessCategory: "Health & Medical",
     personName: "Dr. Harshal Kheni",
     customerTitle: "MBBS, PGDCC, PGDCD",
-    businessLogo: "/public/SocialMedia Data/Aura H 360/logo.png",
+    businessLogo: "/SocialMedia Data/Aura H 360/logo.png",
     customerImage: "/SocialMedia Data/Aura H 360/Photo.jpg",
     review:
       "Aurah 360's online trust grew rapidly - AI Review System gave us a smooth and intelligent way to engage clients post-treatment.",
