@@ -168,10 +168,10 @@ const ArsPage = () => {
                 <div className="flex items-center group">
                   <div className="flex -space-x-2 mr-3">
                   {[
-                    "/testimonials/smit hospital.png",
-                    "/testimonials/Dr harshal kheni.jpg",
-                    "/testimonials/dr jaydev dhameliya.jpg",
-                    "/testimonials/bina- krishnaa tourism.png"
+                    "/testimonials/smit hospital.webp",
+                    "/testimonials/Dr harshal kheni.webp",
+                    "/testimonials/dr jaydev dhameliya.webp",
+                    "/testimonials/bina- krishnaa tourism.webp",
                   ].map((src, i) => (
                     <img
                     key={i}
