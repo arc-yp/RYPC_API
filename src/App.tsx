@@ -28,6 +28,7 @@ import {
   ReviewStoreLayout,
   ReviewDashboard,
   ReviewCategoryPage,
+  ReviewSearchPage,
 } from "./components/ReviewStore";
 
 ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
@@ -79,6 +80,7 @@ function App() {
       {/* Generated Reviews Store with Sidebar */}
       <Route path="/review" element={<ReviewStoreLayout />}>
         <Route index element={<ReviewDashboard />} />
+        <Route path="search" element={<ReviewSearchPage />} />
         <Route path=":categoryName" element={<ReviewCategoryPage />} />
       </Route>
 

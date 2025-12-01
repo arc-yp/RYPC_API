@@ -2,7 +2,14 @@ import React, { useEffect, useState, useMemo } from "react";
 import { Link, useLocation, Outlet } from "react-router-dom";
 import { reviewStore } from "./reviewStore";
 import { GeneratedReviewRecord } from "../../types";
-import { LayoutDashboard, FolderOpen, Database, Menu, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  FolderOpen,
+  Database,
+  Menu,
+  X,
+  Search,
+} from "lucide-react";
 
 /**
  * Layout with Sidebar for Review Store
@@ -80,6 +87,23 @@ export const ReviewStoreLayout: React.FC = () => {
           <LayoutDashboard className="w-5 h-5" />
           <span className="font-medium">Dashboard</span>
           {isActive("/review") && (
+            <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
+          )}
+        </Link>
+
+        {/* Search Link */}
+        <Link
+          to="/review/search"
+          onClick={() => setSidebarOpen(false)}
+          className={`flex items-center gap-3 px-4 py-3 rounded-lg mb-2 transition-all ${
+            isActive("/review/search")
+              ? "bg-indigo-600 text-white shadow-md"
+              : "text-slate-700 hover:bg-slate-100"
+          }`}
+        >
+          <Search className="w-5 h-5" />
+          <span className="font-medium">Search</span>
+          {isActive("/review/search") && (
             <div className="ml-auto w-1.5 h-1.5 bg-white rounded-full animate-pulse" />
           )}
         </Link>
