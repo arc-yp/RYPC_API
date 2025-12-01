@@ -9,7 +9,7 @@ const Pricing = () => {
       <div className="container mx-auto px-6 relative z-10">
         {/* Decorative Festival Image (easily repositionable) */}
         {/* <img
-          src="/navratri.png"
+          src="/navratri.webp"
           alt="Decorative festive"
           className="pointer-events-none select-none absolute top-[6%] left-4 w-40 sm:w-58 md:left-[6%] md:-top-[8%] md:w-56 lg:w-72 "
         /> */}

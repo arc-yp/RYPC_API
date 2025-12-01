@@ -351,7 +351,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
               {card.location && (
                 <div className="mt-1 relative group flex items-start sm:items-center gap-0 w-full">
                   <img
-                    src="/map.png"
+                    src="/map.webp"
                     alt="Map icon"
                     className="w-6 h-6 sm:w-6 sm:h-6 object-contain shrink-0 mt-0 sm:mt-0"
                   />

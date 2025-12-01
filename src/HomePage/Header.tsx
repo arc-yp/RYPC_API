@@ -67,7 +67,7 @@ const Header = () => {
             <div className="flex items-center group cursor-pointer" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
               <div className="relative flex items-center w-44 h-26 transform transition-all duration-300 group-hover:scale-105">
                 <img 
-                  src="/arslogo.png" 
+                  src="/arslogo.webp" 
                   alt="AI Review System Logo" 
                   className="w-[280px] h-[180px] object-contain transition-all duration-300 filter group-hover:brightness-110"
                   onError={(e) => {

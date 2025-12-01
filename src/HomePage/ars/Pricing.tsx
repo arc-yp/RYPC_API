@@ -10,7 +10,7 @@ const Pricing = () => {
       <div className="absolute top-0 left-0 w-full flex justify-center z-20 pointer-events-none">
         <div className="flex items-center gap-2 sm:gap-4 bg-gradient-to-r from-yellow-400 via-pink-300 to-orange-400 px-4 sm:px-8 py-3 sm:py-4 rounded-b-2xl sm:rounded-b-3xl shadow-lg border-b-4 border-yellow-500">
           <img
-            src="/diwali-lamp.png"
+            src="/diwali-lamp.webp"
             alt="Diwali Lamp"
             className="w-10 h-10 sm:w-14 sm:h-14 mr-1 sm:mr-2"
           />
@@ -20,7 +20,7 @@ const Pricing = () => {
             <Sparkles className="w-4 h-4 sm:w-6 sm:h-6 text-white animate-pulse" />
           </span>
           <img
-            src="/diwali-lamp.png"
+            src="/diwali-lamp.webp"
             alt="Diwali Lamp"
             className="w-10 h-10 sm:w-14 sm:h-14 ml-1 sm:ml-2"
           />
@@ -186,12 +186,12 @@ const Pricing = () => {
 
       {/* Festive floating lamps at corners */}
       <img
-        src="/diwali-lamp.png"
+        src="/diwali-lamp.webp"
         alt="Lamp"
         className="absolute bottom-3 left-3 sm:bottom-6 sm:left-6 w-10 h-10 sm:w-16 sm:h-16 opacity-80 pointer-events-none"
       />
       <img
-        src="/diwali-lamp.png"
+        src="/diwali-lamp.webp"
         alt="Lamp"
         className="absolute bottom-3 right-3 sm:bottom-6 sm:right-6 w-10 h-10 sm:w-16 sm:h-16 opacity-80 pointer-events-none"
       />

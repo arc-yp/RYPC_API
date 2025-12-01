@@ -20,8 +20,8 @@ const testimonialsData: Testimonial[] = [
     businessCategory: "Health & Medical",
     personName: "Dr. Harshal Kheni",
     customerTitle: "MBBS, PGDCC, PGDCD",
-    businessLogo: "/SocialMedia Data/Aura H 360/logo.png",
-    customerImage: "/SocialMedia Data/Aura H 360/Photo.jpg",
+    businessLogo: "/SocialMedia Data/Aura H 360/logo.webp",
+    customerImage: "/SocialMedia Data/Aura H 360/Photo.webp",
     review:
       "Aurah 360's online trust grew rapidly - AI Review System gave us a smooth and intelligent way to engage clients post-treatment.",
     rating: 5,
@@ -32,7 +32,7 @@ const testimonialsData: Testimonial[] = [
     businessCategory: "Health & Medical",
     personName: "Dr. Jaydev Dhameliya",
     customerTitle: "Gynecologist & IVF Specialist",
-    businessLogo: "/SocialMedia Data/Candor IVF Center/logo.png",
+    businessLogo: "/SocialMedia Data/Candor IVF Center/logo.webp",
     customerImage: "/SocialMedia Data/Candor IVF Center/Photo.JPG",
     review:
       "With AI Review System, our online visibility and trust grew rapidly, we're now the top-recommended IVF centre on Google Search.",
@@ -44,8 +44,8 @@ const testimonialsData: Testimonial[] = [
     businessCategory: "Retail & Shopping",
     personName: "D. KhushalBhai",
     customerTitle: "Owner",
-    businessLogo: "/SocialMedia Data/D.Khushaldas Jewellers/logo.png",
-    customerImage: "/SocialMedia Data/D.Khushaldas Jewellers/Photo.jpg",
+    businessLogo: "/SocialMedia Data/D.Khushaldas Jewellers/logo.webp",
+    customerImage: "/SocialMedia Data/D.Khushaldas Jewellers/Photo.webp",
     review:
       "The AI Review System transformed our customer engagement! We've seen a 300% increase in Google reviews and our jewellery store now ranks #1 in local searches.",
     rating: 5,
@@ -56,8 +56,8 @@ const testimonialsData: Testimonial[] = [
     businessCategory: "Health & Medical",
     personName: "Dr. Jagdish Sakhiya",
     customerTitle: "Founder & Dermatologist",
-    businessLogo: "/SocialMedia Data/Sakhiya Skin/logo.png",
-    customerImage: "/SocialMedia Data/Sakhiya Skin/Photo.png",
+    businessLogo: "/SocialMedia Data/Sakhiya Skin/logo.webp",
+    customerImage: "/SocialMedia Data/Sakhiya Skin/Photo.webp",
     review:
       "AI Review System revolutionized patient feedback collection at our clinic. Automated, personalized, and incredibly effective - our 5-star ratings doubled in just 3 months!",
     rating: 5,

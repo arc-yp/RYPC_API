@@ -26,7 +26,7 @@ const Footer = () => {
             <div className="lg:col-span-2">
               <div className="flex items-center mb-6">
                 <img
-                  src="/arslogo1.png"
+                  src="/arslogo1.webp"
                   alt="AI Review System Logo"
                   className="w-[160px] h-full mr-1"
                 />

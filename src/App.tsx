@@ -157,7 +157,7 @@ const DynamicReviewCard: React.FC = () => {
             <span className="text-4xl">❌</span>
           </div>
           <img
-            src="/aireviewsystm_qrcode.png"
+            src="/aireviewsystm_qrcode.webp"
             alt="AI Review System QR Code"
             className="mx-auto mb-6 w-40 max-w-full border-4 border-blue-500 rounded-lg shadow-lg bg-white"
           />

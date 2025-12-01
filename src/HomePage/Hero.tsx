@@ -117,10 +117,10 @@ const Hero = () => {
                 <div className="flex items-center group">
                   <div className="flex -space-x-2 mr-3">
                   {[
-                    "/testimonials/smit hospital.png",
-                    "/testimonials/Dr harshal kheni.jpg",
-                    "/testimonials/dr jaydev dhameliya.jpg",
-                    "/testimonials/bina- krishnaa tourism.png"
+                    "/testimonials/smit hospital.webp",
+                    "/testimonials/Dr harshal kheni.webp",
+                    "/testimonials/dr jaydev dhameliya.webp",
+                    "/testimonials/bina- krishnaa tourism.webp"
                   ].map((src, i) => (
                     <img
                     key={i}
@@ -162,7 +162,7 @@ const Hero = () => {
                   <div className="flex items-center mb-4 animate-fade-in-up">
                     <div className="w-16 h-16 rounded-full overflow-hidden ring-2 ring-gray-200 shadow">
                       <img
-                      src="/testimonials/integrityworld.png"
+                      src="/testimonials/integrityworld.webp"
                       alt="Integrity World logo"
                       className="w-full h-full object-cover bg-white"
                       loading="lazy"

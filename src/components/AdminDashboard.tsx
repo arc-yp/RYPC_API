@@ -78,15 +78,23 @@ export const AdminDashboard: React.FC = () => {
     const interval = setInterval(() => {
       const current = Date.now();
       setNowTs(current);
-      setCards(prev => {
+      setCards((prev) => {
         let changed = false;
-        const updated = prev.map(c => {
-          if (c.active !== false && c.expiresAt && Date.parse(c.expiresAt) <= current) {
+        const updated = prev.map((c) => {
+          if (
+            c.active !== false &&
+            c.expiresAt &&
+            Date.parse(c.expiresAt) <= current
+          ) {
             changed = true;
             // fire & forget persistence
             (async () => {
               try {
-                const updatedCard = { ...c, active: false, updatedAt: new Date().toISOString() };
+                const updatedCard = {
+                  ...c,
+                  active: false,
+                  updatedAt: new Date().toISOString(),
+                };
                 await storage.updateCard(updatedCard);
               } catch {}
             })();
@@ -104,7 +112,7 @@ export const AdminDashboard: React.FC = () => {
     if (!card.expiresAt) return null;
     const end = Date.parse(card.expiresAt);
     const diffMs = end - nowTs;
-    if (diffMs <= 0) return 'Expired';
+    if (diffMs <= 0) return "Expired";
     const totalSec = Math.floor(diffMs / 1000);
     const days = Math.floor(totalSec / 86400);
     const hrs = Math.floor((totalSec % 86400) / 3600);
@@ -230,36 +238,41 @@ export const AdminDashboard: React.FC = () => {
       if (!matchesSearch || !matchesCategory) return false;
 
       // Status filter
-      if (statusFilter === 'Active' && card.active === false) return false;
-      if (statusFilter === 'Inactive' && card.active !== false) return false;
+      if (statusFilter === "Active" && card.active === false) return false;
+      if (statusFilter === "Inactive" && card.active !== false) return false;
 
       // Creation date filter
       if (creationFilter) {
         const createdAt = Date.parse(card.createdAt);
         const startOfToday = new Date();
-        startOfToday.setHours(0,0,0,0);
+        startOfToday.setHours(0, 0, 0, 0);
         const now = nowTs;
         let pass = true;
         switch (creationFilter) {
-          case 'Today':
+          case "Today":
             pass = createdAt >= startOfToday.getTime();
             break;
-          case '7d':
+          case "7d":
             pass = createdAt >= now - 7 * 86400000;
             break;
-          case '30d':
+          case "30d":
             pass = createdAt >= now - 30 * 86400000;
             break;
-          case 'Month': { // current calendar month
+          case "Month": {
+            // current calendar month
             const d = new Date(createdAt);
             const today = new Date(now);
-            pass = d.getMonth() === today.getMonth() && d.getFullYear() === today.getFullYear();
-            break; }
-          case 'Year': {
+            pass =
+              d.getMonth() === today.getMonth() &&
+              d.getFullYear() === today.getFullYear();
+            break;
+          }
+          case "Year": {
             const d = new Date(createdAt);
             const today = new Date(now);
             pass = d.getFullYear() === today.getFullYear();
-            break; }
+            break;
+          }
           default:
             pass = true;
         }
@@ -272,23 +285,36 @@ export const AdminDashboard: React.FC = () => {
         const diff = endTs ? endTs - nowTs : null;
         let pass = true;
         switch (expiryFilter) {
-          case 'Expiring 24h':
+          case "Expiring 24h":
             pass = !!endTs && diff! > 0 && diff! <= 24 * 3600000;
             break;
-          case 'Expiring 7d':
-            pass = !!endTs && diff! > 0 && diff! <= 7 * 86400000 && diff! > 24 * 3600000;
+          case "Expiring 7d":
+            pass =
+              !!endTs &&
+              diff! > 0 &&
+              diff! <= 7 * 86400000 &&
+              diff! > 24 * 3600000;
             break;
-          case 'Expiring 30d':
-            pass = !!endTs && diff! > 0 && diff! <= 30 * 86400000 && diff! > 7 * 86400000;
+          case "Expiring 30d":
+            pass =
+              !!endTs &&
+              diff! > 0 &&
+              diff! <= 30 * 86400000 &&
+              diff! > 7 * 86400000;
             break;
-            case 'Expiring 6m': {
-              const sixMonthsMs = 182 * 86400000; // approx 6 months
-              pass = !!endTs && diff! > 0 && diff! <= sixMonthsMs && diff! > 30 * 86400000;
-              break; }
-          case 'Expired':
+          case "Expiring 6m": {
+            const sixMonthsMs = 182 * 86400000; // approx 6 months
+            pass =
+              !!endTs &&
+              diff! > 0 &&
+              diff! <= sixMonthsMs &&
+              diff! > 30 * 86400000;
+            break;
+          }
+          case "Expired":
             pass = !!endTs && diff! <= 0;
             break;
-          case 'No Expiry':
+          case "No Expiry":
             pass = !endTs;
             break;
           default:
@@ -299,7 +325,15 @@ export const AdminDashboard: React.FC = () => {
 
       return true;
     });
-  }, [cards, searchTerm, selectedCategories, statusFilter, creationFilter, expiryFilter, nowTs]);
+  }, [
+    cards,
+    searchTerm,
+    selectedCategories,
+    statusFilter,
+    creationFilter,
+    expiryFilter,
+    nowTs,
+  ]);
 
   const handleViewCard = (slug: string) => {
     window.open(`/${slug}`, "_blank");
@@ -374,47 +408,54 @@ export const AdminDashboard: React.FC = () => {
             {getConnectionStatusDisplay()}
             <div className="flex items-center gap-3">
               {/* Changed <a> to <Link> */}
-                <Link
-                  to="/ai-admin/analytics"
-                  className="inline-flex items-center px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors duration-200 border border-white/20"
-                  title="Analytics"
-                >
-                  <Eye className="w-4 h-4 mr-2" /> Analytics
-                </Link>
-                <Link
-                  to="/ai-admin/pricing"
-                  className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 rounded-lg hover:from-yellow-500/30 hover:to-orange-500/30 transition-colors duration-200 border border-yellow-500/30"
-                  title="Manage Pricing"
-                >
-                  <Building2 className="w-4 h-4 mr-2" /> Pricing
-                </Link>
-                <button
-                  onClick={handleRefresh}
-                  disabled={isRefreshing}
-                  className="inline-flex items-center px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors duration-200 disabled:opacity-50"
-                  title="Refresh Data"
-                >
-                  <RefreshCw
-                    className={`w-4 h-4 mr-2 ${
-                      isRefreshing ? "animate-spin" : ""
-                    }`}
-                  />
-                  {isRefreshing ? "Syncing..." : "Refresh"}
-                </button>
-                <button
-                  onClick={handleLogout}
-                  className="inline-flex items-center px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
-                >
-                  <LogOut className="w-4 h-4 mr-2" />
-                  Logout
-                </button>
+              <Link
+                to="/review"
+                className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 text-indigo-300 rounded-lg hover:from-indigo-500/30 hover:to-purple-500/30 transition-colors duration-200 border border-indigo-500/30"
+                title="Review Store Dashboard"
+              >
+                <Database className="w-4 h-4 mr-2" /> Review Store
+              </Link>
+              <Link
+                to="/ai-admin/analytics"
+                className="inline-flex items-center px-3 py-2 bg-white/10 text-white rounded-lg hover:bg-white/15 transition-colors duration-200 border border-white/20"
+                title="Analytics"
+              >
+                <Eye className="w-4 h-4 mr-2" /> Analytics
+              </Link>
+              <Link
+                to="/ai-admin/pricing"
+                className="inline-flex items-center px-3 py-2 bg-gradient-to-r from-yellow-500/20 to-orange-500/20 text-yellow-300 rounded-lg hover:from-yellow-500/30 hover:to-orange-500/30 transition-colors duration-200 border border-yellow-500/30"
+                title="Manage Pricing"
+              >
+                <Building2 className="w-4 h-4 mr-2" /> Pricing
+              </Link>
+              <button
+                onClick={handleRefresh}
+                disabled={isRefreshing}
+                className="inline-flex items-center px-3 py-2 bg-blue-600/20 text-blue-400 rounded-lg hover:bg-blue-600/30 transition-colors duration-200 disabled:opacity-50"
+                title="Refresh Data"
+              >
+                <RefreshCw
+                  className={`w-4 h-4 mr-2 ${
+                    isRefreshing ? "animate-spin" : ""
+                  }`}
+                />
+                {isRefreshing ? "Syncing..." : "Refresh"}
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center px-4 py-2 bg-red-600/20 text-red-400 rounded-lg hover:bg-red-600/30 transition-colors duration-200"
+              >
+                <LogOut className="w-4 h-4 mr-2" />
+                Logout
+              </button>
             </div>
           </div>
 
           <h1 className="text-4xl lg:text-5xl font-bold text-white mb-4 bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text text-transparent">
             {/* <div className=" flex items-center justify-center mb-8">            
                       <img
-                        src="/py.png"
+                        src="/py.webp"
                         alt="YP Logo"
                         className="w-20 h-20 sm:w-12 sm:h-12 lg:w-20 lg:h-20 object-contain rounded-xl  border border-white"
                       />
@@ -448,7 +489,7 @@ export const AdminDashboard: React.FC = () => {
             <Plus className="w-5 h-5 mr-2" />
             Add New Card
           </button>
-        </div>  
+        </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
@@ -498,7 +539,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </div>
 
-         {/* Filters Row */}
+        {/* Filters Row */}
         <div className="rounded-2xl border border-white/10 bg-gradient-to-br from-white/5 via-white/3 to-white/5 backdrop-blur-md mb-10">
           <div className="flex items-center justify-between px-5 py-4 border-b border-white/10">
             <div className="flex items-center gap-3">
@@ -506,27 +547,48 @@ export const AdminDashboard: React.FC = () => {
                 <Filter className="w-5 h-5 text-blue-300" />
               </div>
               <div>
-                <h3 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">Filters
+                <h3 className="text-sm font-semibold text-white tracking-wide flex items-center gap-2">
+                  Filters
                   {(statusFilter || creationFilter || expiryFilter) && (
-                    <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-600/30 text-blue-200 border border-blue-400/30">{[statusFilter,creationFilter,expiryFilter].filter(Boolean).length} active</span>
+                    <span className="text-[10px] font-normal px-2 py-0.5 rounded-full bg-blue-600/30 text-blue-200 border border-blue-400/30">
+                      {
+                        [statusFilter, creationFilter, expiryFilter].filter(
+                          Boolean
+                        ).length
+                      }{" "}
+                      active
+                    </span>
                   )}
                 </h3>
-                <p className="text-[11px] text-slate-400">Refine results. Showing {filteredCards.length} of {cards.length} cards.</p>
+                <p className="text-[11px] text-slate-400">
+                  Refine results. Showing {filteredCards.length} of{" "}
+                  {cards.length} cards.
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">
               {(statusFilter || creationFilter || expiryFilter) && (
                 <button
-                  onClick={() => { setStatusFilter(''); setCreationFilter(''); setExpiryFilter(''); }}
+                  onClick={() => {
+                    setStatusFilter("");
+                    setCreationFilter("");
+                    setExpiryFilter("");
+                  }}
                   className="text-[11px] px-2 py-1 rounded-md bg-white/10 text-slate-300 hover:bg-white/20 transition"
-                >Reset</button>
+                >
+                  Reset
+                </button>
               )}
               <button
-                onClick={() => setShowFilters(v => !v)}
+                onClick={() => setShowFilters((v) => !v)}
                 className="flex items-center gap-1 text-[11px] px-3 py-1.5 rounded-md bg-blue-600/30 text-blue-100 hover:bg-blue-600/40 border border-blue-500/30 transition"
               >
-                {showFilters ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
-                {showFilters ? 'Hide' : 'Show'}
+                {showFilters ? (
+                  <ChevronUp className="w-3 h-3" />
+                ) : (
+                  <ChevronDown className="w-3 h-3" />
+                )}
+                {showFilters ? "Hide" : "Show"}
               </button>
             </div>
           </div>
@@ -534,45 +596,67 @@ export const AdminDashboard: React.FC = () => {
             <div className="px-5 py-5 space-y-8">
               <div className="grid lg:grid-cols-3 gap-8">
                 <div className="group rounded-xl border border-white/10 bg-white/5 p-4 hover:border-blue-400/40 transition">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">Status
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+                    Status
                     {statusFilter && (
-                      <button onClick={()=>setStatusFilter('')} className="text-slate-400 hover:text-white" title="Clear">
+                      <button
+                        onClick={() => setStatusFilter("")}
+                        className="text-slate-400 hover:text-white"
+                        title="Clear"
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     )}
                   </p>
                   <SegmentedButtonGroup
-                    options={['Active','Inactive']}
+                    options={["Active", "Inactive"]}
                     selected={statusFilter}
                     onChange={(v) => setStatusFilter(v as string)}
                     size="sm"
                   />
                 </div>
                 <div className="group rounded-xl border border-white/10 bg-white/5 p-4 hover:border-purple-400/40 transition">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">Created
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+                    Created
                     {creationFilter && (
-                      <button onClick={()=>setCreationFilter('')} className="text-slate-400 hover:text-white" title="Clear">
+                      <button
+                        onClick={() => setCreationFilter("")}
+                        className="text-slate-400 hover:text-white"
+                        title="Clear"
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     )}
                   </p>
                   <SegmentedButtonGroup
-                    options={['Today','7d','30d','Month','Year']}
+                    options={["Today", "7d", "30d", "Month", "Year"]}
                     selected={creationFilter}
                     onChange={(v) => setCreationFilter(v as string)}
                     size="sm"
                   />
                 </div>
                 <div className="group rounded-xl border border-white/10 bg-white/5 p-4 hover:border-pink-400/40 transition">
-                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">Expiry
+                  <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400 mb-2 flex items-center justify-between">
+                    Expiry
                     {expiryFilter && (
-                      <button onClick={()=>setExpiryFilter('')} className="text-slate-400 hover:text-white" title="Clear">
+                      <button
+                        onClick={() => setExpiryFilter("")}
+                        className="text-slate-400 hover:text-white"
+                        title="Clear"
+                      >
                         <X className="w-3 h-3" />
                       </button>
                     )}
                   </p>
                   <SegmentedButtonGroup
-                    options={['Expiring 24h','Expiring 7d','Expiring 30d','Expiring 6m','Expired','No Expiry']}
+                    options={[
+                      "Expiring 24h",
+                      "Expiring 7d",
+                      "Expiring 30d",
+                      "Expiring 6m",
+                      "Expired",
+                      "No Expiry",
+                    ]}
                     selected={expiryFilter}
                     onChange={(v) => setExpiryFilter(v as string)}
                     size="sm"
@@ -582,12 +666,19 @@ export const AdminDashboard: React.FC = () => {
 
               {(statusFilter || creationFilter || expiryFilter) && (
                 <div>
-                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">Active Filters</p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
+                    Active Filters
+                  </p>
                   <div className="flex flex-wrap gap-2">
                     {statusFilter && (
                       <span className="group inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-blue-600/25 text-blue-100 border border-blue-500/30 text-[11px]">
                         {statusFilter}
-                        <button onClick={()=>setStatusFilter('')} aria-label="Clear status filter" title="Clear status filter" className="p-0.5 rounded-full hover:bg-blue-500/40 transition">
+                        <button
+                          onClick={() => setStatusFilter("")}
+                          aria-label="Clear status filter"
+                          title="Clear status filter"
+                          className="p-0.5 rounded-full hover:bg-blue-500/40 transition"
+                        >
                           <X className="w-3 h-3" />
                         </button>
                       </span>
@@ -595,7 +686,12 @@ export const AdminDashboard: React.FC = () => {
                     {creationFilter && (
                       <span className="group inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-purple-600/25 text-purple-100 border border-purple-500/30 text-[11px]">
                         {creationFilter}
-                        <button onClick={()=>setCreationFilter('')} aria-label="Clear creation date filter" title="Clear creation date filter" className="p-0.5 rounded-full hover:bg-purple-500/40 transition">
+                        <button
+                          onClick={() => setCreationFilter("")}
+                          aria-label="Clear creation date filter"
+                          title="Clear creation date filter"
+                          className="p-0.5 rounded-full hover:bg-purple-500/40 transition"
+                        >
                           <X className="w-3 h-3" />
                         </button>
                       </span>
@@ -603,15 +699,26 @@ export const AdminDashboard: React.FC = () => {
                     {expiryFilter && (
                       <span className="group inline-flex items-center gap-1 pl-2 pr-1 py-1 rounded-full bg-pink-600/25 text-pink-100 border border-pink-500/30 text-[11px]">
                         {expiryFilter}
-                        <button onClick={()=>setExpiryFilter('')} aria-label="Clear expiry filter" title="Clear expiry filter" className="p-0.5 rounded-full hover:bg-pink-500/40 transition">
+                        <button
+                          onClick={() => setExpiryFilter("")}
+                          aria-label="Clear expiry filter"
+                          title="Clear expiry filter"
+                          className="p-0.5 rounded-full hover:bg-pink-500/40 transition"
+                        >
                           <X className="w-3 h-3" />
                         </button>
                       </span>
                     )}
                     <button
-                      onClick={() => { setStatusFilter(''); setCreationFilter(''); setExpiryFilter(''); }}
+                      onClick={() => {
+                        setStatusFilter("");
+                        setCreationFilter("");
+                        setExpiryFilter("");
+                      }}
                       className="text-[11px] text-slate-400 hover:text-white underline decoration-dotted ml-1"
-                    >Clear All</button>
+                    >
+                      Clear All
+                    </button>
                   </div>
                 </div>
               )}
@@ -729,12 +836,25 @@ export const AdminDashboard: React.FC = () => {
                             </p>
                             {card.expiresAt && (
                               <p className="mt-1 mb-0 text-xs text-slate-400">
-                                End: <span className="text-sm text-slate-300">{formatDate(card.expiresAt)}</span>{" "}
-                                <span className={`ml-2 px-2 py-0.5 rounded-full text-[10px] tracking-wide border ${formatRemaining(card)==='Expired' ? 'bg-red-500/20 text-red-300 border-red-400/30' : 'bg-blue-500/10 text-blue-200 border-blue-400/20'}`}>{formatRemaining(card)}</span>
+                                End:{" "}
+                                <span className="text-sm text-slate-300">
+                                  {formatDate(card.expiresAt)}
+                                </span>{" "}
+                                <span
+                                  className={`ml-2 px-2 py-0.5 rounded-full text-[10px] tracking-wide border ${
+                                    formatRemaining(card) === "Expired"
+                                      ? "bg-red-500/20 text-red-300 border-red-400/30"
+                                      : "bg-blue-500/10 text-blue-200 border-blue-400/20"
+                                  }`}
+                                >
+                                  {formatRemaining(card)}
+                                </span>
                               </p>
                             )}
                             {!card.expiresAt && (
-                              <p className="mt-1 mb-0 text-xs text-slate-500">No expiry</p>
+                              <p className="mt-1 mb-0 text-xs text-slate-500">
+                                No expiry
+                              </p>
                             )}
                           </div>
 
@@ -743,29 +863,45 @@ export const AdminDashboard: React.FC = () => {
                             <button
                               type="button"
                               onClick={async () => {
-                                const updated = { ...card, active: !card.active, updatedAt: new Date().toISOString() };
-                                setCards((prev) => prev.map((c) => (c.id === card.id ? updated : c)));
+                                const updated = {
+                                  ...card,
+                                  active: !card.active,
+                                  updatedAt: new Date().toISOString(),
+                                };
+                                setCards((prev) =>
+                                  prev.map((c) =>
+                                    c.id === card.id ? updated : c
+                                  )
+                                );
                                 await storage.updateCard(updated);
                               }}
                               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 ${
                                 card.active ? "bg-green-500" : "bg-gray-400/60"
                               }`}
-                              aria-label={card.active ? "Deactivate card" : "Activate card"}
-                              title={card.active ? "Click to deactivate" : "Click to activate"}
+                              aria-label={
+                                card.active
+                                  ? "Deactivate card"
+                                  : "Activate card"
+                              }
+                              title={
+                                card.active
+                                  ? "Click to deactivate"
+                                  : "Click to activate"
+                              }
                             >
                               <span
                                 className={`inline-block h-4 w-4 transform rounded-full bg-white shadow transition-transform ${
-                                  card.active ? "translate-x-6" : "translate-x-1"
+                                  card.active
+                                    ? "translate-x-6"
+                                    : "translate-x-1"
                                 }`}
                               />
                             </button>
                           </div>
                         </div>
-                        
                       </div>
 
                       <div className="flex flex-wrap gap-2">
-                        
                         <button
                           onClick={() => handleViewCard(card.slug)}
                           className="flex-1 inline-flex items-center justify-center px-3 py-2 bg-green-600/20 text-green-400 rounded-lg hover:bg-green-600/30 transition-colors duration-200"

@@ -17,7 +17,7 @@ const Testimonials = () => {
       rating: 5,
       text: "AI Review System helped us collect genuine 5-star reviews effortlessly our hospital now ranks higher on Google and more patients are finding us organically.",
       avatar:
-        "/testimonials/smit hospital.png",
+        "/testimonials/smit hospital.webp",
     },
     {
       name: "Dr. Jaydev Dhameliya",
@@ -26,7 +26,7 @@ const Testimonials = () => {
       rating: 5,
       text: "With AI Review System, our online visibility and trust grew rapidly , we’re now the top-recommended IVF centre on Google Search.",
       avatar:
-        "/testimonials/dr jaydev dhameliya.jpg",
+        "/testimonials/dr jaydev dhameliya.webp",
     },
     {
       name: "Beena Barot",
@@ -35,7 +35,7 @@ const Testimonials = () => {
       rating: 5,
       text: "This system made it super-easy for our travelers to share reviews, it boosted our Google presence and brought more booking inquiries than ever.",
       avatar:
-        "/testimonials/bina- krishnaa tourism.png ",
+        "/testimonials/bina- krishnaa tourism.webp",
     },
     {
       name: "Mahendra Singhal",
@@ -44,7 +44,7 @@ const Testimonials = () => {
       rating: 5,
       text: "AI Review System simplified our review collection clients love it and our business is now ranking top in local Google search results.",
       avatar:
-        "/testimonials/mahendra bhai UPS.png",
+        "/testimonials/mahendra bhai UPS.webp",
     },
     {
       name: "Dr Harshal Kheni",
@@ -53,7 +53,7 @@ const Testimonials = () => {
       rating: 5,
       text: "Aurah 360's online trust grew rapidly - AI Review System gave us a smooth and intelligent way to engage clients post-treatment.",
       avatar:
-        "/testimonials/Dr harshal kheni.jpg",
+        "/testimonials/Dr harshal kheni.webp",
     },
   ];
 

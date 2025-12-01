@@ -16,7 +16,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ url, title = 'Scan to 
 
   useEffect(() => {
     let isActive = true;
-    const src = logoUrl || '/py.png';
+    const src = logoUrl || '/py.webp';
     // Preload logo as data URL for CORS-safe html2canvas capture
     const load = async () => {
       try {
@@ -113,7 +113,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ url, title = 'Scan to 
       ctx.stroke();
 
       // Draw logo image inside rounded mask
-      const logoSrc = resolvedLogo || logoUrl || '/py.png';
+      const logoSrc = resolvedLogo || logoUrl || '/py.webp';
       if (logoSrc) {
         try {
           const logoImg = await loadImage(logoSrc);
@@ -143,7 +143,7 @@ export const QRCodeModal: React.FC<QRCodeModalProps> = ({ url, title = 'Scan to 
       const dataUrl = canvas.toDataURL('image/png');
       const a = document.createElement('a');
       a.href = dataUrl;
-      a.download = 'qr-code.png';
+      a.download = 'qr-code.webp';
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
