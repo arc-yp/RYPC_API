@@ -12,6 +12,7 @@ import { SegmentedButtonGroup } from "./SegmentedButtonGroup";
 import { ServiceSelector } from "./ServiceSelector";
 import { aiService } from "../utils/aiService";
 import { storage } from "../utils/storage";
+import { reviewStore } from "./ReviewStore/reviewStore"; // for review storage DB
 import {
   addSpellingMistakes,
   parseReviewWithMistakes,
@@ -44,6 +45,7 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [viewCount, setViewCount] = useState(card.viewCount || 0);
   const hasGeneratedInitialReview = useRef(false);
+  const isManualRegeneration = useRef(false);
 
   const languageOptions = useMemo(
     () =>
@@ -57,7 +59,8 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
     rating: number,
     language?: string,
     tone?: "Professional" | "Friendly" | "Grateful",
-    services?: string[]
+    services?: string[],
+    generationSource: "auto" | "service" | "manual"
   ) => {
     setIsGenerating(true);
     try {
@@ -91,6 +94,22 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
       const reviewWithMistakes = addSpellingMistakes(review.text);
       setCurrentReview(reviewWithMistakes.text);
       setMistakes(reviewWithMistakes.mistakes);
+      // Store in separate new DB (after successful generation)
+      try {
+        await reviewStore.saveReview({
+          businessName: card.businessName,
+          category: card.category,
+          rating,
+          language: language || selectedLanguage,
+          tone: tone || selectedTone,
+          services: servicesToUse,
+          reviewText: reviewWithMistakes.text.replace(/\*\*/g, ""), // clean text
+          isFallback: false,
+          generationSource,
+        });
+      } catch (e) {
+        console.warn("Review save failed (new DB)", e);
+      }
     } catch (error) {
       console.error("Failed to generate review:", error);
       // Use contextual fallback review
@@ -102,6 +121,23 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
       }.`;
       setCurrentReview(fallback);
       setMistakes([]);
+
+      // fallback also save
+      try {
+        await reviewStore.saveReview({
+          businessName: card.businessName,
+          category: card.category,
+          rating,
+          language: language || selectedLanguage,
+          tone: tone || selectedTone,
+          services: services || selectedServices,
+          reviewText: fallback,
+          isFallback: true,
+          generationSource,
+        });
+      } catch (e) {
+        console.warn("Fallback review save failed (new DB)", e);
+      }
     } finally {
       setIsGenerating(false);
     }
@@ -133,7 +169,8 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
       selectedRating,
       selectedLanguage,
       selectedTone,
-      services
+      services,
+      "service"
     );
   };
 
@@ -157,11 +194,14 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
   };
 
   const handleRegenerateReview = () => {
+    // Mark this as manual regeneration
+    isManualRegeneration.current = true;
     generateReviewForRating(
       selectedRating,
       selectedLanguage,
       selectedTone,
-      selectedServices
+      selectedServices,
+      "manual"
     );
   };
 
@@ -216,12 +256,11 @@ export const CompactReviewCardView: React.FC<CompactReviewCardViewProps> = ({
       </blockquote>
     );
   };
-
   useEffect(() => {
     // Generate initial review when component loads (only once, prevent double call in React Strict Mode)
     if (!hasGeneratedInitialReview.current) {
       hasGeneratedInitialReview.current = true;
-      generateReviewForRating(5, "English", "Professional", []);
+      generateReviewForRating(5, "English", "Professional", [], "auto");
     }
 
     // Increment view count when component loads

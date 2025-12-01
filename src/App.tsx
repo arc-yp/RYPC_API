@@ -15,7 +15,6 @@ import { CompactReviewCardView } from "./components/CompactReviewCardView";
 import { LoginPage } from "./components/LoginPage";
 import { ProtectedRoute } from "./components/ProtectedRoute";
 import { storage } from "./utils/storage";
-import { auth } from "./utils/auth";
 import { ReviewCard } from "./types";
 import PrivacyPolicy from "./HomePage/PrivacyPolicy";
 import TermsConditions from "./HomePage/TermsConditions";
@@ -25,6 +24,11 @@ import RenewalPlanForm from "./HomePage/RenewalPlanForm";
 import ArsPage from "./HomePage/ArsPage";
 import ThankYouPage from "./HomePage/ThankYouPage";
 import { PricingAdmin } from "./HomePage/HomePage-Admin/PricingAdmin";
+import {
+  ReviewStoreLayout,
+  ReviewDashboard,
+  ReviewCategoryPage,
+} from "./components/ReviewStore";
 
 ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
 
@@ -72,6 +76,12 @@ function App() {
       <Route path="/ars" element={<ArsPage />} />
       <Route path="/thank-you" element={<ThankYouPage />} />
 
+      {/* Generated Reviews Store with Sidebar */}
+      <Route path="/review" element={<ReviewStoreLayout />}>
+        <Route index element={<ReviewDashboard />} />
+        <Route path=":categoryName" element={<ReviewCategoryPage />} />
+      </Route>
+
       {/* Dynamic card at root level */}
       <Route path="/:slug" element={<DynamicReviewCard />} />
 
@@ -94,19 +104,19 @@ const DynamicReviewCard: React.FC = () => {
   const [card, setCard] = React.useState<ReviewCard | null>(null);
   const [loading, setLoading] = React.useState(true);
 
-  // Guard: ignore blank or asset-like slugs
-  if (!slug || slug.includes(".") || slug === "favicon.ico") {
-    return <Navigate to="/" replace />;
-  }
-
   React.useEffect(() => {
+    // Guard: ignore blank or asset-like slugs
+    if (!slug || slug.includes(".") || slug === "favicon.ico") {
+      return;
+    }
+
     let cancelled = false;
     const loadCard = async () => {
       setLoading(true);
       try {
         const foundCard = await storage.getCardBySlug(slug);
         if (!cancelled) setCard(foundCard);
-      } catch (e) {
+      } catch {
         if (!cancelled) setCard(null);
       } finally {
         if (!cancelled) setLoading(false);
@@ -117,6 +127,11 @@ const DynamicReviewCard: React.FC = () => {
       cancelled = true;
     };
   }, [slug]);
+
+  // Guard: ignore blank or asset-like slugs
+  if (!slug || slug.includes(".") || slug === "favicon.ico") {
+    return <Navigate to="/" replace />;
+  }
 
   if (loading) {
     return (
@@ -146,7 +161,9 @@ const DynamicReviewCard: React.FC = () => {
             alt="AI Review System QR Code"
             className="mx-auto mb-6 w-40 max-w-full border-4 border-blue-500 rounded-lg shadow-lg bg-white"
           />
-          <h1 className="text-xl font-bold text-white mb-4">If Card Not Found</h1>
+          <h1 className="text-xl font-bold text-white mb-4">
+            If Card Not Found
+          </h1>
           <h1 className="text-3xl font-bold text-white mb-4">
             Please! Contact Admin&nbsp;
             <a

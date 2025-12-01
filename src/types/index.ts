@@ -35,3 +35,18 @@ export interface ReviewVariations {
   intensifiers: string[];
   timeframes: string[];
 }
+
+// Newly generated reviews storage type (in a separate new database)
+export interface GeneratedReviewRecord {
+  id?: string; // Supabase UUID (optional when inserting)
+  businessName: string;
+  category: string;
+  rating: number;
+  language: string;
+  tone?: string;
+  services?: string[];
+  reviewText: string;
+  isFallback?: boolean; // fallback review when API call fails
+  generationSource?: "auto" | "service" | "manual"; // 'auto' = first load, 'service' = service selection, 'manual' = Generate New Review button
+  createdAt?: string; // server default
+}
