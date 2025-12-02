@@ -16,14 +16,14 @@ interface Testimonial {
 const testimonialsData: Testimonial[] = [
   {
     id: 1,
-    businessName: "Aura H 360",
+    businessName: "Sakhiya Skin Clinic",
     businessCategory: "Health & Medical",
-    personName: "Dr. Harshal Kheni",
-    customerTitle: "MBBS, PGDCC, PGDCD",
-    businessLogo: "/SocialMedia Data/Aura H 360/logo.webp",
-    customerImage: "/SocialMedia Data/Aura H 360/Photo.webp",
+    personName: "",
+    customerTitle: "Founder & Dermatologist",
+    businessLogo: "/SocialMedia Data/Sakhiya Skin/logo.webp",
+    customerImage: "/SocialMedia Data/Sakhiya Skin/Photo.webp",
     review:
-      "Aurah 360's online trust grew rapidly - AI Review System gave us a smooth and intelligent way to engage clients post-treatment.",
+      "AI Review System revolutionized patient feedback collection at our clinic. Automated, personalized, and incredibly effective - our 5-star ratings doubled in just 3 months!",
     rating: 5,
   },
   {
@@ -50,16 +50,16 @@ const testimonialsData: Testimonial[] = [
       "The AI Review System transformed our customer engagement! We've seen a 300% increase in Google reviews and our jewellery store now ranks #1 in local searches.",
     rating: 5,
   },
-  {
+    {
     id: 4,
-    businessName: "Sakhiya Skin Clinic",
+    businessName: "Aura H 360",
     businessCategory: "Health & Medical",
-    personName: "Dr. Jagdish Sakhiya",
-    customerTitle: "Founder & Dermatologist",
-    businessLogo: "/SocialMedia Data/Sakhiya Skin/logo.webp",
-    customerImage: "/SocialMedia Data/Sakhiya Skin/Photo.webp",
+    personName: "Dr. Harshal Kheni",
+    customerTitle: "MBBS, PGDCC, PGDCD",
+    businessLogo: "/SocialMedia Data/Aura H 360/logo.webp",
+    customerImage: "/SocialMedia Data/Aura H 360/Photo.webp",
     review:
-      "AI Review System revolutionized patient feedback collection at our clinic. Automated, personalized, and incredibly effective - our 5-star ratings doubled in just 3 months!",
+      "Aurah 360's online trust grew rapidly - AI Review System gave us a smooth and intelligent way to engage clients post-treatment.",
     rating: 5,
   },
 ];
