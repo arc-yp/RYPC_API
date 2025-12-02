@@ -18,8 +18,8 @@ const testimonialsData: Testimonial[] = [
     id: 1,
     businessName: "Sakhiya Skin Clinic",
     businessCategory: "Health & Medical",
-    personName: <br/>,
-    customerTitle: <br/>,
+    personName: "",
+    customerTitle: "",
     businessLogo: "/SocialMedia Data/Sakhiya Skin/logo.webp",
     customerImage: "/SocialMedia Data/Sakhiya Skin/Photo.webp",
     review:
