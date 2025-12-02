@@ -59,7 +59,7 @@ const testimonialsData: Testimonial[] = [
     businessLogo: "/SocialMedia Data/Aura H 360/logo.webp",
     customerImage: "/SocialMedia Data/Aura H 360/Photo.webp",
     review:
-      "Aurah 360's online trust grew rapidly - AI Review System gave us a smooth and intelligent way to engage clients post-treatment.",
+      "AI Review System gave us a smooth and intelligent way to engage clients post-treatment. Our online trust and credibility grew rapidly with authentic patient feedback.",
     rating: 5,
   },
 ];
