@@ -11,10 +11,12 @@ import {
 } from "lucide-react";
 import type { MouseEvent } from "react";
 
-const newLocal = <div className="flex items-center text-gray-300">
-  <Phone className="w-5 h-5 mr-3 text-green-400" />
-  <span>+91 99099 08230</span>
-</div>;
+const newLocal = (
+  <div className="flex items-center text-gray-300">
+    <Phone className="w-5 h-5 mr-3 text-green-400" />
+    <span>+91 99099 08230</span>
+  </div>
+);
 const Footer = () => {
   return (
     <footer className="bg-gray-900 text-white">
@@ -197,6 +199,14 @@ const Footer = () => {
                     Refund &amp; Cancellation
                   </a>
                 </li>
+                <li>
+                  <a
+                    href="/shipping-policy"
+                    className="text-gray-300 hover:text-white transition-colors duration-300"
+                  >
+                    Shipping Policy
+                  </a>
+                </li>
               </ul>
             </div>
           </div>
@@ -236,7 +246,7 @@ const Footer = () => {
 
             {/* Social Links */}
             <div className="flex items-center space-x-4">
-                {[
+              {[
                 {
                   icon: Facebook,
                   href: "https://www.facebook.com/share/1A4NKVy36W/",
@@ -250,7 +260,7 @@ const Footer = () => {
                   href: "https://www.instagram.com/ai_review_system?igsh=MTIxdzZwaDJ5ZjdrYg==",
                   label: "Instagram",
                   hoverColor:
-                  "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500",
+                    "hover:bg-gradient-to-r hover:from-purple-500 hover:to-pink-500",
                   bgColor: "bg-gradient-to-r from-purple-500/20 to-pink-500/20",
                   iconColor: "text-pink-400 group-hover:text-white",
                 },
@@ -270,25 +280,25 @@ const Footer = () => {
                   bgColor: "bg-blue-700/20",
                   iconColor: "text-blue-500 group-hover:text-white",
                 },
-                ].map((social, index) => (
+              ].map((social, index) => (
                 <a
                   key={index}
                   href={social.href}
                   target={social.href.startsWith("http") ? "_blank" : "_self"}
                   rel={
-                  social.href.startsWith("http")
-                    ? "noopener noreferrer"
-                    : undefined
+                    social.href.startsWith("http")
+                      ? "noopener noreferrer"
+                      : undefined
                   }
                   aria-label={social.label}
                   title={social.label}
                   className={`group w-12 h-12 ${social.bgColor} ${social.hoverColor} rounded-xl flex items-center justify-center transition-all duration-300 transform hover:scale-110 hover:rotate-3 hover:shadow-lg`}
                   style={{
-                  animationDelay: `${index * 100}ms`,
+                    animationDelay: `${index * 100}ms`,
                   }}
                 >
                   <social.icon
-                  className={`w-6 h-6 ${social.iconColor} transition-all duration-300 group-hover:scale-110`}
+                    className={`w-6 h-6 ${social.iconColor} transition-all duration-300 group-hover:scale-110`}
                   />
 
                   {/* Animated ring effect on hover */}
@@ -297,7 +307,7 @@ const Footer = () => {
                   {/* Subtle glow effect */}
                   <div className="absolute inset-0 rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 shadow-lg"></div>
                 </a>
-                ))}
+              ))}
             </div>
           </div>
         </div>

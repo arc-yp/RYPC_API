@@ -17,6 +17,7 @@ import { ProtectedRoute } from "./components/ProtectedRoute";
 import { storage } from "./utils/storage";
 import { ReviewCard } from "./types";
 import PrivacyPolicy from "./HomePage/PrivacyPolicy";
+import ShippingPolicy from "./HomePage/ShippingPolicy";
 import TermsConditions from "./HomePage/TermsConditions";
 import RefundPolicy from "./HomePage/RefundPolicy";
 import HomeLink from "./HomePage/HomeLink";
@@ -72,6 +73,7 @@ function App() {
       <Route path="/" element={<HomeLink />} />
       <Route path="/privacy-policy" element={<PrivacyPolicy />} />
       <Route path="/terms" element={<TermsConditions />} />
+      <Route path="/shipping-policy" element={<ShippingPolicy />} />
       <Route path="/refund-policy" element={<RefundPolicy />} />
       <Route path="/renewalplanform" element={<RenewalPlanForm />} />
       <Route path="/ars" element={<ArsPage />} />
