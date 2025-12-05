@@ -259,19 +259,19 @@ const Industries = () => {
             <div className="grid md:grid-cols-3 gap-8 text-center relative z-10">
               {[
                 {
-                  number: "500+",
+                  number: "50+",
                   label: "Businesses Using AI Reviews",
                   gradient: "from-blue-600 to-green-600",
                   delay: "0ms",
                 },
                 {
-                  number: "50K+",
+                  number: "10K+",
                   label: "Reviews Generated",
                   gradient: "from-purple-600 to-pink-600",
                   delay: "200ms",
                 },
                 {
-                  number: "300%",
+                  number: "200%",
                   label: "Average Review Increase",
                   gradient: "from-orange-600 to-red-600",
                   delay: "400ms",
