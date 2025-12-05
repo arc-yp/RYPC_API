@@ -18,10 +18,17 @@ if (!REVIEWSTORE_URL || !REVIEWSTORE_KEY) {
   );
 }
 
-// Create Supabase client for Review Store
+// Create Supabase client for Review Store with unique storage key
 export const reviewStoreClient = createClient(
   REVIEWSTORE_URL || "",
-  REVIEWSTORE_KEY || ""
+  REVIEWSTORE_KEY || "",
+  {
+    auth: {
+      storageKey: 'review_store_auth', // Unique key to avoid conflicts
+      autoRefreshToken: true,
+      persistSession: true
+    }
+  }
 );
 
 // Table name in the Review Store database
