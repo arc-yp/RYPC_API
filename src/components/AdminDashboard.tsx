@@ -136,29 +136,8 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const checkForMigration = async () => {
-    const localData = localStorage.getItem("scc_review_cards");
-    if (localData) {
-      try {
-        const localCards = JSON.parse(localData);
-        if (localCards.length > 0) {
-          console.log(`Found ${localCards.length} local cards to migrate`);
-          setIsMigrating(true);
-          try {
-            await storage.migrateFromLocalStorage();
-          } catch (migrationError) {
-            console.error(
-              "Migration failed, continuing with local storage:",
-              migrationError
-            );
-          }
-          setIsMigrating(false);
-          console.log("Migration completed");
-        }
-      } catch (error) {
-        console.error("Error during migration check:", error);
-        setIsMigrating(false);
-      }
-    }
+    // Migration removed - now using Supabase only
+    console.log("Migration check skipped - using Supabase directly");
   };
 
   const handleAddCard = async (newCard: ReviewCard) => {
