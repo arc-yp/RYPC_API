@@ -18,7 +18,12 @@ import {
 import { ReviewCard } from "../types";
 import { storage } from "../utils/storage";
 import { formatDate } from "../utils/helpers";
-import { BarChartHorizontal, DonutChart, CreationTrendChart, LegendDot } from "./analytics/charts";
+import {
+  BarChartHorizontal,
+  DonutChart,
+  CreationTrendChart,
+  LegendDot,
+} from "./analytics/charts";
 import ExpiringSection from "./analytics/ExpiringSection";
 
 export const AnalyticsDashboard: React.FC = () => {
@@ -80,11 +85,11 @@ export const AnalyticsDashboard: React.FC = () => {
 
   // Active vs inactive breakdown
   const activeInactiveData = useMemo(() => {
-    const active = filtered.filter(c => c.active !== false).length;
+    const active = filtered.filter((c) => c.active !== false).length;
     const inactive = filtered.length - active;
     return [
-      { label: 'Active', value: active },
-      { label: 'Inactive', value: inactive }
+      { label: "Active", value: active },
+      { label: "Inactive", value: inactive },
     ];
   }, [filtered]);
 
@@ -92,50 +97,56 @@ export const AnalyticsDashboard: React.FC = () => {
   const expiringSoon = useMemo(() => {
     const in24h = nowTs + 24 * 60 * 60 * 1000;
     return filtered
-      .filter(c => c.expiresAt && c.active !== false && Date.parse(c.expiresAt) > nowTs && Date.parse(c.expiresAt) <= in24h)
-      .sort((a,b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
-      .slice(0,10);
+      .filter(
+        (c) =>
+          c.expiresAt &&
+          c.active !== false &&
+          Date.parse(c.expiresAt) > nowTs &&
+          Date.parse(c.expiresAt) <= in24h
+      )
+      .sort((a, b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
+      .slice(0, 10);
   }, [filtered, nowTs]);
 
   const expiringIn30Days = useMemo(() => {
     const in30d = nowTs + 30 * 24 * 60 * 60 * 1000;
     const in24h = nowTs + 24 * 60 * 60 * 1000; // exclude ones already in 24h list
     return filtered
-      .filter(c => c.expiresAt && c.active !== false) 
-      .filter(c => {
+      .filter((c) => c.expiresAt && c.active !== false)
+      .filter((c) => {
         const t = Date.parse(c.expiresAt!);
         return t > in24h && t <= in30d; // strictly beyond 24h up to 30d
       })
-      .sort((a,b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
-      .slice(0,15);
+      .sort((a, b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
+      .slice(0, 15);
   }, [filtered, nowTs]);
 
   const expiringIn6Months = useMemo(() => {
     const in6m = nowTs + 182 * 24 * 60 * 60 * 1000; // approx 6 months (182 days)
     const in30d = nowTs + 30 * 24 * 60 * 60 * 1000; // exclude ones already in 30d list
     return filtered
-      .filter(c => c.expiresAt && c.active !== false)
-      .filter(c => {
+      .filter((c) => c.expiresAt && c.active !== false)
+      .filter((c) => {
         const t = Date.parse(c.expiresAt!);
         return t > in30d && t <= in6m;
       })
-      .sort((a,b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
-      .slice(0,20);
+      .sort((a, b) => Date.parse(a.expiresAt!) - Date.parse(b.expiresAt!))
+      .slice(0, 20);
   }, [filtered, nowTs]);
 
   const formatRemaining = (card: ReviewCard) => {
-    if (!card.expiresAt) return '—';
+    if (!card.expiresAt) return "—";
     const end = Date.parse(card.expiresAt);
     const diff = end - nowTs;
-    if (diff <= 0) return 'Expired';
-    const s = Math.floor(diff/1000);
-    const d = Math.floor(s/86400);
-    const h = Math.floor((s%86400)/3600);
-    const m = Math.floor((s%3600)/60);
-    const sec = s%60;
-    if (d>0) return `${d}d ${h}h ${m}m`;
-    if (h>0) return `${h}h ${m}m ${sec}s`;
-    if (m>0) return `${m}m ${sec}s`;
+    if (diff <= 0) return "Expired";
+    const s = Math.floor(diff / 1000);
+    const d = Math.floor(s / 86400);
+    const h = Math.floor((s % 86400) / 3600);
+    const m = Math.floor((s % 3600) / 60);
+    const sec = s % 60;
+    if (d > 0) return `${d}d ${h}h ${m}m`;
+    if (h > 0) return `${h}h ${m}m ${sec}s`;
+    if (m > 0) return `${m}m ${sec}s`;
     return `${sec}s`;
   };
 
@@ -143,15 +154,15 @@ export const AnalyticsDashboard: React.FC = () => {
   const creationTrend = useMemo(() => {
     const days: { date: string; count: number }[] = [];
     const today = new Date();
-    for (let i=29;i>=0;i--) {
+    for (let i = 29; i >= 0; i--) {
       const d = new Date(today);
-      d.setDate(d.getDate()-i);
-      const key = d.toISOString().slice(0,10);
+      d.setDate(d.getDate() - i);
+      const key = d.toISOString().slice(0, 10);
       days.push({ date: key, count: 0 });
     }
-    const index = new Map(days.map((d,i)=>[d.date,i]));
-    filtered.forEach(c => {
-      const key = new Date(c.createdAt).toISOString().slice(0,10);
+    const index = new Map(days.map((d, i) => [d.date, i]));
+    filtered.forEach((c) => {
+      const key = new Date(c.createdAt).toISOString().slice(0, 10);
       if (index.has(key)) {
         days[index.get(key)!].count += 1;
       }
@@ -285,7 +296,7 @@ export const AnalyticsDashboard: React.FC = () => {
         c.createdAt,
         c.updatedAt,
         (c.active !== false).toString(),
-        c.expiresAt || '',
+        c.expiresAt || "",
         perDay,
       ];
     });
@@ -306,7 +317,6 @@ export const AnalyticsDashboard: React.FC = () => {
   const handleRefresh = useCallback(async () => {
     setRefreshing(true);
     try {
-      await storage.syncData();
       const fresh = await storage.getCards();
       setCards(fresh);
     } finally {
@@ -423,7 +433,11 @@ export const AnalyticsDashboard: React.FC = () => {
         </div>
 
         {loading ? (
-          <div className="space-y-6 animate-pulse" aria-label="Loading analytics" role="status">
+          <div
+            className="space-y-6 animate-pulse"
+            aria-label="Loading analytics"
+            role="status"
+          >
             <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
               <div className="h-52 bg-white/10 rounded-xl" />
               <div className="h-52 bg-white/10 rounded-xl xl:col-span-2" />
@@ -437,28 +451,59 @@ export const AnalyticsDashboard: React.FC = () => {
             {/* Overview Row Including Active Breakdown & Creation Trend */}
             <section>
               <h2 className="text-xl font-semibold text-white mb-4 flex items-center">
-                <TrendingUp className="w-5 h-5 mr-2 text-emerald-300" /> Status & Creation Trend
+                <TrendingUp className="w-5 h-5 mr-2 text-emerald-300" /> Status
+                & Creation Trend
               </h2>
               <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
                 <div className="bg-white/10 border border-white/20 rounded-xl p-4 flex flex-col items-center justify-center">
-                  <h3 className="text-slate-200 text-sm mb-2">Active vs Inactive</h3>
-                  {activeInactiveData.every(d=>d.value===0) ? <div className="text-slate-400 text-sm">No cards</div> : <DonutChart data={activeInactiveData} size={200} thickness={28} ariaLabel="Active vs Inactive cards" />}
+                  <h3 className="text-slate-200 text-sm mb-2">
+                    Active vs Inactive
+                  </h3>
+                  {activeInactiveData.every((d) => d.value === 0) ? (
+                    <div className="text-slate-400 text-sm">No cards</div>
+                  ) : (
+                    <DonutChart
+                      data={activeInactiveData}
+                      size={200}
+                      thickness={28}
+                      ariaLabel="Active vs Inactive cards"
+                    />
+                  )}
                   <div className="flex gap-4 mt-4 text-xs text-slate-300">
-                    {activeInactiveData.map(d => (
-                      <span key={d.label} className="flex items-center gap-1"><span className={`inline-block w-2 h-2 rounded-full ${d.label==='Active' ? 'bg-emerald-400' : 'bg-red-400'}`}></span>{d.label}: {d.value}</span>
+                    {activeInactiveData.map((d) => (
+                      <span key={d.label} className="flex items-center gap-1">
+                        <span
+                          className={`inline-block w-2 h-2 rounded-full ${
+                            d.label === "Active"
+                              ? "bg-emerald-400"
+                              : "bg-red-400"
+                          }`}
+                        ></span>
+                        {d.label}: {d.value}
+                      </span>
                     ))}
                   </div>
                 </div>
                 <div className="bg-white/10 border border-white/20 rounded-xl p-4 xl:col-span-2">
-                  <h3 className="text-slate-200 text-sm mb-3">New Cards (Last 30 Days)</h3>
-                  <CreationTrendChart data={creationTrend} ariaLabel="Cards created last 30 days" />
+                  <h3 className="text-slate-200 text-sm mb-3">
+                    New Cards (Last 30 Days)
+                  </h3>
+                  <CreationTrendChart
+                    data={creationTrend}
+                    ariaLabel="Cards created last 30 days"
+                  />
                 </div>
               </div>
             </section>
 
             <ExpiringSection
               id="expiring24h"
-              title={<><Calendar className="w-5 h-5 mr-2 text-amber-300" /> Expiring Within 24 Hours</>}
+              title={
+                <>
+                  <Calendar className="w-5 h-5 mr-2 text-amber-300" /> Expiring
+                  Within 24 Hours
+                </>
+              }
               rows={expiringSoon}
               emptyMessage="No cards expiring in the next 24 hours."
               accentClass=""
@@ -468,7 +513,12 @@ export const AnalyticsDashboard: React.FC = () => {
 
             <ExpiringSection
               id="expiring30d"
-              title={<><Calendar className="w-5 h-5 mr-2 text-blue-300" /> Expiring Within 30 Days</>}
+              title={
+                <>
+                  <Calendar className="w-5 h-5 mr-2 text-blue-300" /> Expiring
+                  Within 30 Days
+                </>
+              }
               rows={expiringIn30Days}
               emptyMessage="No cards expiring in the next 30 days (beyond 24h)."
               accentClass=""
@@ -478,7 +528,12 @@ export const AnalyticsDashboard: React.FC = () => {
 
             <ExpiringSection
               id="expiring6m"
-              title={<><Calendar className="w-5 h-5 mr-2 text-purple-300" /> Expiring Within 6 Months</>}
+              title={
+                <>
+                  <Calendar className="w-5 h-5 mr-2 text-purple-300" /> Expiring
+                  Within 6 Months
+                </>
+              }
               rows={expiringIn6Months}
               emptyMessage="No cards expiring in the next 6 months (beyond 30 days)."
               accentClass=""
@@ -507,88 +562,99 @@ export const AnalyticsDashboard: React.FC = () => {
                 {/* Table */}
                 <div className="overflow-x-auto">
                   <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden min-w-[720px]">
-                  <div className="grid grid-cols-12 gap-0 px-4 py-2 text-slate-300 text-xs border-b border-white/10">
-                    <div className="col-span-1">#</div>
-                    <div className="col-span-4">Business</div>
-                    <div className="col-span-3">Slug</div>
-                    <div className="col-span-2 flex items-center gap-1">
-                      <Eye className="w-4 h-4" /> Views
+                    <div className="grid grid-cols-12 gap-0 px-4 py-2 text-slate-300 text-xs border-b border-white/10">
+                      <div className="col-span-1">#</div>
+                      <div className="col-span-4">Business</div>
+                      <div className="col-span-3">Slug</div>
+                      <div className="col-span-2 flex items-center gap-1">
+                        <Eye className="w-4 h-4" /> Views
+                      </div>
+                      <div className="col-span-2 flex items-center gap-1">
+                        <TrendingUp className="w-4 h-4" />
+                        /day
+                      </div>
                     </div>
-                    <div className="col-span-2 flex items-center gap-1">
-                      <TrendingUp className="w-4 h-4" />
-                      /day
-                    </div>
-                  </div>
-                  {leaderboard.length === 0 ? (
-                    <div className="p-4 text-slate-400">No data</div>
-                  ) : (
-                    leaderboard.map((c, idx) => {
-                      const days = Math.max(
-                        1,
-                        Math.round(
-                          (Date.now() - new Date(c.createdAt).getTime()) /
-                            (1000 * 60 * 60 * 24)
-                        )
-                      );
-                      const perDay = ((c.viewCount || 0) / days).toFixed(2);
-                      return (
-                        <div
-                          key={c.id}
-                          className="grid grid-cols-12 gap-0 px-4 py-3 text-slate-200 border-t border-white/5 hover:bg-white/5"
-                        >
-                          <div className="col-span-1 font-mono">{idx + 1}</div>
-                          <div className="col-span-4">
-                            <div className="font-medium text-white">
-                              {c.businessName}
+                    {leaderboard.length === 0 ? (
+                      <div className="p-4 text-slate-400">No data</div>
+                    ) : (
+                      leaderboard.map((c, idx) => {
+                        const days = Math.max(
+                          1,
+                          Math.round(
+                            (Date.now() - new Date(c.createdAt).getTime()) /
+                              (1000 * 60 * 60 * 24)
+                          )
+                        );
+                        const perDay = ((c.viewCount || 0) / days).toFixed(2);
+                        return (
+                          <div
+                            key={c.id}
+                            className="grid grid-cols-12 gap-0 px-4 py-3 text-slate-200 border-t border-white/5 hover:bg-white/5"
+                          >
+                            <div className="col-span-1 font-mono">
+                              {idx + 1}
                             </div>
-                            <div className="text-xs text-slate-400">
-                              {c.category} • {c.type}
+                            <div className="col-span-4">
+                              <div className="font-medium text-white">
+                                {c.businessName}
+                              </div>
+                              <div className="text-xs text-slate-400">
+                                {c.category} • {c.type}
+                              </div>
+                            </div>
+                            <div className="col-span-3 font-mono text-xs">
+                              /{c.slug}
+                            </div>
+                            <div className="col-span-2">
+                              {metric === "total"
+                                ? (c.viewCount || 0).toLocaleString()
+                                : perDay}
+                            </div>
+                            <div className="col-span-2">
+                              <div className="flex items-center gap-2 justify-end">
+                                <a
+                                  href={`/${c.slug}`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="px-2 py-1 rounded-md bg-white/10 text-slate-200 text-xs border border-white/10"
+                                  title={`Open /${c.slug}`}
+                                  aria-label={`Open /${c.slug} in new tab`}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </a>
+                                <button
+                                  onClick={() => {
+                                    navigator.clipboard
+                                      .writeText(
+                                        `${window.location.origin}/${c.slug}`
+                                      )
+                                      .then(() => {
+                                        setCopyFeedback(`Copied /${c.slug}`);
+                                        setTimeout(
+                                          () => setCopyFeedback(null),
+                                          1500
+                                        );
+                                      })
+                                      .catch(() => {
+                                        setCopyFeedback("Copy failed");
+                                        setTimeout(
+                                          () => setCopyFeedback(null),
+                                          1500
+                                        );
+                                      });
+                                  }}
+                                  className="px-2 py-1 rounded-md bg-white/10 text-slate-200 text-xs border border-white/10"
+                                  title={`Copy link /${c.slug}`}
+                                  aria-label={`Copy link /${c.slug}`}
+                                >
+                                  <CopyIcon className="w-4 h-4" />
+                                </button>
+                              </div>
                             </div>
                           </div>
-                          <div className="col-span-3 font-mono text-xs">
-                            /{c.slug}
-                          </div>
-                          <div className="col-span-2">
-                            {metric === "total"
-                              ? (c.viewCount || 0).toLocaleString()
-                              : perDay}
-                          </div>
-                          <div className="col-span-2">
-                            <div className="flex items-center gap-2 justify-end">
-                              <a
-                                href={`/${c.slug}`}
-                                target="_blank"
-                                rel="noreferrer"
-                                className="px-2 py-1 rounded-md bg-white/10 text-slate-200 text-xs border border-white/10"
-                                title={`Open /${c.slug}`}
-                                aria-label={`Open /${c.slug} in new tab`}
-                              >
-                                <Eye className="w-4 h-4" />
-                              </a>
-                              <button
-                                onClick={() => {
-                                  navigator.clipboard.writeText(`${window.location.origin}/${c.slug}`)
-                                    .then(() => {
-                                      setCopyFeedback(`Copied /${c.slug}`);
-                                      setTimeout(() => setCopyFeedback(null), 1500);
-                                    })
-                                    .catch(() => {
-                                      setCopyFeedback('Copy failed');
-                                      setTimeout(() => setCopyFeedback(null), 1500);
-                                    });
-                                }}
-                                className="px-2 py-1 rounded-md bg-white/10 text-slate-200 text-xs border border-white/10"
-                                title={`Copy link /${c.slug}`}
-                                aria-label={`Copy link /${c.slug}`}
-                              >
-                                <CopyIcon className="w-4 h-4" />
-                              </button>
-                            </div>
-                          </div>
-                        </div>
-                      );
-                    })
-                  )}
+                        );
+                      })
+                    )}
                   </div>
                 </div>
               </div>
@@ -657,36 +723,36 @@ export const AnalyticsDashboard: React.FC = () => {
               </h2>
               <div className="overflow-x-auto">
                 <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden min-w-[720px]">
-                <div className="grid grid-cols-12 gap-0 px-4 py-2 text-slate-300 text-xs border-b border-white/10">
-                  <div className="col-span-1">#</div>
-                  <div className="col-span-5">Business</div>
-                  <div className="col-span-3">Slug</div>
-                  <div className="col-span-3">Views/day</div>
-                </div>
-                {velocity.length === 0 ? (
-                  <div className="p-4 text-slate-400">No data</div>
-                ) : (
-                  velocity.map((c, idx) => (
-                    <div
-                      key={c.id}
-                      className="grid grid-cols-12 gap-0 px-4 py-3 text-slate-200 border-t border-white/5 hover:bg-white/5"
-                    >
-                      <div className="col-span-1 font-mono">{idx + 1}</div>
-                      <div className="col-span-5">
-                        <div className="font-medium text-white">
-                          {c.businessName}
+                  <div className="grid grid-cols-12 gap-0 px-4 py-2 text-slate-300 text-xs border-b border-white/10">
+                    <div className="col-span-1">#</div>
+                    <div className="col-span-5">Business</div>
+                    <div className="col-span-3">Slug</div>
+                    <div className="col-span-3">Views/day</div>
+                  </div>
+                  {velocity.length === 0 ? (
+                    <div className="p-4 text-slate-400">No data</div>
+                  ) : (
+                    velocity.map((c, idx) => (
+                      <div
+                        key={c.id}
+                        className="grid grid-cols-12 gap-0 px-4 py-3 text-slate-200 border-t border-white/5 hover:bg-white/5"
+                      >
+                        <div className="col-span-1 font-mono">{idx + 1}</div>
+                        <div className="col-span-5">
+                          <div className="font-medium text-white">
+                            {c.businessName}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            Created {formatDate(c.createdAt)} • {c.days} days
+                          </div>
                         </div>
-                        <div className="text-xs text-slate-400">
-                          Created {formatDate(c.createdAt)} • {c.days} days
+                        <div className="col-span-3 font-mono text-xs">
+                          /{c.slug}
                         </div>
+                        <div className="col-span-3">{c.perDay.toFixed(2)}</div>
                       </div>
-                      <div className="col-span-3 font-mono text-xs">
-                        /{c.slug}
-                      </div>
-                      <div className="col-span-3">{c.perDay.toFixed(2)}</div>
-                    </div>
-                  ))
-                )}
+                    ))
+                  )}
                 </div>
               </div>
             </section>
@@ -699,76 +765,85 @@ export const AnalyticsDashboard: React.FC = () => {
               </h2>
               <div className="overflow-x-auto">
                 <div className="bg-white/10 border border-white/20 rounded-xl overflow-hidden min-w-[720px]">
-                <div className="grid grid-cols-12 gap-0 px-4 py-2 text-slate-300 text-xs border-b border-white/10">
-                  <div className="col-span-1">#</div>
-                  <div className="col-span-5">Business</div>
-                  {/* <div className="col-span-3">Slug</div> */}
-                  <div className="col-span-2">Created</div>
-                  <div className="col-span-2 text-right">Actions</div>
-                </div>
-                {zeroViewCards.length === 0 ? (
-                  <div className="p-4 text-slate-400">
-                    Great! All cards have views.
+                  <div className="grid grid-cols-12 gap-0 px-4 py-2 text-slate-300 text-xs border-b border-white/10">
+                    <div className="col-span-1">#</div>
+                    <div className="col-span-5">Business</div>
+                    {/* <div className="col-span-3">Slug</div> */}
+                    <div className="col-span-2">Created</div>
+                    <div className="col-span-2 text-right">Actions</div>
                   </div>
-                ) : (
-                  zeroViewCards.map((c, idx) => (
-                    <div
-                      key={c.id}
-                      className="grid grid-cols-12 gap-0 px-4 py-3 text-slate-200 border-t border-white/5 hover:bg-white/5"
-                    >
-                      <div className="col-span-1 font-mono">{idx + 1}</div>
-                      <div className="col-span-5">
-                        <div className="font-medium text-white">
-                          {c.businessName}
-                        </div>
-                        <div className="text-xs text-slate-400">
-                          {c.category} • {c.type}
-                        </div>
-                      </div>
-                      {/* <div className="col-span-3 font-mono text-xs">/{c.slug}</div> */}
-                      <div className="col-span-2 text-xs text-slate-400">
-                        {formatDate(c.createdAt)}
-                      </div>
-                      <div className="col-span-2">
-                        <div className="flex items-center gap-2 justify-end">
-                          <a
-                            href={`/${c.slug}`}
-                            target="_blank"
-                            rel="noreferrer"
-                            className="p-2 rounded-md bg-white/10 text-slate-200 border border-white/10"
-                            title="Open"
-                          >
-                            <Eye className="w-4 h-4" />
-                          </a>
-                          <button
-                            onClick={() => {
-                              navigator.clipboard.writeText(`${window.location.origin}/${c.slug}`)
-                                .then(()=>{
-                                  setCopyFeedback(`Copied /${c.slug}`);
-                                  setTimeout(()=> setCopyFeedback(null), 1500);
-                                })
-                                .catch(()=>{
-                                  setCopyFeedback('Copy failed');
-                                  setTimeout(()=> setCopyFeedback(null), 1500);
-                                });
-                            }}
-                            className="p-2 rounded-md bg-white/10 text-slate-200 border border-white/10"
-                            title="Copy link"
-                          >
-                            <CopyIcon className="w-4 h-4" />
-                          </button>
-                          <button
-                            onClick={() => handleDelete(c.id)}
-                            className="p-2 rounded-md bg-white/10 text-red-300 border border-white/10"
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
-                        </div>
-                      </div>
+                  {zeroViewCards.length === 0 ? (
+                    <div className="p-4 text-slate-400">
+                      Great! All cards have views.
                     </div>
-                  ))
-                )}
+                  ) : (
+                    zeroViewCards.map((c, idx) => (
+                      <div
+                        key={c.id}
+                        className="grid grid-cols-12 gap-0 px-4 py-3 text-slate-200 border-t border-white/5 hover:bg-white/5"
+                      >
+                        <div className="col-span-1 font-mono">{idx + 1}</div>
+                        <div className="col-span-5">
+                          <div className="font-medium text-white">
+                            {c.businessName}
+                          </div>
+                          <div className="text-xs text-slate-400">
+                            {c.category} • {c.type}
+                          </div>
+                        </div>
+                        {/* <div className="col-span-3 font-mono text-xs">/{c.slug}</div> */}
+                        <div className="col-span-2 text-xs text-slate-400">
+                          {formatDate(c.createdAt)}
+                        </div>
+                        <div className="col-span-2">
+                          <div className="flex items-center gap-2 justify-end">
+                            <a
+                              href={`/${c.slug}`}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="p-2 rounded-md bg-white/10 text-slate-200 border border-white/10"
+                              title="Open"
+                            >
+                              <Eye className="w-4 h-4" />
+                            </a>
+                            <button
+                              onClick={() => {
+                                navigator.clipboard
+                                  .writeText(
+                                    `${window.location.origin}/${c.slug}`
+                                  )
+                                  .then(() => {
+                                    setCopyFeedback(`Copied /${c.slug}`);
+                                    setTimeout(
+                                      () => setCopyFeedback(null),
+                                      1500
+                                    );
+                                  })
+                                  .catch(() => {
+                                    setCopyFeedback("Copy failed");
+                                    setTimeout(
+                                      () => setCopyFeedback(null),
+                                      1500
+                                    );
+                                  });
+                              }}
+                              className="p-2 rounded-md bg-white/10 text-slate-200 border border-white/10"
+                              title="Copy link"
+                            >
+                              <CopyIcon className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => handleDelete(c.id)}
+                              className="p-2 rounded-md bg-white/10 text-red-300 border border-white/10"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </div>
             </section>
@@ -776,11 +851,10 @@ export const AnalyticsDashboard: React.FC = () => {
         )}
       </div>
       <div className="sr-only" aria-live="polite">
-        {refreshing ? 'Refreshing data' : 'Idle'} {copyFeedback || ''}
+        {refreshing ? "Refreshing data" : "Idle"} {copyFeedback || ""}
       </div>
     </div>
   );
 };
 
 export default AnalyticsDashboard;
-

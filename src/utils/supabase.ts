@@ -24,7 +24,9 @@ export const isSupabaseConfigured = () => {
   if (isConfigured) {
     console.log("Supabase is properly configured");
   } else {
-    console.log("Supabase not configured - using localStorage only");
+    console.warn(
+      "⚠️ Supabase not configured - application requires Supabase to function"
+    );
   }
 
   return isConfigured;

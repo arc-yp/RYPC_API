@@ -136,28 +136,8 @@ export const AdminDashboard: React.FC = () => {
   };
 
   const checkForMigration = async () => {
-    const localData = localStorage.getItem("scc_review_cards");
-    if (localData) {
-      try {
-        const localCards = JSON.parse(localData);
-        if (localCards.length > 0) {
-          console.log(`Found ${localCards.length} local cards to migrate`);
-          setIsMigrating(true);
-          try {
-            await storage.migrateFromLocalStorage();
-          } catch (migrationError) {
-            console.error(
-              "Migration failed, continuing with local storage:",
-              migrationError
-            );
-          }
-          setIsMigrating(false);
-          console.log("Migration completed");
-        }
-      } catch (error) {
-        console.error("Error during migration check:", error);
-        setIsMigrating(false);
-      }
+    // Migration logic removed - now using Supabase only
+    console.log("Migration check skipped - using Supabase directly");
     }
   };
 
@@ -214,9 +194,6 @@ export const AdminDashboard: React.FC = () => {
   const handleRefresh = async () => {
     setIsRefreshing(true);
     try {
-      if (isSupabaseConfigured()) {
-        await storage.syncData();
-      }
       await loadCards();
       console.log("Data refreshed successfully");
     } catch (error) {
@@ -356,10 +333,10 @@ export const AdminDashboard: React.FC = () => {
         );
       case "local":
         return (
-          <div className="flex items-center text-yellow-400 text-sm">
+          <div className="flex items-center text-red-400 text-sm">
             <Building2 className="w-4 h-4 mr-2" />
             <WifiOff className="w-3 h-3 mr-1" />
-            <span>Local Storage Only</span>
+            <span>Database Disconnected</span>
           </div>
         );
       default:
@@ -737,8 +714,8 @@ export const AdminDashboard: React.FC = () => {
             </h3>
             <p className="text-slate-400">
               {connectionStatus === "connected"
-                ? "Fetching your review cards from cloud storage..."
-                : "Loading your review cards from local storage..."}
+                ? "Fetching your review cards from database..."
+                : "Connecting to database..."}
             </p>
           </div>
         ) : filteredCards.length === 0 ? (
