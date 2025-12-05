@@ -304,14 +304,14 @@ const Testimonials = () => {
                 },
                 {
                   emoji: "⚡",
-                  number: "5 Min",
+                  number: "30 Secs",
                   label: "Setup Time",
                   gradient: "from-green-600 to-teal-600",
                   delay: "300ms",
                 },
                 {
                   emoji: "🎯",
-                  number: "500+",
+                  number: "50+",
                   label: "Happy Businesses",
                   gradient: "from-purple-600 to-pink-600",
                   delay: "450ms",
