@@ -80,8 +80,15 @@ function App() {
       <Route path="/ars" element={<ArsPage />} />
       <Route path="/thank-you" element={<ThankYouPage />} />
 
-      {/* Generated Reviews Store with Sidebar */}
-      <Route path="/review" element={<ReviewStoreLayout />}>
+      {/* Generated Reviews Store with Sidebar - Protected */}
+      <Route
+        path="/review"
+        element={
+          <ProtectedRoute>
+            <ReviewStoreLayout />
+          </ProtectedRoute>
+        }
+      >
         <Route index element={<ReviewDashboard />} />
         <Route path="search" element={<ReviewSearchPage />} />
         <Route path=":categoryName" element={<ReviewCategoryPage />} />
