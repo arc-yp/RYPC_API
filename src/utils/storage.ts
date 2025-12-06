@@ -5,6 +5,9 @@ import { supabase, isSupabaseConfigured } from "./supabase";
 const cardCache = new Map<string, ReviewCard | null>();
 const inFlightCardFetch = new Map<string, Promise<ReviewCard | null>>();
 
+// Cache for getCards() API call deduplication
+let inFlightGetCardsRequest: Promise<ReviewCard[]> | null = null;
+
 // Helper function to validate UUID format
 const isValidUuid = (id: string): boolean => {
   const uuidRegex =
@@ -115,49 +118,65 @@ export const storage = {
         throw new Error("Supabase is not configured");
       }
 
-      console.log("Fetching cards from Supabase...");
-      const { data, error } = await supabase
-        .from("review_cards")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (error) {
-        console.error("Supabase error:", error);
-        throw error;
+      // If there's already a request in flight, reuse it
+      if (inFlightGetCardsRequest) {
+        console.log("Reusing in-flight getCards request...");
+        return await inFlightGetCardsRequest;
       }
 
-      console.log(
-        `Successfully fetched ${data?.length || 0} cards from Supabase`
-      );
-      let supabaseCards = (data || []).map(transformDbRowToCard);
-
-      // Auto deactivate expired cards
-      const now = Date.now();
-      const expiredActiveCards = supabaseCards.filter(
-        (c) =>
-          c.active !== false && c.expiresAt && Date.parse(c.expiresAt) < now
-      );
-
-      if (expiredActiveCards.length > 0) {
-        for (const card of expiredActiveCards) {
-          card.active = false;
-        }
-
-        // Update Supabase to persist deactivation
+      // Create a new request
+      inFlightGetCardsRequest = (async () => {
         try {
-          await supabase.from("review_cards").upsert(
-            expiredActiveCards.map((c) => ({
-              id: c.id,
-              active: false,
-              updated_at: new Date().toISOString(),
-            }))
-          );
-        } catch (e) {
-          console.warn("Failed to persist expiry deactivations:", e);
-        }
-      }
+          console.log("Fetching cards from Supabase...");
+          const { data, error } = await supabase
+            .from("review_cards")
+            .select("*")
+            .order("created_at", { ascending: false });
 
-      return supabaseCards;
+          if (error) {
+            console.error("Supabase error:", error);
+            throw error;
+          }
+
+          console.log(
+            `Successfully fetched ${data?.length || 0} cards from Supabase`
+          );
+          let supabaseCards = (data || []).map(transformDbRowToCard);
+
+          // Auto deactivate expired cards
+          const now = Date.now();
+          const expiredActiveCards = supabaseCards.filter(
+            (c) =>
+              c.active !== false && c.expiresAt && Date.parse(c.expiresAt) < now
+          );
+
+          if (expiredActiveCards.length > 0) {
+            for (const card of expiredActiveCards) {
+              card.active = false;
+            }
+
+            // Update Supabase to persist deactivation
+            try {
+              await supabase.from("review_cards").upsert(
+                expiredActiveCards.map((c) => ({
+                  id: c.id,
+                  active: false,
+                  updated_at: new Date().toISOString(),
+                }))
+              );
+            } catch (e) {
+              console.warn("Failed to persist expiry deactivations:", e);
+            }
+          }
+
+          return supabaseCards;
+        } finally {
+          // Clear the in-flight promise after completion
+          inFlightGetCardsRequest = null;
+        }
+      })();
+
+      return await inFlightGetCardsRequest;
     } catch (error) {
       console.error("Error loading cards:", error);
       return [];
