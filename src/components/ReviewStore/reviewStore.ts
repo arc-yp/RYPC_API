@@ -24,10 +24,10 @@ export const reviewStoreClient = createClient(
   REVIEWSTORE_KEY || "",
   {
     auth: {
-      storageKey: 'review_store_auth', // Unique key to avoid conflicts
+      storageKey: "review_store_auth", // Unique key to avoid conflicts
       autoRefreshToken: true,
-      persistSession: true
-    }
+      persistSession: true,
+    },
   }
 );
 

@@ -32,7 +32,8 @@ import {
   ReviewSearchPage,
 } from "./components/ReviewStore";
 
-ReactGA.initialize("G-J7T5QPZPQ9"); // your measurement ID
+// Initialize GA4 once
+ReactGA.initialize("G-J7T5QPZPQ9");
 
 function App() {
   const location = useLocation();
